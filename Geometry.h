@@ -11,8 +11,9 @@
 /////////////////////////////////////
 #include <stdbool.h>
 
-#define Vec3D_subtract((a),(b)) Vec3D_add((a),Vec2D_scalarMult((b),-1))
+#define Vec3D_subtract((a),(b)) Vec3D_add((a),Vec3D_scalarMult((b),-1))
 #define Vec3D_getNormal((a),(b)) Vec3D_normalise(Vec3D_crossProduct((a),(b)))
+#define Vec3D_isZero((v)) Vec3D_isEqual((v), VECTOR_ZERO)
 
 //////////////////////////////////////////////////
 ////   Vector related code
@@ -25,7 +26,13 @@ typedef struct Vec3D
     int k;
 } Vec3D;
 
-static const Vec3D ZERO_VECTOR = {0,0,0};
+static const Vec3D VECTOR_ZERO = {0,0,0};
+static const Vec3D VECTOR_N = {0,-1,0};
+static const Vec3D VECTOR_E = {1,0,0};
+static const Vec3D VECTOR_S = {0,1,0};
+static const Vec3D VECTOR_W = {-1,0,0};
+static const Vec3D VECTOR_UP = {0,0,1};
+static const Vec3D VECTOR_DOWN = {0,0,-1};
 
 //3d vector addition
 Vec3D Vec3D_add(Vec3D v1, Vec3D v2);
@@ -66,10 +73,17 @@ double Vec3D_getMagnitude(Vec3D v);
 
 #define Rect_inCollisionCirc((r),(c)) Circle_inCollisionRect((c),(r))
 
+//Rect struct
 typedef struct Rect
 {
     int x, y, w, h;
 } Rect
+
+//Circle struct
+typedef struct Circle
+{
+    int x, y, r;
+} Circle
 
 //greate circle with central coordinates and radius
 Rect Rect_create(int x, int y, int w, int h);
@@ -87,6 +101,12 @@ int Rect_getH(const Rect* r);
 //move Rect
 void Rect_translate(Rect* r, Vec3D delta);
 
+//returns whether rect contains point P
+bool Rect_containsPoint(Rect r, x, y);
+
+//returns whether rect contains circle
+bool Rect_containsCircle(Rect r, Circle c);
+
 //interRect collision
 bool Rect_inCollision(Rect r1, Rect r2);
 
@@ -94,11 +114,6 @@ bool Rect_inCollision(Rect r1, Rect r2);
 ///////////////////////////////////////////////////
 ////           Circle
 ///////////////////////////////////////////////////
-
-typedef struct Circle
-{
-    int x, y, r;
-} Circle
 
 //greate circle with central coordinates and radius
 Circle Circle_create(int x, int y, int r);
@@ -113,6 +128,9 @@ int Circle_getR(const Circle* c);
 
 //move circle
 void Circle_translate(Circle* c, Vec3D delta);
+
+//return whether circle contains point
+bool Circle_containsPoint(Circle c, x, y);
 
 //intercircle collision
 bool Circle_inCollision(Circle c1, Circle c2);

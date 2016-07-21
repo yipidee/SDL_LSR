@@ -84,12 +84,6 @@ int GO_getRAcc(GameObject* go)
     return go->rAcc;
 }
 
-// simple physics update based on elapsed time
-void GO_updateVel(GameObject* go, long dt);
-void GO_updatePos(GameObject* go, long dt);
-void GO_updateRVel(GameObject* go, long dt);
-void GO_updateRPos(GameObject* go, long dt);
-
 //collision detection function
 bool GO_isInContact(GameObject go1, GameObject go2);
-bool GO_isInBounds(GameObject go, SDL_Rect BoundingRect);
+bool GO_isInBounds(GameObject go, Rect BoundingRect);
