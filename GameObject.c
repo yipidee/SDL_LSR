@@ -1,4 +1,4 @@
-static id_counter = 0;
+#include "GameObject.h"
 
 // create/destroy functions for game object
 GameObject GO_createGameObject()
@@ -85,5 +85,13 @@ int GO_getRAcc(GameObject* go)
 }
 
 //collision detection function
-bool GO_isInContact(GameObject go1, GameObject go2);
-bool GO_isInBounds(GameObject go, Rect BoundingRect);
+bool GO_isInContact(GameObject go1, GameObject go2)
+{
+    return Circle_inCollision(go1.BCirc, go2.BCirc);
+}
+
+//returns whether a circle is completely enclosed within a rect
+bool GO_isInBounds(GameObject go, Rect BoundingRect)
+{
+    return Rect_containsCircle(BoundingRect, go.BCirc);
+}

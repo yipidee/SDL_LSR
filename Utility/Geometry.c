@@ -178,6 +178,13 @@ bool Rect_inCollision(Rect r1, Rect r2)
     return res;
 }
 
+//converts to SDL_Rect
+SDL_Rect Rect_getSDLRect(Rect r)
+{
+    SDL_Rect R = {r.x, r.y, r.w, r.h};
+    return R;
+}
+
 
 ///////////////////////////////////////////////////
 ////           Circle

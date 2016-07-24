@@ -10,6 +10,7 @@
 ////  3D Vectors
 /////////////////////////////////////
 #include <stdbool.h>
+#include <SDL2/SDL.h>
 
 #define Vec3D_subtract((a),(b)) Vec3D_add((a),Vec3D_scalarMult((b),-1))
 #define Vec3D_getNormal((a),(b)) Vec3D_normalise(Vec3D_crossProduct((a),(b)))
@@ -110,6 +111,9 @@ bool Rect_containsCircle(Rect r, Circle c);
 //interRect collision
 bool Rect_inCollision(Rect r1, Rect r2);
 
+//converts to SDL_Rect
+SDL_Rect Rect_getSDLRect(Rect r);
+
 
 ///////////////////////////////////////////////////
 ////           Circle
@@ -136,6 +140,6 @@ bool Circle_containsPoint(Circle c, x, y);
 bool Circle_inCollision(Circle c1, Circle c2);
 
 //circle-square collision
-bool Circle_inCollisionRect(Circle c, SDL_Rect r);
+bool Circle_inCollisionRect(Circle c, Rect r);
 
 #endif // _GEOMETRY_H
