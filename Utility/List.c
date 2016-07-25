@@ -101,5 +101,4 @@ void List_tail(List* list, void* element)
 {
     ListNode* node = list->head;
     memccpy(element, node, list->elementSize);
-
 }

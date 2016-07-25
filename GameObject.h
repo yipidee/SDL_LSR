@@ -8,7 +8,7 @@
  ******************************************************************/
 
 #include <stdbool.h>
-#include "Geometry.h"
+#include "Utility/Geometry.h"
 
 typedef struct GameObject
 {
