@@ -1,5 +1,5 @@
-#ifndef GAMEOBJECT_H_
-#define GAMEOBJECT_H_
+#ifndef _GAMEOBJECT_H_
+#define _GAMEOBJECT_H_
 
 /*******************************************************************
  *******************************************************************
@@ -43,4 +43,4 @@ int GO_getRAcc(const GameObject* go);
 bool GO_isInContact(GameObject go1, GameObject go2);
 bool GO_isInBounds(GameObject go, Rect BoundingRect);
 
-#endif // GAMEOBJECT_H_
+#endif // _GAMEOBJECT_H_

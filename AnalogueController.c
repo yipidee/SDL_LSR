@@ -1,30 +1,24 @@
-#ifndef _ANALOGUE_CONTROLLER_H
-#define _ANALOGUE_CONTROLLER_H
-
-#include <stdbool.h>
-#include <stdint.h>
-#include <SDL2/SDL.h>
-#include "Utility/Geometry.h"
-
-typedef bool (*EventHandler)(AnalogueController*, SDL_Event*);
-
-typedef enum Controller_Mode
+//prototype event handling function
+static EventHandler _eh(AnalogueController* c, SDL_Event* e)
 {
-    ANALOGUE_MODE,
-    DIGITAL_MODE
-}Controller_Mode;
-
-typedef struct AnalogueController
-{
-    Circle base, knob;
-    Rect touchableArea;
-    EventHandler evHand;
-    Controller_Mode mode;
-    bool isPressed;
-}AnalogueController;
+    SDL_Event.type==SDL_EventType.SDL_MOUSEBUTTONDOWN
+    SDL_MouseButtonEvent* me = e;
+    c->knob.x = me->x;
+    return true;
+}
 
 //create controller
-AnalogueController AnalCont_create();
+AnalogueController AnalCont_create()
+{
+    AnalogueController c;
+    c.isPressed = false;
+    c.base = {50, 50, 50};
+    c.knob = {50, 50, 30};
+    c.touchableArea = {0, 0, 100, 100};
+    c.mode = ANALOGUE_MODE;
+    c.evHand = &_eh;
+    return c;
+}
 
 //get current input
 uint32_t AnalCont_getCurrentInput(AnalogueController* ac);
@@ -41,4 +35,3 @@ int AnalCont_getKnobSize(AnalogueController* ac);
 Rect AnalCont_getTouchableArea(AnalogueController* ac);
 bool AnalCont_getPressed(AnalogueController* ac);
 
-#endif // _ANALOGUE_CONTROLLER_H
