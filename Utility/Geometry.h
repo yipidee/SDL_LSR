@@ -12,9 +12,9 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
-#define Vec3D_subtract((a),(b)) Vec3D_add((a),Vec3D_scalarMult((b),-1))
-#define Vec3D_getNormal((a),(b)) Vec3D_normalise(Vec3D_crossProduct((a),(b)))
-#define Vec3D_isZero((v)) Vec3D_isEqual((v), VECTOR_ZERO)
+#define Vec3D_subtract(a,b) Vec3D_add((a),Vec3D_scalarMult((b),-1))
+#define Vec3D_getNormal(a,b) Vec3D_normalise(Vec3D_crossProduct((a),(b)))
+#define Vec3D_isZero(v) Vec3D_isEqual((v),VECTOR_ZERO)
 
 //////////////////////////////////////////////////
 ////   Vector related code
@@ -58,9 +58,6 @@ bool Vec3D_isPerpendicular(Vec3D v1, Vec3D v2);
 //equals
 bool Vec3D_equal(Vec3D v1, Vec3D v2);
 
-//is zero
-bool Vec3D_isZero(Vec3D v);
-
 //normalise
 Vec3D Vec3D_normalise(Vec3D v);
 
@@ -72,19 +69,19 @@ double Vec3D_getMagnitude(Vec3D v);
 ////           Rect
 ///////////////////////////////////////////////////
 
-#define Rect_inCollisionCirc((r),(c)) Circle_inCollisionRect((c),(r))
+#define Rect_inCollisionCirc(r,c) Circle_inCollisionRect((c),(r))
 
 //Rect struct
 typedef struct Rect
 {
     int x, y, w, h;
-} Rect
+} Rect;
 
 //Circle struct
 typedef struct Circle
 {
     int x, y, r;
-} Circle
+} Circle;
 
 //greate circle with central coordinates and radius
 Rect Rect_create(int x, int y, int w, int h);
@@ -103,7 +100,7 @@ int Rect_getH(const Rect* r);
 void Rect_translate(Rect* r, Vec3D delta);
 
 //returns whether rect contains point P
-bool Rect_containsPoint(Rect r, x, y);
+bool Rect_containsPoint(Rect r, int x, int y);
 
 //returns whether rect contains circle
 bool Rect_containsCircle(Rect r, Circle c);
@@ -134,7 +131,7 @@ int Circle_getR(const Circle* c);
 void Circle_translate(Circle* c, Vec3D delta);
 
 //return whether circle contains point
-bool Circle_containsPoint(Circle c, x, y);
+bool Circle_containsPoint(Circle c, int x, int y);
 
 //intercircle collision
 bool Circle_inCollision(Circle c1, Circle c2);

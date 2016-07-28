@@ -33,7 +33,7 @@ void List_prepend(List* list, void* element)
 {
     ListNode* newFront = malloc(sizeof(ListNode));
     newFront->data = malloc(list->elementSize);
-    memccpy(newFront->data, element, list->elementSize);
+    memcpy(newFront->data, element, list->elementSize);
 
     newFront->next = list->head;
     list->head = newFront;
@@ -50,7 +50,7 @@ void List_append(List* list, void* element)
     newEnd->data = malloc(list->elementSize);
     newEnd->next = NULL;
 
-    memccpy(newEnd->data, element, list->elementSize);
+    memcpy(newEnd->data, element, list->elementSize);
 
     if(list->logicalLength == 0)
     {
@@ -76,8 +76,8 @@ void List_forEach(List* list, ListIterator iterator)
 
     while(node!=NULL)
     {
-        result = iterator(node->data);
-        node = node->next;
+        res = iterator(node->data);
+        if(res){node = node->next;}else{return;}
     }
 }
 
@@ -85,7 +85,7 @@ void List_forEach(List* list, ListIterator iterator)
 void List_head(List* list, void* element, bool removeFromList)
 {
     ListNode* node = list->head;
-    memccpy(element, node, list->elementSize);
+    memcpy(element, node, list->elementSize);
 
     if(removeFromList)
     {
@@ -100,5 +100,5 @@ void List_head(List* list, void* element, bool removeFromList)
 void List_tail(List* list, void* element)
 {
     ListNode* node = list->head;
-    memccpy(element, node, list->elementSize);
+    memcpy(element, node, list->elementSize);
 }

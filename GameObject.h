@@ -33,7 +33,7 @@ void GO_setStationary(GameObject* go, bool b);
 
 //getters for physics variables
 Vec3D GO_getAcc(const GameObject* go);
-Vec3D GO_getVel(const GameObject* go;
+Vec3D GO_getVel(const GameObject* go);
 Vec3D GO_getPos(const GameObject* go);
 int GO_getRPos(const GameObject* go);
 int GO_getRVel(const GameObject* go);

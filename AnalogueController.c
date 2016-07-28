@@ -1,9 +1,12 @@
+#include "AnalogueController.h"
+
 //prototype event handling function
-static EventHandler _eh(AnalogueController* c, SDL_Event* e)
+static bool _eh(AnalogueController* c, SDL_Event* e)
 {
-    SDL_Event.type==SDL_EventType.SDL_MOUSEBUTTONDOWN
-    SDL_MouseButtonEvent* me = e;
-    c->knob.x = me->x;
+    if(e->type==SDL_MOUSEBUTTONDOWN)
+    {
+        c->knob.x = e->button.x;
+    }
     return true;
 }
 
@@ -12,11 +15,11 @@ AnalogueController AnalCont_create()
 {
     AnalogueController c;
     c.isPressed = false;
-    c.base = {50, 50, 50};
-    c.knob = {50, 50, 30};
-    c.touchableArea = {0, 0, 100, 100};
+    c.base = Circle_create(50, 50, 50);
+    c.knob = Circle_create(50, 50, 30);
+    c.touchableArea = Rect_create(0, 0, 100, 100);
     c.mode = ANALOGUE_MODE;
-    c.evHand = &_eh;
+    c.EventHandler = &_eh;
     return c;
 }
 

@@ -1,14 +1,17 @@
+#include <stdint.h>
 #include "GameObject.h"
 
-// create/destroy functions for game object
+static int id_counter = 0;
+
+// create functions for game object
 GameObject GO_createGameObject()
 {
     GameObject go;
     go.id = id_counter;
     ++id_counter;
-    go.pos = ZERO_VECTOR;
-    go.vec = ZERO_VECTOR;
-    go.acc = ZERO_VECTOR;
+    go.pos = VECTOR_ZERO;
+    go.vel = VECTOR_ZERO;
+    go.acc = VECTOR_ZERO;
     go.rPos = 0;
     go.rVel = 0;
     go.rAcc = 0;
@@ -18,7 +21,7 @@ GameObject GO_createGameObject()
 }
 
 //setters for physics variables
-void GO_setAcc(GameObject* go, Vec3D a);
+void GO_setAcc(GameObject* go, Vec3D a)
 {
     go->acc = a;
 }
@@ -54,32 +57,32 @@ void GO_setStationary(GameObject* go, bool b)
 }
 
 //getters for physics variables
-Vec3D GO_getAcc(GameObject* go)
+Vec3D GO_getAcc(const GameObject* go)
 {
     return go->acc;
 }
 
-Vec3D GO_getVel(GameObject* go)
+Vec3D GO_getVel(const GameObject* go)
 {
     return go->vel;
 }
 
-Vec3D GO_getPos(GameObject* go)
+Vec3D GO_getPos(const GameObject* go)
 {
     return go->pos;
 }
 
-int GO_getRPos(GameObject* go)
+int GO_getRPos(const GameObject* go)
 {
     return go->rPos;
 }
 
-int GO_getRVel(GameObject* go)
+int GO_getRVel(const GameObject* go)
 {
     return go->rVel;
 }
 
-int GO_getRAcc(GameObject* go)
+int GO_getRAcc(const GameObject* go)
 {
     return go->rAcc;
 }

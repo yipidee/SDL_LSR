@@ -6,7 +6,6 @@
 #include <SDL2/SDL.h>
 #include "Utility/Geometry.h"
 
-typedef bool (*EventHandler)(AnalogueController*, SDL_Event*);
 
 typedef enum Controller_Mode
 {
@@ -18,10 +17,12 @@ typedef struct AnalogueController
 {
     Circle base, knob;
     Rect touchableArea;
-    EventHandler evHand;
+    bool (*EventHandler)(struct AnalogueController*, SDL_Event*);
     Controller_Mode mode;
     bool isPressed;
 }AnalogueController;
+
+typedef bool (*EventHandler)(AnalogueController*, SDL_Event*);
 
 //create controller
 AnalogueController AnalCont_create();

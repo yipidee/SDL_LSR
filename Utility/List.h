@@ -32,4 +32,4 @@ void List_forEach(List* list, ListIterator iterator);
 void List_head(List* list, void* element, bool removeFromList);
 void List_tail(List* list, void* element);
 
-#endif _LIST_H
+#endif //_LIST_H

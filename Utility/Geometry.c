@@ -32,15 +32,15 @@ Vec3D Vec3D_ScalarMult(Vec3D v, int scalar)
 
 int Vec3D_dotProduct(Vec3D v1, Vec3D v2)
 {
-    return (v1.x*v2.x + v1.y*v2.y + v1.z*v2.z);
+    return (v1.i*v2.i + v1.j*v2.j + v1.k*v2.k);
 }
 
 Vec3D Vec3D_crossProduct(Vec3D v1, Vec3D v2)
 {
     int coeff1, coeff2, coeff3;
-    coeff1 = v1.y*v2.z-v2.y*v1.z;
-    coeff2 = v1.x*v2.z-v2.x*v1.z;
-    coeff3 = v1.x*v2.y-v2.x*v1.y;
+    coeff1 = v1.j*v2.k-v2.j*v1.k;
+    coeff2 = v1.i*v2.k-v2.i*v1.k;
+    coeff3 = v1.i*v2.j-v2.i*v1.j;
     Vec3D res = {coeff1, coeff2, coeff3};
     return res;
 }
@@ -61,7 +61,7 @@ double Vec3D_getAngle(Vec3D v1, Vec3D v2)
 //get magnitude
 double Vec3D_getMagnitude(Vec3D v)
 {
-    return sqrt(pow(v.x, 2)+pow(v.y, 2)+pow(v.z,2));
+    return sqrt(pow(v.i, 2)+pow(v.j, 2)+pow(v.k,2));
 }
 
 //check for parallel
@@ -86,9 +86,9 @@ bool Vec3D_equal(Vec3D v1, Vec3D v2)
 Vec3D Vec3D_normalise(Vec3D v)
 {
     double mag = Vec3D_getMagnitude(v);
-    Vec3D res = {(int)((double)v.x/mag),
-                 (int)((double)v.y/mag),
-                 (int)((double)v.z/mag)
+    Vec3D res = {(int)((double)v.i/mag),
+                 (int)((double)v.j/mag),
+                 (int)((double)v.k/mag)
                 };
     return res;
 }
@@ -118,12 +118,12 @@ void Rect_setY(Rect* r, int y)
 
 void Rect_setW(Rect* r, int w)
 {
-    r->W=W;
+    r->w=w;
 }
 
 void Rect_setH(Rect* r, int h)
 {
-    r->H=H;
+    r->h=h;
 }
 
 int Rect_getX(const Rect* r)
@@ -151,11 +151,11 @@ int Rect_getH(const Rect* r)
 void Rect_translate(Rect* r, Vec3D delta)
 {
     r->x+=delta.i;
-    r->y+=delta.j
+    r->y+=delta.j;
 }
 
 //returns whether rect contains point P
-bool Rect_containsPoint(Rect r, x, y)
+bool Rect_containsPoint(Rect r, int x, int y)
 {
     bool res = false;
     if((x>=r.x&&x<=(r.x+r.w))&&(y>=r.y&&y<=(r.y+r.h)))res = true;
@@ -242,7 +242,7 @@ bool Circle_inCollision(Circle c1, Circle c2)
 }
 
 //return whether circle contains point
-bool Circle_containsPoint(Circle c, x, y)
+bool Circle_containsPoint(Circle c, int x, int y)
 {
     bool res = false;
     int dx = c.x-x;
