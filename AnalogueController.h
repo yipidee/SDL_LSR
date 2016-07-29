@@ -17,12 +17,9 @@ typedef struct AnalogueController
 {
     Circle base, knob;
     Rect touchableArea;
-    bool (*EventHandler)(struct AnalogueController*, SDL_Event*);
     Controller_Mode mode;
     bool isPressed;
 }AnalogueController;
-
-typedef bool (*EventHandler)(AnalogueController*, SDL_Event*);
 
 //create controller
 AnalogueController AnalCont_create();
@@ -30,12 +27,14 @@ AnalogueController AnalCont_create();
 //get current input
 uint32_t AnalCont_getCurrentInput(AnalogueController* ac);
 
+//handle event
+bool AnalCont_handleEvent(AnalogueController* ac, SDL_Event* e);
+
 //set and get
 void AnalCont_setPosition(AnalogueController* ac, int x, int y);
 void AnalCont_setSize(AnalogueController* ac, int r);
 void AnalCont_setKnobSize(AnalogueController* ac, int r);
 void AnalCont_setTouchableArea(AnalogueController* ac, Rect rect);
-void AnalCont_setTouchHandler(AnalogueController* ac, EventHandler handler);
 void AnalCont_setPressed(AnalogueController* ac, bool isPressed);
 int AnalCont_getSize(AnalogueController* ac);
 int AnalCont_getKnobSize(AnalogueController* ac);

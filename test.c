@@ -55,9 +55,9 @@ int main(int argc, char* argv[])
 
 	/****************************************************************
 	*****************************************************************
-	*******                ******************************************
-	*******    TEST AREA   ******************************************
-	*******                ******************************************
+	**********************                ***************************
+	**********************    TEST AREA   ***************************
+	**********************                ***************************
 	*****************************************************************
 	*****************************************************************/
     //Main loop flag
@@ -65,6 +65,8 @@ int main(int argc, char* argv[])
 
     //Event handler
     SDL_Event e;
+
+    AnalogueController controller = AnalCont_create();
 
     //While application is running
     while( !quit )
@@ -77,16 +79,26 @@ int main(int argc, char* argv[])
             {
                 quit = true;
             }
+            else
+            {
+                AnalCont_handleEvent(&controller, &e);
+            }
         }
 
-        AnalogueController controller = AnalCont_create();
-
         SDL_Rect cRect = {controller.knob.x-controller.knob.r, controller.knob.y-controller.knob.r, 2*controller.knob.r, 2*controller.knob.r};
-        //SDL_Rect testRect = {50,50,250,250};
+        SDL_Rect dRect = {controller.base.x-controller.base.r, controller.base.y-controller.base.r, 2*controller.base.r, 2*controller.base.r};
+
+        SDL_SetRenderDrawColor(gRenderer, COLOUR_BLUE);
+        SDL_RenderFillRect(gRenderer, &dRect);
+
         SDL_SetRenderDrawColor(gRenderer, COLOUR_GREEN);
         SDL_RenderFillRect(gRenderer, &cRect);
 
         SDL_RenderPresent(gRenderer);
+
+        SDL_SetRenderDrawColor(gRenderer, COLOUR_BLACK);
+        SDL_RenderClear(gRenderer);
+
     }
 
     //Destroy window
