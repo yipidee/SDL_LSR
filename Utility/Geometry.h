@@ -86,6 +86,8 @@ typedef struct Circle
     int x, y, r;
 } Circle;
 
+static const Rect RECT_NULL = {0,0,0,0};
+
 //greate circle with central coordinates and radius
 Rect Rect_create(int x, int y, int w, int h);
 
@@ -118,6 +120,9 @@ SDL_Rect Rect_getSDLRect(Rect r);
 ///////////////////////////////////////////////////
 ////           Circle
 ///////////////////////////////////////////////////
+
+//final cirlces
+static const Circle CIRCLE_NULL = {0,0,0};
 
 //greate circle with central coordinates and radius
 Circle Circle_create(int x, int y, int r);

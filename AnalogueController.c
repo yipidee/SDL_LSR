@@ -14,17 +14,52 @@ static bool _MouseMove(AnalogueController* ac, SDL_Event* e);
 AnalogueController AnalCont_create()
 {
     AnalogueController c;
-    c.base = Circle_create(51, 51, 50);
-    c.knob = Circle_create(51, 51, 30);
-    c.touchableArea = Rect_create(1, 1, 101, 101);
+    c.base = CIRCLE_NULL;
+    c.knob = CIRCLE_NULL;
+    c.touchableArea = RECT_NULL;
     c.mode = ANALOGUE_MODE;
     return c;
+}
+
+//sets the position of the controller in global coordinates
+void AnalCont_setPosition(AnalogueController* ac, int x, int y)
+{
+    ac->base.x = x;
+    ac->base.y = y;
+    ac->knob.x = x;
+    ac->knob.y = y;
+}
+
+// set diameter of controller view
+void AnalCont_setSize(AnalogueController* ac, int d)
+{
+    ac->base.r = d/2;
+    Rect r = {ac->base.x - ac->base.r, ac->base.y - ac->base.r, 2 * ac->base.r, 2 * ac->base.r};
+    ac->touchableArea = r;
+}
+
+//set diameter of knob within view
+void AnalCont_setKnobSize(AnalogueController* ac, int d)
+{
+    ac->knob.r = d/2;
 }
 
 //returns a Rect represented touchable area of controller
 Rect AnalCont_getTouchableArea(AnalogueController* ac)
 {
     return ac->touchableArea;
+}
+
+//returns diameter of controller view
+int AnalCont_getSize(AnalogueController* ac)
+{
+    return (ac->base.r * 2);
+}
+
+//returns diameter of knob within view
+int AnalCont_getKnobSize(AnalogueController* ac)
+{
+    return (ac->knob.r * 2);
 }
 
 //get current input

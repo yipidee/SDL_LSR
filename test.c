@@ -68,6 +68,9 @@ int main(int argc, char* argv[])
     SDL_Event e;
 
     AnalogueController controller = AnalCont_create();
+    AnalCont_setPosition(&controller, 51, 51);
+    AnalCont_setSize(&controller, 100);
+    AnalCont_setKnobSize(&controller, 60);
 
     //While application is running
     while( !quit )
