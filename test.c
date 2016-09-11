@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+//#include "Utility/Geometry.h"
 #include "AnalogueController.h"
 
 //Colour definitions in RGBA list format for SDL renderer
@@ -81,7 +82,17 @@ int main(int argc, char* argv[])
             }
             else
             {
-                AnalCont_handleEvent(&controller, &e);
+                if(Rect_containsPoint(AnalCont_getTouchableArea(&controller), e.button.x, e.button.y))
+                {
+                    AnalCont_handleEvent(&controller, &e);
+                }else
+                {
+                    SDL_Event ev;
+                    ev.type = SDL_MOUSEBUTTONUP;
+                    ev.button.x = 0;
+                    ev.button.y = 0;
+                    AnalCont_handleEvent(&controller, &ev);
+                }
             }
         }
 

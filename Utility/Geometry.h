@@ -39,7 +39,7 @@ static const Vec3D VECTOR_DOWN = {0,0,-1};
 Vec3D Vec3D_add(Vec3D v1, Vec3D v2);
 
 //3d vector multiplication
-Vec3D Vec3D_scalarMult(Vec3D v, int scalar);
+Vec3D Vec3D_scalarMult(Vec3D v, float scalar);
 int Vec3D_dotProduct(Vec3D v1, Vec3D v2);
 Vec3D Vec3D_crossProduct(Vec3D v1, Vec3D v2);
 
@@ -59,10 +59,13 @@ bool Vec3D_isPerpendicular(Vec3D v1, Vec3D v2);
 bool Vec3D_equal(Vec3D v1, Vec3D v2);
 
 //normalise
-Vec3D Vec3D_normalise(Vec3D v);
+Vec3D Vec3D_normalise(Vec3D v);     //magnitude of result is 1000
 
 //get magnitude
 double Vec3D_getMagnitude(Vec3D v);
+
+//prints string rep of vec to stout
+void Vec3D_print(Vec3D v);
 
 
 ///////////////////////////////////////////////////

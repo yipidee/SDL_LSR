@@ -21,12 +21,12 @@ Vec3D Vec3D_add(Vec3D v1, Vec3D v2)
 }
 
 //2d vector multiplication
-Vec3D Vec3D_ScalarMult(Vec3D v, int scalar)
+Vec3D Vec3D_scalarMult(Vec3D v, float scalar)
 {
     Vec3D res = VECTOR_ZERO;
-    res.i = v.i * scalar;
-    res.j = v.j * scalar;
-    res.k = v.k * scalar;
+    res.i = (int)((float)v.i * scalar);
+    res.j = (int)((float)v.j * scalar);
+    res.k = (int)((float)v.k * scalar);
     return res;
 }
 
@@ -86,11 +86,16 @@ bool Vec3D_equal(Vec3D v1, Vec3D v2)
 Vec3D Vec3D_normalise(Vec3D v)
 {
     double mag = Vec3D_getMagnitude(v);
-    Vec3D res = {(int)((double)v.i/mag),
-                 (int)((double)v.j/mag),
-                 (int)((double)v.k/mag)
+    Vec3D res = {(int)((double)v.i*1000/mag),
+                 (int)((double)v.j*1000/mag),
+                 (int)((double)v.k*1000/mag)
                 };
     return res;
+}
+
+void Vec3D_print(Vec3D v)
+{
+    printf("%ii %ij %ik\n", v.i, v.j, v.k);
 }
 
 
@@ -158,7 +163,8 @@ void Rect_translate(Rect* r, Vec3D delta)
 bool Rect_containsPoint(Rect r, int x, int y)
 {
     bool res = false;
-    if((x>=r.x&&x<=(r.x+r.w))&&(y>=r.y&&y<=(r.y+r.h)))res = true;
+    if((x>=r.x)&&(x<=(r.x+r.w))&&(y>=r.y)&&(y<=(r.y+r.h)))
+        res = true;
     return res;
 }
 

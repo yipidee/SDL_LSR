@@ -18,7 +18,6 @@ typedef struct AnalogueController
     Circle base, knob;
     Rect touchableArea;
     Controller_Mode mode;
-    bool isPressed;
 }AnalogueController;
 
 //create controller

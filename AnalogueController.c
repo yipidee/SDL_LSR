@@ -1,16 +1,30 @@
 #include <stdio.h>
 #include "AnalogueController.h"
 
+//helper meta functions to test whether mouse buttons pressed during move
+#define isMouseBL(e) (((e)->motion.state&SDL_BUTTON_LMASK)==SDL_BUTTON_LMASK)
+#define isMouseBR(e) (((e)->motion.state&SDL_BUTTON_RMASK)==SDL_BUTTON_RMASK)
+
+//Protype static functions
+static bool _MouseDown(AnalogueController* ac, SDL_Event* e);
+static bool _MouseUp(AnalogueController* ac, SDL_Event* e);
+static bool _MouseMove(AnalogueController* ac, SDL_Event* e);
+
 //create controller
 AnalogueController AnalCont_create()
 {
     AnalogueController c;
-    c.isPressed = false;
-    c.base = Circle_create(50, 50, 50);
-    c.knob = Circle_create(50, 50, 30);
-    c.touchableArea = Rect_create(0, 0, 100, 100);
+    c.base = Circle_create(51, 51, 50);
+    c.knob = Circle_create(51, 51, 30);
+    c.touchableArea = Rect_create(1, 1, 101, 101);
     c.mode = ANALOGUE_MODE;
     return c;
+}
+
+//returns a Rect represented touchable area of controller
+Rect AnalCont_getTouchableArea(AnalogueController* ac)
+{
+    return ac->touchableArea;
 }
 
 //get current input
@@ -22,19 +36,13 @@ bool AnalCont_handleEvent(AnalogueController* ac, SDL_Event* e)
     Uint32 eventType = e->type;
     switch(eventType){
         case SDL_MOUSEBUTTONDOWN:
-            ac->knob.x = e->button.x;
-            ac->knob.y = e->button.y;
+            _MouseDown(ac, e);
             break;
         case SDL_MOUSEBUTTONUP:
-            ac->knob.x = ac->base.x;
-            ac->knob.y = ac->base.y;
+            _MouseUp(ac, e);
             break;
         case SDL_MOUSEMOTION:
-            if((e->motion.state&SDL_BUTTON_LMASK)==SDL_BUTTON_LMASK)
-            {
-                ac->knob.x += e->motion.xrel;
-                ac->knob.y += e->motion.yrel;
-            }
+            _MouseMove(ac, e);
             break;
     }
     return true;
@@ -51,3 +59,71 @@ int AnalCont_getKnobSize(AnalogueController* ac);
 Rect AnalCont_getTouchableArea(AnalogueController* ac);
 bool AnalCont_getPressed(AnalogueController* ac);
 
+/*****************************************************************
+******************************************************************
+***              Static methods                   ****************
+******************************************************************
+*****************************************************************/
+
+static bool _MouseDown(AnalogueController* ac, SDL_Event* e)
+{
+    //immediately return if null pointer
+    if(ac==NULL || e==NULL) return false;
+
+    if(Rect_containsPoint(ac->touchableArea, e->button.x, e->button.y))
+    {
+        Rect inner = {ac->touchableArea.x+ac->knob.r,
+                      ac->touchableArea.y+ac->knob.r,
+                      ac->touchableArea.w-2*ac->knob.r,
+                      ac->touchableArea.h-2*ac->knob.r};
+        if(Rect_containsPoint(inner, e->button.x, e->button.y))
+        {
+            ac->knob.x = e->button.x;
+            ac->knob.y = e->button.y;
+        }else{
+            Vec3D touchPos = {e->button.x, e->button.y, 0};
+            Vec3D basePos = {ac->base.x, ac->base.y, 0};
+            Vec3D delta = Vec3D_subtract(touchPos, basePos);
+            delta = Vec3D_normalise(delta);
+            delta = Vec3D_scalarMult(delta, (float)(ac->base.r-ac->knob.r)/1000);
+            ac->knob.x = ac->base.x+delta.i;
+            ac->knob.y = ac->base.y+delta.j;
+        }
+    }
+
+    return true;
+}
+
+static bool _MouseUp(AnalogueController* ac, SDL_Event* e)
+{
+    //immediately return if null pointer
+    if(ac==NULL || e==NULL) return false;
+
+    ac->knob.x = ac->base.x;
+    ac->knob.y = ac->base.y;
+    return true;
+}
+
+static bool _MouseMove(AnalogueController* ac, SDL_Event* e)
+{
+    //immediately return if null pointer
+    if(ac==NULL || e==NULL) return false;
+
+    if(isMouseBL(e))
+    {
+        ac->knob.x = e->motion.x;
+        ac->knob.y = e->motion.y;
+        SDL_Event myEvent;
+        if(Rect_containsPoint(ac->touchableArea, ac->knob.x, ac->knob.y))
+        {
+            myEvent.button.x = ac->knob.x;
+            myEvent.button.y = ac->knob.y;
+            _MouseDown(ac, &myEvent);
+        }else
+        {
+            _MouseUp(ac, &myEvent);
+        }
+
+    }
+    return true;
+}
