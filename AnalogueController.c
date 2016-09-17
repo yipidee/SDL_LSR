@@ -63,7 +63,17 @@ int AnalCont_getKnobSize(AnalogueController* ac)
 }
 
 //get current input
-uint32_t AnalCont_getCurrentInput(AnalogueController* ac);
+Vec3D AnalCont_getCurrentInput(AnalogueController* ac)
+{
+    Vec3D in;
+    Vec3D kp = {ac->knob.x,ac->knob.y,0};
+    Vec3D bp = {ac->base.x,ac->base.y,0};
+    in = Vec3D_subtract(kp, bp);
+    float max = (float)(ac->base.r-ac->knob.r);
+    in.i = (int)((float)in.i/max*100);
+    in.j = (int)((float)in.j/max*100);
+    return in;
+}
 
 //handle event
 bool AnalCont_handleEvent(AnalogueController* ac, SDL_Event* e)

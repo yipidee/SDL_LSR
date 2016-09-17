@@ -24,7 +24,7 @@ typedef struct AnalogueController
 AnalogueController AnalCont_create();
 
 //get current input
-uint32_t AnalCont_getCurrentInput(AnalogueController* ac);
+Vec3D AnalCont_getCurrentInput(AnalogueController* ac);
 
 //handle event
 bool AnalCont_handleEvent(AnalogueController* ac, SDL_Event* e);
