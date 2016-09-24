@@ -11,13 +11,17 @@ static bool _MouseUp(AnalogueController* ac, SDL_Event* e);
 static bool _MouseMove(AnalogueController* ac, SDL_Event* e);
 
 //create controller
-AnalogueController AnalCont_create()
+AnalogueController AnalCont_create(Controller_Mode mode)
 {
     AnalogueController c;
     c.base = CIRCLE_NULL;
     c.knob = CIRCLE_NULL;
     c.touchableArea = RECT_NULL;
-    c.mode = ANALOGUE_MODE;
+    c.mode = mode;
+    c.pathToBImg = NULL;
+    c.pathToKImg = NULL;
+    c.baseImg = NULL;
+    c.knobImg = NULL;
     return c;
 }
 
@@ -42,6 +46,17 @@ void AnalCont_setSize(AnalogueController* ac, int d)
 void AnalCont_setKnobSize(AnalogueController* ac, int d)
 {
     ac->knob.r = d/2;
+}
+
+//set path to base image
+void AnalCont_setPathToBImg(AnalogueController* ac, char* path)
+{
+    ac->pathToBImg = path;
+}
+
+void AnalCont_setPathToKImg(AnalogueController* ac, char* path)
+{
+    ac->pathToKImg = path;
 }
 
 //returns a Rect represented touchable area of controller
@@ -92,17 +107,6 @@ bool AnalCont_handleEvent(AnalogueController* ac, SDL_Event* e)
     }
     return true;
 }
-
-//set and get
-void AnalCont_setPosition(AnalogueController* ac, int x, int y);
-void AnalCont_setSize(AnalogueController* ac, int r);
-void AnalCont_setKnobSize(AnalogueController* ac, int r);
-void AnalCont_setTouchableArea(AnalogueController* ac, Rect rect);
-void AnalCont_setPressed(AnalogueController* ac, bool isPressed);
-int AnalCont_getSize(AnalogueController* ac);
-int AnalCont_getKnobSize(AnalogueController* ac);
-Rect AnalCont_getTouchableArea(AnalogueController* ac);
-bool AnalCont_getPressed(AnalogueController* ac);
 
 /*****************************************************************
 ******************************************************************

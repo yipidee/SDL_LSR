@@ -25,11 +25,18 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 
+//initialise/quit drawing utilities
 bool Draw_init();
 void Draw_quit();
 
+//metohd to render a controller
 void Draw_controller(AnalogueController* ac);
 
+//method to free an image
+//TODO: keep track of loaded textures in the module and delete as part of quit
+void Draw_freeImage(SDL_Texture* img);
+
+//render current buffer to screen
 void Draw_renderScene();
 
 #endif // _DRAW_H_
