@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include "EventHandler.h"
 #include "AnalogueController.h"
 #include "Draw.h"
 
@@ -39,6 +40,9 @@ int main(int argc, char* argv[])
     AnalCont_setPathToBImg(&controller2, p1);
     AnalCont_setPathToKImg(&controller2, p2);
 
+    EH_registerHandler(controller1.touchableArea, controller1.evHan, true, &controller1);
+    EH_registerHandler(controller2.touchableArea, controller2.evHan, true, &controller2);
+
     //While application is running
     while( !quit )
     {
@@ -52,6 +56,7 @@ int main(int argc, char* argv[])
             }
             else
             {
+                /*
                 if(Rect_containsPoint(AnalCont_getTouchableArea(&controller1), e.button.x, e.button.y))
                 {
                     AnalCont_handleEvent(&controller1, &e);
@@ -63,6 +68,8 @@ int main(int argc, char* argv[])
                     ev.button.y = 0;
                     AnalCont_handleEvent(&controller1, &ev);
                 }
+                */
+                EH_handleEvent(&e);
             }
             //Vec3D_print(AnalCont_getCurrentInput(&controller));
         }
@@ -71,8 +78,5 @@ int main(int argc, char* argv[])
         Draw_controller(&controller2);
         Draw_renderScene();
     }
-
-    Draw_freeImage(controller1.baseImg);
-    Draw_freeImage(controller1.knobImg);
     Draw_quit();
 }

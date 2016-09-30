@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <SDL2/SDL.h>
 #include "Utility/Geometry.h"
-
+#include "EventHandler.h"
 
 typedef enum Controller_Mode
 {
@@ -22,6 +22,7 @@ typedef struct AnalogueController
     char* pathToKImg;
     SDL_Texture* baseImg;
     SDL_Texture* knobImg;
+    EventHandler evHan;
 
 }AnalogueController;
 
@@ -32,7 +33,7 @@ AnalogueController AnalCont_create(Controller_Mode mode);
 Vec3D AnalCont_getCurrentInput(AnalogueController* ac);
 
 //handle event
-bool AnalCont_handleEvent(AnalogueController* ac, SDL_Event* e);
+bool AnalCont_handleEvent(void* ac, SDL_Event* e);
 
 //set and get
 void AnalCont_setPosition(AnalogueController* ac, int x, int y);

@@ -1,9 +1,14 @@
 #include <SDL2/SDL_image.h>
 #include "Draw.h"
+#include "Utility/List.h"
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;
 static bool isInitialised = false;
+
+//list for tracking loaded textures
+static List loadedTextures;
+static void freeListedTexture(void* data);
 
 bool Draw_init()
 {
@@ -46,6 +51,7 @@ bool Draw_init()
                     }
                     else
                     {
+                        List_new(&loadedTextures, sizeof(SDL_Texture*), &freeListedTexture);
                         isInitialised = true;
                     }
                 }
@@ -64,6 +70,9 @@ void Draw_quit()
         SDL_DestroyWindow( gWindow );
         gWindow = NULL;
         gRenderer = NULL;
+
+
+        List_destroy(&loadedTextures);
 
         //Quit SDL subsystems
         IMG_Quit();
@@ -116,3 +125,8 @@ void Draw_renderScene()
     SDL_RenderClear(gRenderer);
 }
 
+static void freeListedTexture(void* data)
+{
+    SDL_Texture* img = data;
+    SDL_DestroyTexture(img);
+}

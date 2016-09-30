@@ -22,6 +22,7 @@ AnalogueController AnalCont_create(Controller_Mode mode)
     c.pathToKImg = NULL;
     c.baseImg = NULL;
     c.knobImg = NULL;
+    c.evHan = &AnalCont_handleEvent;
     return c;
 }
 
@@ -91,18 +92,19 @@ Vec3D AnalCont_getCurrentInput(AnalogueController* ac)
 }
 
 //handle event
-bool AnalCont_handleEvent(AnalogueController* ac, SDL_Event* e)
+bool AnalCont_handleEvent(void* ac, SDL_Event* e)
 {
+    AnalogueController* a = ac;
     Uint32 eventType = e->type;
     switch(eventType){
         case SDL_MOUSEBUTTONDOWN:
-            _MouseDown(ac, e);
+            _MouseDown(a, e);
             break;
         case SDL_MOUSEBUTTONUP:
-            _MouseUp(ac, e);
+            _MouseUp(a, e);
             break;
         case SDL_MOUSEMOTION:
-            _MouseMove(ac, e);
+            _MouseMove(a, e);
             break;
     }
     return true;
@@ -110,7 +112,7 @@ bool AnalCont_handleEvent(AnalogueController* ac, SDL_Event* e)
 
 /*****************************************************************
 ******************************************************************
-***              Static methods                   ****************
+********              Static methods                   ***********
 ******************************************************************
 *****************************************************************/
 
@@ -139,7 +141,6 @@ static bool _MouseDown(AnalogueController* ac, SDL_Event* e)
             ac->knob.y = ac->base.y+delta.j;
         }
     }
-
     return true;
 }
 
