@@ -37,3 +37,7 @@
 *.layout
 *.depend
 bin/*
+
+# Custom
+*.ignore
+*.swp

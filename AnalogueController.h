@@ -18,10 +18,6 @@ typedef struct AnalogueController
     Circle base, knob;
     Rect touchableArea;
     Controller_Mode mode;
-    char* pathToBImg;
-    char* pathToKImg;
-    SDL_Texture* baseImg;
-    SDL_Texture* knobImg;
     EventHandler evHan;
 
 }AnalogueController;
@@ -39,8 +35,6 @@ bool AnalCont_handleEvent(void* ac, SDL_Event* e);
 void AnalCont_setPosition(AnalogueController* ac, int x, int y);
 void AnalCont_setSize(AnalogueController* ac, int d);
 void AnalCont_setKnobSize(AnalogueController* ac, int r);
-void AnalCont_setPathToBImg(AnalogueController* ac, char* path);
-void AnalCont_setPathToKImg(AnalogueController* ac, char* path);
 int AnalCont_getSize(AnalogueController* ac);
 int AnalCont_getKnobSize(AnalogueController* ac);
 Rect AnalCont_getTouchableArea(AnalogueController* ac);

@@ -18,10 +18,6 @@ AnalogueController AnalCont_create(Controller_Mode mode)
     c.knob = CIRCLE_NULL;
     c.touchableArea = RECT_NULL;
     c.mode = mode;
-    c.pathToBImg = NULL;
-    c.pathToKImg = NULL;
-    c.baseImg = NULL;
-    c.knobImg = NULL;
     c.evHan = &AnalCont_handleEvent;
     return c;
 }
@@ -49,16 +45,6 @@ void AnalCont_setKnobSize(AnalogueController* ac, int d)
     ac->knob.r = d/2;
 }
 
-//set path to base image
-void AnalCont_setPathToBImg(AnalogueController* ac, char* path)
-{
-    ac->pathToBImg = path;
-}
-
-void AnalCont_setPathToKImg(AnalogueController* ac, char* path)
-{
-    ac->pathToKImg = path;
-}
 
 //returns a Rect represented touchable area of controller
 Rect AnalCont_getTouchableArea(AnalogueController* ac)
