@@ -109,22 +109,19 @@ static bool _MouseDown(AnalogueController* ac, SDL_Event* e)
 
     if(Rect_containsPoint(ac->touchableArea, e->button.x, e->button.y))
     {
-        Rect inner = {ac->touchableArea.x+ac->knob.r,
-                      ac->touchableArea.y+ac->knob.r,
-                      ac->touchableArea.w-2*ac->knob.r,
-                      ac->touchableArea.h-2*ac->knob.r};
-        if(Rect_containsPoint(inner, e->button.x, e->button.y))
+        Vec3D centre = {ac->base.x,ac->base.y,0};
+        Vec3D touch = {e->button.x,e->button.y,0};
+        Vec3D a = Vec3D_subtract(touch, centre);
+        double r = Vec3D_getMagnitude(a);
+        if(r<=(ac->base.r-ac->knob.r))
         {
             ac->knob.x = e->button.x;
             ac->knob.y = e->button.y;
         }else{
-            Vec3D touchPos = {e->button.x, e->button.y, 0};
-            Vec3D basePos = {ac->base.x, ac->base.y, 0};
-            Vec3D delta = Vec3D_subtract(touchPos, basePos);
-            delta = Vec3D_normalise(delta);
-            delta = Vec3D_scalarMult(delta, (float)(ac->base.r-ac->knob.r)/1000);
-            ac->knob.x = ac->base.x+delta.i;
-            ac->knob.y = ac->base.y+delta.j;
+            a = Vec3D_normalise(a);
+            a = Vec3D_scalarMult(a, (float)(ac->base.r-ac->knob.r)/1000);
+            ac->knob.x = ac->base.x+a.i;
+            ac->knob.y = ac->base.y+a.j;
         }
     }
     return true;

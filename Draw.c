@@ -23,7 +23,6 @@ struct textureListItem
 //List of sprites to render
 static List sprites;
 
-
 //function prototypes
 void Viewport_init(int w, int h);
 SDL_Texture* Draw_loadTexture(char* pathToImage);
@@ -73,14 +72,10 @@ struct _Sprite
 {
     int* gX, * gY, * gZ;        //global x, y and z of sprite
     int gW, gH;                 //global width and height of sprite
-    //char* pathToSpriteSheet;    //location of sprite map file
     bool isVisible, posRefByCentre; //flag to mark a sprite for drawing
     Spritesheet spriteSheet;   //pointer to texture
-    //int sW, sH;                 //width and height of sprite in sprite map
     int* state;                 //state
     int frame;                  //current frame
-    //int numStates;
-    //int* framesPerState;        //how many frame per state (points to double array of ints)
     bool isFullscreen;     //whether exists in global space or directly on screen
 };
 
@@ -306,23 +301,6 @@ void Draw_freeImage(SDL_Texture* img)
     if(img!=NULL) SDL_DestroyTexture(img);
 }
 
-/*
-void Draw_controller(AnalogueController* ac)
-{
-    if(!isInitialised) Draw_init();
-    if(ac->baseImg == NULL)
-    {
-        ac->knobImg = Draw_loadImage(ac->pathToKImg);
-        ac->baseImg = Draw_loadImage(ac->pathToBImg);
-    }
-
-    SDL_Rect cRect = {ac->knob.x-ac->knob.r, ac->knob.y-ac->knob.r, 2*ac->knob.r, 2*ac->knob.r};
-    SDL_Rect dRect = {ac->base.x-ac->base.r, ac->base.y-ac->base.r, 2*ac->base.r, 2*ac->base.r};
-
-    SDL_RenderCopy(gRenderer, ac->baseImg, NULL, &dRect);
-    SDL_RenderCopy(gRenderer, ac->knobImg, NULL, &cRect);
-}
-*/
 
 /********************************************************************
 *********************************************************************
