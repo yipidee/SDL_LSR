@@ -87,8 +87,12 @@ int main(int argc, char* argv[])
     //Main loop flag
     bool quit = false;
 
+    int MaxVx = 7;
+
     //Event handler
     SDL_Event e;
+    Vec3D input;
+    Vec3D delta;
 
     //While application is running
     while( !quit )
@@ -103,9 +107,18 @@ int main(int argc, char* argv[])
                 if(e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEMOTION) EH_handleEvent(&e);
             }
         }
+        //get input
+        input = AnalCont_getCurrentInput(&controller1);
+        delta.i = input.i * MaxVx /100;
+        delta.j = input.j * MaxVx /100;
+
+        //update physics
+        obj.pos.i = (int)((float)obj.pos.i + (float)delta.i);
+        obj.pos.j = (int)((float)obj.pos.j + (float)delta.j);
+
+        //draw result
         Draw_renderScene();
     }
-
     releaseResources();
 }
 
