@@ -29,6 +29,8 @@ void AnalCont_setPosition(AnalogueController* ac, int x, int y)
     ac->base.y = y;
     ac->knob.x = x;
     ac->knob.y = y;
+    ac->touchableArea.x = ac->base.x-ac->base.r;
+    ac->touchableArea.y = ac->base.y-ac->base.r;
 }
 
 // set diameter of controller view
@@ -44,7 +46,6 @@ void AnalCont_setKnobSize(AnalogueController* ac, int d)
 {
     ac->knob.r = d/2;
 }
-
 
 //returns a Rect represented touchable area of controller
 Rect AnalCont_getTouchableArea(AnalogueController* ac)

@@ -191,6 +191,11 @@ SDL_Rect Rect_getSDLRect(Rect r)
     return R;
 }
 
+bool Rect_equals(Rect r1, Rect r2)
+{
+    return ((r1.x==r2.x) && (r1.y==r2.y) && (r1.w==r2.w) && (r1.h==r2.h));
+}
+
 
 ///////////////////////////////////////////////////
 ////           Circle

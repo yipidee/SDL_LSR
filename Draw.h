@@ -8,6 +8,9 @@
 ********************************************************
 */
 
+#define USE_FULL_IMAGE_WIDTH 0
+#define USE_FULL_IMAGE_HEIGHT 0
+
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include "Utility/Geometry.h"

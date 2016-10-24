@@ -116,6 +116,9 @@ bool Rect_inCollision(Rect r1, Rect r2);
 //converts to SDL_Rect
 SDL_Rect Rect_getSDLRect(Rect r);
 
+//compares two rectangles for equivalency
+bool Rect_equals(Rect r1, Rect r2);
+
 
 ///////////////////////////////////////////////////
 ////           Circle
