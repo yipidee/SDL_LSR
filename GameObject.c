@@ -20,6 +20,25 @@ GameObject GO_createGameObject()
     return go;
 }
 
+//collision detection function
+bool GO_isInContact(GameObject go1, GameObject go2)
+{
+    return Circle_inCollision(go1.BCirc, go2.BCirc);
+}
+
+//returns whether a circle is completely enclosed within a rect
+bool GO_isInBounds(GameObject go, Rect BoundingRect)
+{
+    return Rect_containsCircle(BoundingRect, go.BCirc);
+}
+
+void GO_move(GameObject* go, Vec3D delta)
+{
+    go->pos = Vec3D_add(go->pos, delta);
+    go->BCirc.x = go->pos.i;
+    go->BCirc.y = go->pos.j;
+}
+
 //setters for physics variables
 void GO_setAcc(GameObject* go, Vec3D a)
 {
@@ -56,6 +75,13 @@ void GO_setStationary(GameObject* go, bool b)
     go->isStationary = b;
 }
 
+void GO_setBCirc(GameObject* go, Circle c)
+{
+    go->BCirc = c;
+    go->BCirc.x = go->pos.i;
+    go->BCirc.y = go->pos.j;
+}
+
 //getters for physics variables
 Vec3D GO_getAcc(const GameObject* go)
 {
@@ -85,16 +111,4 @@ int GO_getRVel(const GameObject* go)
 int GO_getRAcc(const GameObject* go)
 {
     return go->rAcc;
-}
-
-//collision detection function
-bool GO_isInContact(GameObject go1, GameObject go2)
-{
-    return Circle_inCollision(go1.BCirc, go2.BCirc);
-}
-
-//returns whether a circle is completely enclosed within a rect
-bool GO_isInBounds(GameObject go, Rect BoundingRect)
-{
-    return Rect_containsCircle(BoundingRect, go.BCirc);
 }
