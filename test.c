@@ -99,8 +99,8 @@ int main(int argc, char* argv[])
 
     //Event handler
     SDL_Event e;
-    Vec3D input;
-    Vec3D delta;
+    Vec3D input = VECTOR_ZERO;
+    Vec3D delta = VECTOR_ZERO;
 
     //While application is running
     while( !quit )
