@@ -75,6 +75,7 @@ Vec3D AnalCont_getCurrentInput(AnalogueController* ac)
     float max = (float)(ac->base.r-ac->knob.r);
     in.i = (int)((float)in.i/max*100);
     in.j = (int)((float)in.j/max*100);
+    in.k = 0;
     return in;
 }
 
