@@ -24,13 +24,13 @@ Vec3D Vec3D_add(Vec3D v1, Vec3D v2)
 Vec3D Vec3D_scalarMult(Vec3D v, float scalar)
 {
     Vec3D res = VECTOR_ZERO;
-    res.i = (int)((float)v.i * scalar);
-    res.j = (int)((float)v.j * scalar);
-    res.k = (int)((float)v.k * scalar);
+    res.i = v.i * scalar;
+    res.j = v.j * scalar;
+    res.k = v.k * scalar;
     return res;
 }
 
-int Vec3D_dotProduct(Vec3D v1, Vec3D v2)
+double Vec3D_dotProduct(Vec3D v1, Vec3D v2)
 {
     return (v1.i*v2.i + v1.j*v2.j + v1.k*v2.k);
 }
@@ -48,8 +48,8 @@ Vec3D Vec3D_crossProduct(Vec3D v1, Vec3D v2)
 //get cosine of angle between two vetors
 double Vec3D_getCosAlpha(Vec3D v1, Vec3D v2)
 {
-    int DP = Vec3D_dotProduct(v1, v2);
-    return ((double)DP/(Vec3D_getMagnitude(v1) * Vec3D_getMagnitude(v2)));
+    double DP = Vec3D_dotProduct(v1, v2);
+    return (DP/(Vec3D_getMagnitude(v1) * Vec3D_getMagnitude(v2)));
 }
 
 //get angle between vectors
@@ -86,16 +86,16 @@ bool Vec3D_equal(Vec3D v1, Vec3D v2)
 Vec3D Vec3D_normalise(Vec3D v)
 {
     double mag = Vec3D_getMagnitude(v);
-    Vec3D res = {(int)((double)v.i*1000/mag),
-                 (int)((double)v.j*1000/mag),
-                 (int)((double)v.k*1000/mag)
+    Vec3D res = {v.i/mag,
+                 v.j/mag,
+                 v.k/mag
                 };
     return res;
 }
 
 void Vec3D_print(Vec3D v)
 {
-    printf("%ii %ij %ik\n", v.i, v.j, v.k);
+    printf("%0.3fi %0.3fj %0.3fk\n", v.i, v.j, v.k);
 }
 
 
@@ -104,49 +104,49 @@ void Vec3D_print(Vec3D v)
 ///////////////////////////////////////////////////
 
 //greate circle with central coordinates and radius
-Rect Rect_create(int x, int y, int w, int h)
+Rect Rect_create(double x, double y, double w, double h)
 {
     Rect r = {x, y, w, h};
     return r;
 }
 
 //set/get properties
-void Rect_setX(Rect* r, int x)
+void Rect_setX(Rect* r, double x)
 {
     r->x=x;
 }
 
-void Rect_setY(Rect* r, int y)
+void Rect_setY(Rect* r, double y)
 {
     r->y=y;
 }
 
-void Rect_setW(Rect* r, int w)
+void Rect_setW(Rect* r, double w)
 {
     r->w=w;
 }
 
-void Rect_setH(Rect* r, int h)
+void Rect_setH(Rect* r, double h)
 {
     r->h=h;
 }
 
-int Rect_getX(const Rect* r)
+double Rect_getX(const Rect* r)
 {
     return r->x;
 }
 
-int Rect_getY(const Rect* r)
+double Rect_getY(const Rect* r)
 {
     return r->y;
 }
 
-int Rect_getW(const Rect* r)
+double Rect_getW(const Rect* r)
 {
     return r->w;
 }
 
-int Rect_getH(const Rect* r)
+double Rect_getH(const Rect* r)
 {
     return r->h;
 }
@@ -160,7 +160,7 @@ void Rect_translate(Rect* r, Vec3D delta)
 }
 
 //returns whether rect contains point P
-bool Rect_containsPoint(Rect r, int x, int y)
+bool Rect_containsPoint(Rect r, double x, double y)
 {
     bool res = false;
     if((x>=r.x)&&(x<=(r.x+r.w))&&(y>=r.y)&&(y<=(r.y+r.h)))
@@ -202,22 +202,22 @@ bool Rect_equals(Rect r1, Rect r2)
 ///////////////////////////////////////////////////
 
 //greate circle with central coordinates and radius
-Circle Circle_create(int x, int y, int r)
+Circle Circle_create(double x, double y, double r)
 {
     Circle c = {x, y, r};
     return c;
 }
 
 //set/get properties
-void Circle_setX(Circle* c, int x)
+void Circle_setX(Circle* c, double x)
 {
     c->x=x;
 }
-void Circle_setY(Circle* c, int y)
+void Circle_setY(Circle* c, double y)
 {
     c->y=y;
 }
-void Circle_setR(Circle* c, int r)
+void Circle_setR(Circle* c, double r)
 {
     c->r=r;
 }
@@ -245,19 +245,19 @@ void Circle_translate(Circle* c, Vec3D delta)
 bool Circle_inCollision(Circle c1, Circle c2)
 {
     bool res = false;
-    int dx = c1.x-c2.x;
-    int dy = c1.y-c2.y;
-    int rr = c1.r+c2.r;
+    double dx = c1.x-c2.x;
+    double dy = c1.y-c2.y;
+    double rr = c1.r+c2.r;
     if(rr*rr >= (dx*dx + dy*dy))res=true;
     return res;
 }
 
 //return whether circle contains point
-bool Circle_containsPoint(Circle c, int x, int y)
+bool Circle_containsPoint(Circle c, double x, double y)
 {
     bool res = false;
-    int dx = c.x-x;
-    int dy = c.y-y;
+    double dx = c.x-x;
+    double dy = c.y-y;
     if(c.r*c.r >= (dx*dx + dy*dy))res = true;
     return res;
 }

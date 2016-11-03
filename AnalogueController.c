@@ -72,9 +72,9 @@ Vec3D AnalCont_getCurrentInput(AnalogueController* ac)
     Vec3D kp = {ac->knob.x,ac->knob.y,0};
     Vec3D bp = {ac->base.x,ac->base.y,0};
     in = Vec3D_subtract(kp, bp);
-    float max = (float)(ac->base.r-ac->knob.r);
-    in.i = (int)((float)in.i/max*100);
-    in.j = (int)((float)in.j/max*100);
+    double max = ac->base.r-ac->knob.r;
+    in.i = in.i/max;
+    in.j = in.j/max;
     in.k = 0;
     return in;
 }
@@ -121,7 +121,7 @@ static bool _MouseDown(AnalogueController* ac, SDL_Event* e)
             ac->knob.y = e->button.y;
         }else{
             a = Vec3D_normalise(a);
-            a = Vec3D_scalarMult(a, (float)(ac->base.r-ac->knob.r)/1000);
+            a = Vec3D_scalarMult(a, (float)(ac->base.r-ac->knob.r));
             ac->knob.x = ac->base.x+a.i;
             ac->knob.y = ac->base.y+a.j;
         }

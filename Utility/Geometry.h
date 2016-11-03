@@ -22,9 +22,9 @@
 
 typedef struct Vec3D
 {
-    int i;
-    int j;
-    int k;
+    double i;
+    double j;
+    double k;
 } Vec3D;
 
 static const Vec3D VECTOR_ZERO = {0,0,0};
@@ -40,7 +40,7 @@ Vec3D Vec3D_add(Vec3D v1, Vec3D v2);
 
 //3d vector multiplication
 Vec3D Vec3D_scalarMult(Vec3D v, float scalar);
-int Vec3D_dotProduct(Vec3D v1, Vec3D v2);
+double Vec3D_dotProduct(Vec3D v1, Vec3D v2);
 Vec3D Vec3D_crossProduct(Vec3D v1, Vec3D v2);
 
 //get cosine of angle between two vetors
@@ -59,7 +59,7 @@ bool Vec3D_isPerpendicular(Vec3D v1, Vec3D v2);
 bool Vec3D_equal(Vec3D v1, Vec3D v2);
 
 //normalise
-Vec3D Vec3D_normalise(Vec3D v);     //magnitude of result is 1000
+Vec3D Vec3D_normalise(Vec3D v);
 
 //get magnitude
 double Vec3D_getMagnitude(Vec3D v);
@@ -77,35 +77,35 @@ void Vec3D_print(Vec3D v);
 //Rect struct
 typedef struct Rect
 {
-    int x, y, w, h;
+    double x, y, w, h;
 } Rect;
 
 //Circle struct
 typedef struct Circle
 {
-    int x, y, r;
+    double x, y, r;
 } Circle;
 
 static const Rect RECT_NULL = {0,0,0,0};
 
 //greate circle with central coordinates and radius
-Rect Rect_create(int x, int y, int w, int h);
+Rect Rect_create(double x, double y, double w, double h);
 
 //set/get properties
-void Rect_setX(Rect* r, int x);
-void Rect_setY(Rect* r, int y);
-void Rect_setW(Rect* r, int w);
-void Rect_setH(Rect* r, int h);
-int Rect_getX(const Rect* r);
-int Rect_getY(const Rect* r);
-int Rect_getW(const Rect* r);
-int Rect_getH(const Rect* r);
+void Rect_setX(Rect* r, double x);
+void Rect_setY(Rect* r, double y);
+void Rect_setW(Rect* r, double w);
+void Rect_setH(Rect* r, double h);
+double Rect_getX(const Rect* r);
+double Rect_getY(const Rect* r);
+double Rect_getW(const Rect* r);
+double Rect_getH(const Rect* r);
 
 //move Rect
 void Rect_translate(Rect* r, Vec3D delta);
 
 //returns whether rect contains point P
-bool Rect_containsPoint(Rect r, int x, int y);
+bool Rect_containsPoint(Rect r, double x, double y);
 
 //returns whether rect contains circle
 bool Rect_containsCircle(Rect r, Circle c);
@@ -128,12 +128,12 @@ bool Rect_equals(Rect r1, Rect r2);
 static const Circle CIRCLE_NULL = {0,0,0};
 
 //greate circle with central coordinates and radius
-Circle Circle_create(int x, int y, int r);
+Circle Circle_create(double x, double y, double r);
 
 //set/get properties
-void Circle_setX(Circle* c, int x);
-void Circle_setY(Circle* c, int y);
-void Circle_setR(Circle* c, int r);
+void Circle_setX(Circle* c, double x);
+void Circle_setY(Circle* c, double y);
+void Circle_setR(Circle* c, double r);
 int Circle_getX(const Circle* c);
 int Circle_getY(const Circle* c);
 int Circle_getR(const Circle* c);
@@ -142,7 +142,7 @@ int Circle_getR(const Circle* c);
 void Circle_translate(Circle* c, Vec3D delta);
 
 //return whether circle contains point
-bool Circle_containsPoint(Circle c, int x, int y);
+bool Circle_containsPoint(Circle c, double x, double y);
 
 //intercircle collision
 bool Circle_inCollision(Circle c1, Circle c2);

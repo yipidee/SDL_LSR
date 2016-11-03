@@ -30,7 +30,7 @@ void Sprite_destroySprite(Sprite s);
 void Sprite_isFullscreen(Sprite s, bool fullscreen);
 void Sprite_posByCentre(Sprite s, bool PBC);
 void Sprite_setSpriteInWorldDims(Sprite s, int w, int h);
-void Sprite_setSpriteInWorldPosRef(Sprite s, int* x, int* y, int* z);
+void Sprite_setSpriteInWorldPosRef(Sprite s, double* x, double* y, double* z);
 void Sprite_setSpriteStateRef(Sprite s, int* state);
 void Sprite_renderSprite(Sprite s);
 

@@ -70,7 +70,7 @@ void Spritesheet_destroy(Spritesheet s)
 //the sprite structure used for rendering game objects
 struct _Sprite
 {
-    int* gX, * gY, * gZ;        //global x, y and z of sprite
+    double* gX, * gY, * gZ;        //global x, y and z of sprite
     int gW, gH;                 //global width and height of sprite
     bool isVisible, posRefByCentre; //flag to mark a sprite for drawing
     Spritesheet spriteSheet;   //pointer to texture
@@ -122,7 +122,7 @@ void Sprite_setSpriteInWorldDims(Sprite s, int w, int h)
     s->gW = w;
 }
 
-void Sprite_setSpriteInWorldPosRef(Sprite s, int* x, int* y, int* z)
+void Sprite_setSpriteInWorldPosRef(Sprite s, double* x, double* y, double* z)
 {
     if(x)s->gX = x;
     if(y)s->gY = y;
@@ -181,8 +181,8 @@ void Sprite_renderSprite(Sprite s)
         relPos = Vec3D_subtract(gPos, vPos);
 
         SDL_Rect tmpRect = {
-                relPos.i,       //x
-                relPos.j,       //y
+                (int)relPos.i,       //x
+                (int)relPos.j,       //y
                 s->gW,          //w
                 s->gH           //h
         };
@@ -318,14 +318,14 @@ void Viewport_init(int w, int h)
 
 void Viewport_setPos(Vec3D p)
 {
-    viewport.x = p.i;
-    viewport.y = p.j;
+    viewport.x = (int)p.i;
+    viewport.y = (int)p.j;
 }
 
 void Viewport_setPosByCentre(Vec3D p)
 {
-    viewport.x = p.i-(viewport.w/2);
-    viewport.y = p.j-(viewport.h/2);
+    viewport.x = (int)p.i-(viewport.w/2);
+    viewport.y = (int)p.j-(viewport.h/2);
 }
 
 /********************************************************************

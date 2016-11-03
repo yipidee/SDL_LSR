@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
+#include <math.h>
 #include "EventHandler.h"
 #include "AnalogueController.h"
 #include "Draw.h"
@@ -116,9 +117,10 @@ int main(int argc, char* argv[])
             }
         }
         //get input
+        delta = VECTOR_ZERO;
         input = AnalCont_getCurrentInput(&controller1);
-        delta.i = input.i * MaxVx /100;
-        delta.j = input.j * MaxVx /100;
+        delta.i = input.i * MaxVx;
+        delta.j = input.j * MaxVx;
 
         //update physics
         //update position data
@@ -127,14 +129,14 @@ int main(int argc, char* argv[])
 
         GO_move(&player, delta);
         delta = Vec3D_add(ball.vel, ball.acc);
-        if(Vec3D_getMagnitude(Vec3D_add(delta, ball.vel))<=Vec3D_getMagnitude(ball.vel))
-        {
-            GO_setVel(&ball, VECTOR_ZERO);
-            GO_setAcc(&ball, VECTOR_ZERO);
-        }else
-        {
-            GO_setVel(&ball, delta);
-        }
+        Vec3D_print(delta);
+        if(((ball.vel.i >= 0) && (delta.i <= 0)) || ((ball.vel.i <= 0) && (delta.i >= 0))) {delta.i = 0;ball.acc.i=0;}
+        if(((ball.vel.j >= 0) && (delta.j <= 0)) || ((ball.vel.j <= 0) && (delta.j >= 0))) {delta.j = 0;ball.acc.j=0;}
+        //if((int)fabs(delta.i)==1)delta.i=0;
+        //if((int)fabs(delta.j)==1)delta.j=0;
+        GO_setVel(&ball, delta);
+        Vec3D_print(ball.vel);
+        Vec3D_print(ball.acc);
         GO_move(&ball, ball.vel);
 
         //collision detection
@@ -144,22 +146,19 @@ int main(int argc, char* argv[])
         if(player.pos.j>=SCREEN_HEIGHT-50)player.pos.j=SCREEN_HEIGHT-50;
         if(player.pos.i<=50)player.pos.i=50;
         if(player.pos.j<=50)player.pos.j=50;
-        player.pos.k=0;
 
         //with ball
         if(GO_isInContact(player, ball))
         {
-            //printf("contact\n");
             input = AnalCont_getCurrentInput(&controller2);
             if(Vec3D_equal(input, VECTOR_ZERO))
             {
                 Vec3D dVector = Vec3D_subtract(ball.pos, player.pos);
-                Vec3D_print(dVector);
                 dVector = Vec3D_normalise(dVector);
-                Vec3D_print(ball.vel);
-                Vec3D vVector = Vec3D_scalarMult(dVector, 0.08);
+                Vec3D_print(dVector);
+                Vec3D vVector = Vec3D_scalarMult(dVector, 30);
                 GO_setVel(&ball, vVector);
-                Vec3D aVector = Vec3D_scalarMult(dVector, -0.02);
+                Vec3D aVector = Vec3D_scalarMult(dVector, -2);
                 GO_setAcc(&ball, aVector);
             }
         }
