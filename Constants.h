@@ -27,9 +27,10 @@
 #define COLOUR_YELLOW 0xFF, 0xFF, 0x00, 0xFF
 
 //////////////////////////////////////////////////////////////////////////////////////////
-/////////   Defines for physics constants                                  //////////
+/////////        Defines for physics constants                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
-#define CONS_BALL_WALL_COR 100
+#define CONS_STD_APPLIED_IMPULSE 100
+#define CONS_BALL_WALL_COR 0.8
 #define CONS_BALL_COURT_COR 100
 #define CONS_BALL_COURT_DEACC -100
 #define CONS_BALL_AIR_DEACC -100
@@ -39,5 +40,7 @@
 #define CONS_ACC_GRAVITY -100
 #define CONS_PLAYER_HEIGHT 100
 #define CONS_JUMP_HEIGHT 100
+
+#define PI 3.14159265358979323846
 
 #endif // CONSTANTS_H_

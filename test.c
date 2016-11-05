@@ -6,6 +6,7 @@
 #include "Draw.h"
 #include "Constants.h"
 #include "GameObject.h"
+#include "Physics.h"
 
 // prototypes
 void releaseResources();
@@ -103,6 +104,16 @@ int main(int argc, char* argv[])
     Vec3D input = VECTOR_ZERO;
     Vec3D delta = VECTOR_ZERO;
 
+    //world boundaries
+    Vec3D tl = {0, 0, 0};
+    Vec3D tr = {SCREEN_WIDTH, 0, 0};
+    Vec3D bl = {0, SCREEN_HEIGHT, 0};
+    Vec3D br = {SCREEN_WIDTH, SCREEN_HEIGHT, 0};
+    Line topWall = {tl, tr};
+    Line bottomWall = {bl, br};
+    Line leftWall = {tl, bl};
+    Line rightWall = {tr, br};
+
     //While application is running
     while( !quit )
     {
@@ -127,25 +138,58 @@ int main(int argc, char* argv[])
 
         //Vec3D_print(ball.vel);
 
-        GO_move(&player, delta);
+        GO_setVel(&player, delta);
         delta = Vec3D_add(ball.vel, ball.acc);
-        Vec3D_print(delta);
+
         if(((ball.vel.i >= 0) && (delta.i <= 0)) || ((ball.vel.i <= 0) && (delta.i >= 0))) {delta.i = 0;ball.acc.i=0;}
         if(((ball.vel.j >= 0) && (delta.j <= 0)) || ((ball.vel.j <= 0) && (delta.j >= 0))) {delta.j = 0;ball.acc.j=0;}
-        //if((int)fabs(delta.i)==1)delta.i=0;
-        //if((int)fabs(delta.j)==1)delta.j=0;
+
         GO_setVel(&ball, delta);
+
         Vec3D_print(ball.vel);
         Vec3D_print(ball.acc);
-        GO_move(&ball, ball.vel);
+
+        GO_move(&player, GO_getVel(&player));
+        GO_move(&ball, GO_getVel(&ball));
 
         //collision detection
         //screen boundaries
         //TODO fix this to move bounding circle too
-        if(player.pos.i>=SCREEN_WIDTH-50)player.pos.i=SCREEN_WIDTH-50;
-        if(player.pos.j>=SCREEN_HEIGHT-50)player.pos.j=SCREEN_HEIGHT-50;
-        if(player.pos.i<=50)player.pos.i=50;
-        if(player.pos.j<=50)player.pos.j=50;
+        if(player.pos.i>=SCREEN_WIDTH-50){player.pos.i=SCREEN_WIDTH-50;player.BCirc.x = player.pos.i;}
+        if(player.pos.j>=SCREEN_HEIGHT-50){player.pos.j=SCREEN_HEIGHT-50; player.BCirc.y = player.pos.j;};
+        if(player.pos.i<=50){player.pos.i=50;player.BCirc.x = player.pos.i;}
+        if(player.pos.j<=50){player.pos.j=50;player.BCirc.y = player.pos.j;}
+
+        //ball collides with walls
+        if(Phys_inCollisionWithLine(ball, topWall)||Phys_inCollisionWithLine(ball, bottomWall))
+        {
+            ball.vel.j *= -CONS_BALL_WALL_COR;
+            ball.acc.j *= -1;
+            ball.vel.i *= CONS_BALL_WALL_COR;
+        }else if(Phys_inCollisionWithLine(ball, rightWall)||Phys_inCollisionWithLine(ball, leftWall))
+        {
+            ball.vel.j *= CONS_BALL_WALL_COR;
+            ball.vel.i *= -CONS_BALL_WALL_COR;
+            ball.acc.i *= -1;
+        }
+        if(ball.pos.j>=SCREEN_HEIGHT-25)
+        {
+            ball.pos.j=SCREEN_HEIGHT-25;
+            ball.BCirc.y=ball.pos.j;
+        }else if(ball.pos.j<=25)
+        {
+            ball.pos.j=25;
+            ball.BCirc.y=ball.pos.j;
+        }
+        if(ball.pos.i>=SCREEN_WIDTH-25)
+        {
+            ball.pos.i=SCREEN_WIDTH-25;
+            ball.BCirc.x=ball.pos.i;
+        }else if(ball.pos.i<=25)
+        {
+            ball.pos.i=25;
+            ball.BCirc.x=ball.pos.i;
+        }
 
         //with ball
         if(GO_isInContact(player, ball))
@@ -156,9 +200,9 @@ int main(int argc, char* argv[])
                 Vec3D dVector = Vec3D_subtract(ball.pos, player.pos);
                 dVector = Vec3D_normalise(dVector);
                 Vec3D_print(dVector);
-                Vec3D vVector = Vec3D_scalarMult(dVector, 30);
+                Vec3D vVector = Vec3D_scalarMult(dVector, 25);
                 GO_setVel(&ball, vVector);
-                Vec3D aVector = Vec3D_scalarMult(dVector, -2);
+                Vec3D aVector = Vec3D_scalarMult(dVector, -0.75);
                 GO_setAcc(&ball, aVector);
             }
         }

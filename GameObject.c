@@ -15,6 +15,7 @@ GameObject GO_createGameObject()
     go.rPos = 0;
     go.rVel = 0;
     go.rAcc = 0;
+    go.mass = 1;
     go.isStationary = true;
     go.BCirc = Circle_create(0, 0, 1);
     return go;

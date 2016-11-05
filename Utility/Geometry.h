@@ -150,4 +150,25 @@ bool Circle_inCollision(Circle c1, Circle c2);
 //circle-square collision
 bool Circle_inCollisionRect(Circle c, Rect r);
 
+
+///////////////////////////////////////////////////
+////           Line
+///////////////////////////////////////////////////
+
+#define LINE_IS_HORIZ_OR_VERT 0
+
+typedef struct Line
+{
+    Vec3D p1;
+    Vec3D p2;
+}Line;
+
+double Line_getLength(Line l);
+
+double Line_getGradient(Line l);
+
+bool Line_isVertical(Line l);
+
+bool Line_isHorizontal(Line l);
+
 #endif // _GEOMETRY_H

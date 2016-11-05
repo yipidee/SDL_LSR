@@ -278,3 +278,32 @@ bool Circle_inCollisionRect(Circle c, Rect r)
 
     return false;
 }
+
+
+///////////////////////////////////////////////////
+////           Circle
+///////////////////////////////////////////////////
+
+double Line_getLength(Line l)
+{
+    Vec3D dVec = Vec3D_subtract(l.p2, l.p1);
+    return Vec3D_getMagnitude(dVec);
+}
+
+double Line_getGradient(Line l)
+{
+    double m = LINE_IS_HORIZ_OR_VERT;
+    if((l.p1.i == l.p2.i)||(l.p1.j == l.p2.j))return m;
+    m = (l.p2.j-l.p1.j)/(l.p2.i - l.p1.i);
+    return m;
+}
+
+bool Line_isVertical(Line l)
+{
+    return (l.p1.i == l.p2.i);
+}
+
+bool Line_isHorizontal(Line l)
+{
+    return (l.p1.j == l.p2.j);
+}
