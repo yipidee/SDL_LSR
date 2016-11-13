@@ -46,6 +46,9 @@ Vec3D Vec3D_crossProduct(Vec3D v1, Vec3D v2);
 //get cosine of angle between two vetors
 double Vec3D_getCosAlpha(Vec3D v1, Vec3D v2);
 
+//get sine of angle between two vetors
+double Vec3D_getSinAlpha(Vec3D v1, Vec3D v2);
+
 //get angle between vectors
 double Vec3D_getAngle(Vec3D v1, Vec3D v2);
 
@@ -66,6 +69,9 @@ double Vec3D_getMagnitude(Vec3D v);
 
 //prints string rep of vec to stout
 void Vec3D_print(Vec3D v);
+
+//get unit vector normal to speified vector (2D only)
+Vec3D Vec3D_getUnitNormal(Vec3D v);
 
 
 ///////////////////////////////////////////////////

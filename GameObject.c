@@ -83,6 +83,11 @@ void GO_setBCirc(GameObject* go, Circle c)
     go->BCirc.y = go->pos.j;
 }
 
+void GO_setMass(GameObject* go, int m)
+{
+    go->mass = m;
+}
+
 //getters for physics variables
 Vec3D GO_getAcc(const GameObject* go)
 {
@@ -112,4 +117,9 @@ int GO_getRVel(const GameObject* go)
 int GO_getRAcc(const GameObject* go)
 {
     return go->rAcc;
+}
+
+int GO_getMass(const GameObject* go)
+{
+    return go->mass;
 }

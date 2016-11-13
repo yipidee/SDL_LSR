@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
     GO_setPos(&player, playerStartPosition);
     Circle playerBounds = {0,0,50};
     GO_setBCirc(&player, playerBounds);
+    GO_setMass(&player, 10);
 
     //logical game object, ball
     GameObject ball = GO_createGameObject();
@@ -49,6 +50,7 @@ int main(int argc, char* argv[])
     GO_setPos(&ball, ballStartPosition);
     Circle ballBounds = {0,0,25};
     GO_setBCirc(&ball, ballBounds);
+    //GO_setMass(&ball, 50);
 
     //sprite rep of player
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
@@ -136,8 +138,6 @@ int main(int argc, char* argv[])
         //update physics
         //update position data
 
-        //Vec3D_print(ball.vel);
-
         GO_setVel(&player, delta);
         delta = Vec3D_add(ball.vel, ball.acc);
 
@@ -145,12 +145,11 @@ int main(int argc, char* argv[])
         if(((ball.vel.j >= 0) && (delta.j <= 0)) || ((ball.vel.j <= 0) && (delta.j >= 0))) {delta.j = 0;ball.acc.j=0;}
 
         GO_setVel(&ball, delta);
-
-        Vec3D_print(ball.vel);
-        Vec3D_print(ball.acc);
+        //printf("ball vell ");Vec3D_print(ball.vel);
 
         GO_move(&player, GO_getVel(&player));
         GO_move(&ball, GO_getVel(&ball));
+        //Vec3D_print(GO_getPos(&ball));
 
         //collision detection
         //screen boundaries
@@ -197,13 +196,8 @@ int main(int argc, char* argv[])
             input = AnalCont_getCurrentInput(&controller2);
             if(Vec3D_equal(input, VECTOR_ZERO))
             {
-                Vec3D dVector = Vec3D_subtract(ball.pos, player.pos);
-                dVector = Vec3D_normalise(dVector);
-                Vec3D_print(dVector);
-                Vec3D vVector = Vec3D_scalarMult(dVector, 25);
-                GO_setVel(&ball, vVector);
-                Vec3D aVector = Vec3D_scalarMult(dVector, -0.75);
-                GO_setAcc(&ball, aVector);
+                Phys_conservationMomentumCollision2D(&player, &ball, CONS_BALL_PLAYER_COR);
+                GO_setAcc(&ball, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(&ball)), CONS_BALL_COURT_DEACC));
             }
         }
 

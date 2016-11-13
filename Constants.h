@@ -31,10 +31,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #define CONS_STD_APPLIED_IMPULSE 100
 #define CONS_BALL_WALL_COR 0.8
-#define CONS_BALL_COURT_COR 100
-#define CONS_BALL_COURT_DEACC -100
+#define CONS_BALL_COURT_COR 0.5
+#define CONS_BALL_PLAYER_COR 0.9
+#define CONS_BALL_COURT_DEACC -0.03
 #define CONS_BALL_AIR_DEACC -100
 #define CONS_PLAYER_WALL_COR 100
+#define CONS_PLAYER_PLAYER_COR 0.3
 #define CONS_PLAYER_COURT_COR 100
 #define CONS_PLAYER_COURT_DEACC -100
 #define CONS_ACC_GRAVITY -100

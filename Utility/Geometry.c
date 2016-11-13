@@ -52,6 +52,15 @@ double Vec3D_getCosAlpha(Vec3D v1, Vec3D v2)
     return (DP/(Vec3D_getMagnitude(v1) * Vec3D_getMagnitude(v2)));
 }
 
+//get sine of angle between two vetors
+double Vec3D_getSinAlpha(Vec3D v1, Vec3D v2)
+{
+    double DP = Vec3D_dotProduct(v1, v2);
+    double productOfMagnitudes = Vec3D_getMagnitude(v1) * Vec3D_getMagnitude(v2);
+    double opposite = sqrt(pow(productOfMagnitudes, 2)-pow(DP,2));
+    return opposite/DP;
+}
+
 //get angle between vectors
 double Vec3D_getAngle(Vec3D v1, Vec3D v2)
 {
@@ -96,6 +105,15 @@ Vec3D Vec3D_normalise(Vec3D v)
 void Vec3D_print(Vec3D v)
 {
     printf("%0.3fi %0.3fj %0.3fk\n", v.i, v.j, v.k);
+}
+
+Vec3D Vec3D_getUnitNormal(Vec3D v)
+{
+    Vec3D res = VECTOR_ZERO;
+    Vec3D normalisedV = Vec3D_normalise(v);
+    res.i = v.j;
+    res.j = -v.i;
+    return res;
 }
 
 

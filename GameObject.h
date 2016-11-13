@@ -32,6 +32,7 @@ void GO_setRVel(GameObject* go, int v);
 void GO_setRAcc(GameObject* go, int a);
 void GO_setStationary(GameObject* go, bool b);
 void GO_setBCirc(GameObject* go, Circle c);
+void GO_setMass(GameObject* go, int m);
 
 //getters for physics variables
 Vec3D GO_getAcc(const GameObject* go);
@@ -40,6 +41,7 @@ Vec3D GO_getPos(const GameObject* go);
 int GO_getRPos(const GameObject* go);
 int GO_getRVel(const GameObject* go);
 int GO_getRAcc(const GameObject* go);
+int GO_getMass(const GameObject* go);
 
 //collision detection function
 bool GO_isInContact(GameObject go1, GameObject go2);
