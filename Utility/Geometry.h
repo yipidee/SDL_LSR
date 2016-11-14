@@ -73,6 +73,12 @@ void Vec3D_print(Vec3D v);
 //get unit vector normal to speified vector (2D only)
 Vec3D Vec3D_getUnitNormal(Vec3D v);
 
+//rotate a vector anticlockwise through alpha radians
+Vec3D Vec3D_rotateVectorByAlphaRad(Vec3D v, double alpha);
+
+//rotate a vector anticlockwise through alpha radians, pass cos alpha as arg
+Vec3D Vec3D_rotateVectorByCosAlpha(Vec3D v, double cosAlpha);
+
 
 ///////////////////////////////////////////////////
 ////           Rect

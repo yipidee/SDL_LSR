@@ -96,19 +96,21 @@ void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, floa
     Vec3D perpToCollision = Vec3D_getUnitNormal(dirOfCollision);
 
     //get component of vel in direction of collision
-    double  alpha1 = Vec3D_getCosAlpha(go1->vel, dirOfCollision);
-    double  alpha2 = Vec3D_getCosAlpha(go2->vel, dirOfCollision);
+    double  alpha1;
+    alpha1 = Vec3D_equal(go1->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go1->vel, dirOfCollision);
+    double  alpha2;
+    alpha2 = Vec3D_equal(go2->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go2->vel, dirOfCollision);
 
     //velocities precollision in cirection of collision
     Vec3D u1DOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go1->vel) * alpha1);
     Vec3D u2DOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go2->vel) * alpha2);
 
-    double alpha3 = Vec3D_getCosAlpha(go1->vel, perpToCollision);
-    double alpha4 = Vec3D_getCosAlpha(go2->vel, perpToCollision);
+    alpha1 = Vec3D_equal(go1->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go1->vel, perpToCollision);
+    alpha2 = Vec3D_equal(go2->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go2->vel, perpToCollision);
 
     //velocities precollision perp to cirection of collision
-    Vec3D u1PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go1->vel) * alpha3);
-    Vec3D u2PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go2->vel) * alpha4);
+    Vec3D u1PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go1->vel) * alpha1);
+    Vec3D u2PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go2->vel) * alpha2);
 
     go1->vel = u1DOC;
     go2->vel = u2DOC;
@@ -117,27 +119,6 @@ void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, floa
     Phys_conservationMomentumCollision1D(go1, go2, COR);
 
     //resolve into global coords again
-    //go1
-    alpha1 = Vec3D_getCosAlpha(u1PTC, VECTOR_E);
-    alpha2 = Vec3D_getCosAlpha(go1->vel, VECTOR_W);
-    double tmp1 = Vec3D_getMagnitude(u1PTC) * alpha1 - Vec3D_getMagnitude(go1->vel) * alpha2;
-
-    alpha1 = Vec3D_getCosAlpha(u1PTC, VECTOR_N);
-    alpha2 = Vec3D_getCosAlpha(go1->vel, VECTOR_N);
-    double tmp2 = Vec3D_getMagnitude(u1PTC) * alpha1 + Vec3D_getMagnitude(go1->vel) * alpha2;
-
-    go1->vel.i = tmp1;
-    go1->vel.j = tmp2;
-
-    //go2
-    alpha1 = Vec3D_getCosAlpha(u2PTC, VECTOR_E);
-    alpha2 = Vec3D_getCosAlpha(go2->vel, VECTOR_W);
-    tmp1 = Vec3D_getMagnitude(u2PTC) * alpha1 - Vec3D_getMagnitude(go2->vel) * alpha2;
-
-    alpha1 = Vec3D_getCosAlpha(u2PTC, VECTOR_S);
-    alpha2 = Vec3D_getCosAlpha(go2->vel, VECTOR_S);
-    tmp2 = Vec3D_getMagnitude(u2PTC) * alpha1 + Vec3D_getMagnitude(go2->vel) * alpha2;
-
-    go2->vel.i = tmp1;
-    go2->vel.j = tmp2;
+    GO_setVel(go1, Vec3D_add(go1->vel, u1PTC));
+    GO_setVel(go1, Vec3D_add(go2->vel, u2PTC));
 }

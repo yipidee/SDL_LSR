@@ -11,4 +11,6 @@ bool Phys_inCollisionWithLine(GameObject go, Line l);
 
 void Phys_conservationMomentumCollision1D(GameObject* go1, GameObject* go2, float COR);
 
+void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, float COR);
+
 #endif // PHYSICS_H_

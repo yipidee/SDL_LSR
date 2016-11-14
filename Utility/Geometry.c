@@ -110,9 +110,28 @@ void Vec3D_print(Vec3D v)
 Vec3D Vec3D_getUnitNormal(Vec3D v)
 {
     Vec3D res = VECTOR_ZERO;
-    Vec3D normalisedV = Vec3D_normalise(v);
+    v = Vec3D_normalise(v);
     res.i = v.j;
     res.j = -v.i;
+    return res;
+}
+
+Vec3D Vec3D_rotateVectorByAlphaRad(Vec3D v, double alpha)
+{
+    Vec3D res = VECTOR_ZERO;
+    double cosA = cos(alpha);
+    double sinA = sin(alpha);
+    res.i = v.i * cosA + v.j * sinA;
+    res.j = v.i * -sinA + v.j * cosA;
+    return res;
+}
+
+Vec3D Vec3D_rotateVectorByCosAlpha(Vec3D v, double cosAlpha)
+{
+    Vec3D res = VECTOR_ZERO;
+    double sinA = sqrt(1 - cosAlpha*cosAlpha);
+    res.i = v.i * cosAlpha + v.j * sinA;
+    res.j = v.i * -sinA + v.j * cosAlpha;
     return res;
 }
 
