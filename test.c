@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     GO_setPos(&player, playerStartPosition);
     Circle playerBounds = {0,0,50};
     GO_setBCirc(&player, playerBounds);
-    GO_setMass(&player, 10);
+    GO_setMass(&player, CONS_MASS_PLAYER);
 
     //logical game object, ball
     GameObject ball = GO_createGameObject();
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     GO_setPos(&ball, ballStartPosition);
     Circle ballBounds = {0,0,25};
     GO_setBCirc(&ball, ballBounds);
-    //GO_setMass(&ball, 50);
+    //GO_setMass(&ball, 5);
 
     //sprite rep of player
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
@@ -129,35 +129,30 @@ int main(int argc, char* argv[])
                 if(e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEMOTION) EH_handleEvent(&e);
             }
         }
-        //get input
-        delta = VECTOR_ZERO;
-        input = AnalCont_getCurrentInput(&controller1);
-        delta.i = input.i * MaxVx;
-        delta.j = input.j * MaxVx;
 
-        //update physics
-        //update position data
+        //get input
+        input = AnalCont_getCurrentInput(&controller1);
+        delta = Vec3D_scalarMult(input, MaxVx);
 
         GO_setVel(&player, delta);
+
         delta = Vec3D_add(ball.vel, ball.acc);
 
         if(((ball.vel.i >= 0) && (delta.i <= 0)) || ((ball.vel.i <= 0) && (delta.i >= 0))) {delta.i = 0;ball.acc.i=0;}
         if(((ball.vel.j >= 0) && (delta.j <= 0)) || ((ball.vel.j <= 0) && (delta.j >= 0))) {delta.j = 0;ball.acc.j=0;}
 
         GO_setVel(&ball, delta);
-        //printf("ball vell ");Vec3D_print(ball.vel);
 
         GO_move(&player, GO_getVel(&player));
         GO_move(&ball, GO_getVel(&ball));
-        //Vec3D_print(GO_getPos(&ball));
 
         //collision detection
         //screen boundaries
         //TODO fix this to move bounding circle too
-        if(player.pos.i>=SCREEN_WIDTH-50){player.pos.i=SCREEN_WIDTH-50;player.BCirc.x = player.pos.i;}
-        if(player.pos.j>=SCREEN_HEIGHT-50){player.pos.j=SCREEN_HEIGHT-50; player.BCirc.y = player.pos.j;};
-        if(player.pos.i<=50){player.pos.i=50;player.BCirc.x = player.pos.i;}
-        if(player.pos.j<=50){player.pos.j=50;player.BCirc.y = player.pos.j;}
+        if(player.pos.i>=SCREEN_WIDTH-50){player.pos.i=SCREEN_WIDTH-50;player.BCirc.x = player.pos.i;player.vel.i=0;}
+        if(player.pos.j>=SCREEN_HEIGHT-50){player.pos.j=SCREEN_HEIGHT-50; player.BCirc.y = player.pos.j;player.vel.j=0;};
+        if(player.pos.i<=50){player.pos.i=50;player.BCirc.x = player.pos.i;player.vel.i=0;}
+        if(player.pos.j<=50){player.pos.j=50;player.BCirc.y = player.pos.j;player.vel.j=0;}
 
         //ball collides with walls
         if(Phys_inCollisionWithLine(ball, topWall)||Phys_inCollisionWithLine(ball, bottomWall))
@@ -197,7 +192,7 @@ int main(int argc, char* argv[])
             if(Vec3D_equal(input, VECTOR_ZERO))
             {
                 Phys_conservationMomentumCollision2D(&player, &ball, CONS_BALL_PLAYER_COR);
-                GO_setAcc(&ball, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(&ball)), CONS_BALL_COURT_DEACC));
+                //if(!(Vec3D_equal(GO_getVel(&ball), VECTOR_ZERO)))GO_setAcc(&ball, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(&ball)), CONS_BALL_COURT_DEACC));
             }
         }
 

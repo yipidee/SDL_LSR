@@ -84,41 +84,58 @@ void Phys_conservationMomentumCollision1D(GameObject* go1, GameObject* go2, floa
     tmp = Vec3D_scalarMult(tmp, COR);
     v2 = Vec3D_add(v1, tmp);
     GO_setVel(go1, v1);
-    //printf("ball initial vel ");Vec3D_print(go2->vel);
+    //printf("ball initial vel ");Vec3D_print(go2->vel);printf("\n");
     GO_setVel(go2, v2);
-    //printf("ball final vel ");Vec3D_print(go2->vel);
+    //printf("ball final vel ");Vec3D_print(go2->vel);printf("\n");
 }
 
 void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, float COR)
 {
-    Vec3D dirOfCollision = Vec3D_subtract(go2->pos, go1->pos);
-    dirOfCollision = Vec3D_normalise(dirOfCollision);
-    Vec3D perpToCollision = Vec3D_getUnitNormal(dirOfCollision);
+    if(!(Vec3D_equal(go1->vel, VECTOR_ZERO)&&Vec3D_equal(go2->vel, VECTOR_ZERO)))
+    {
+        Vec3D dirOfCollision = Vec3D_subtract(go2->pos, go1->pos);
+        dirOfCollision = Vec3D_normalise(dirOfCollision);
+        Vec3D perpToCollision = Vec3D_getUnitNormal(dirOfCollision);
 
-    //get component of vel in direction of collision
-    double  alpha1;
-    alpha1 = Vec3D_equal(go1->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go1->vel, dirOfCollision);
-    double  alpha2;
-    alpha2 = Vec3D_equal(go2->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go2->vel, dirOfCollision);
+        //get component of vel in direction of collision
+        double  alpha1;
+        alpha1 = Vec3D_equal(go1->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go1->vel, dirOfCollision);
+        double  alpha2;
+        alpha2 = Vec3D_equal(go2->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go2->vel, Vec3D_scalarMult(dirOfCollision, -1));
 
-    //velocities precollision in cirection of collision
-    Vec3D u1DOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go1->vel) * alpha1);
-    Vec3D u2DOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go2->vel) * alpha2);
+        //velocities precollision in cirection of collision
+        Vec3D u1DOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go1->vel) * alpha1);
+        Vec3D u2DOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go2->vel) * alpha2);
 
-    alpha1 = Vec3D_equal(go1->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go1->vel, perpToCollision);
-    alpha2 = Vec3D_equal(go2->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go2->vel, perpToCollision);
+        alpha1 = Vec3D_equal(go1->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go1->vel, perpToCollision);
+        alpha2 = Vec3D_equal(go2->vel, VECTOR_ZERO) ? 1 : Vec3D_getCosAlpha(go2->vel, Vec3D_scalarMult(perpToCollision, -1));
 
-    //velocities precollision perp to cirection of collision
-    Vec3D u1PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go1->vel) * alpha1);
-    Vec3D u2PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go2->vel) * alpha2);
+        //velocities precollision perp to cirection of collision
+        Vec3D u1PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go1->vel) * alpha1);
+        Vec3D u2PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go2->vel) * alpha2);
 
-    go1->vel = u1DOC;
-    go2->vel = u2DOC;
+        go1->vel = u1DOC;
+        go2->vel = u2DOC;
 
-    //collision in dir of collision
-    Phys_conservationMomentumCollision1D(go1, go2, COR);
+        //collision in dir of collision
+        Phys_conservationMomentumCollision1D(go1, go2, COR);
 
-    //resolve into global coords again
-    GO_setVel(go1, Vec3D_add(go1->vel, u1PTC));
-    GO_setVel(go1, Vec3D_add(go2->vel, u2PTC));
+        //resolve into global coords again
+        GO_setVel(go1, Vec3D_add(go1->vel, u1PTC));
+        GO_setVel(go2, Vec3D_add(go2->vel, u2PTC));
+        GO_setAcc(go2, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go2)),CONS_BALL_COURT_DEACC));
+    }else
+    {
+        //Vec3D origin = {25, 25, 0};
+        //go2->vel = VECTOR_ZERO;
+        //go2->acc = VECTOR_ZERO;
+        //go2->pos=origin;
+        //printf("both stopped\n");
+        Vec3D dirOfContact = Vec3D_subtract(go2->pos, go1->pos);
+        dirOfContact = Vec3D_scalarMult(Vec3D_normalise(dirOfContact), Vec3D_getMagnitude(dirOfContact)+1.0);
+        GO_setPos(go2, Vec3D_add(GO_getPos(go1), dirOfContact));
+        GO_setVel(go2, VECTOR_ZERO);
+        GO_setAcc(go2, VECTOR_ZERO);
+    }
+    //Vec3D_print(go2->vel);printf("\n"); */
 }

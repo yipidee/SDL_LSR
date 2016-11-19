@@ -104,7 +104,7 @@ Vec3D Vec3D_normalise(Vec3D v)
 
 void Vec3D_print(Vec3D v)
 {
-    printf("%0.3fi %0.3fj %0.3fk\n", v.i, v.j, v.k);
+    printf("%0.3fi %0.3fj %0.3fk", v.i, v.j, v.k);
 }
 
 Vec3D Vec3D_getUnitNormal(Vec3D v)
