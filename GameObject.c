@@ -16,7 +16,7 @@ GameObject GO_createGameObject()
     go.rVel = 0;
     go.rAcc = 0;
     go.mass = 1;
-    go.isStationary = true;
+    go.isStationary = false;
     go.BCirc = Circle_create(0, 0, 1);
     return go;
 }
@@ -38,6 +38,11 @@ void GO_move(GameObject* go, Vec3D delta)
     go->pos = Vec3D_add(go->pos, delta);
     go->BCirc.x = go->pos.i;
     go->BCirc.y = go->pos.j;
+}
+
+bool GO_inContactWithBoundary(GameObject* go, Rect r)
+{
+    return !Rect_containsCircle(r, go->BCirc);
 }
 
 //setters for physics variables

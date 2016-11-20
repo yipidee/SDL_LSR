@@ -15,20 +15,20 @@ int main(int argc, char* argv[])
 {
     //first controller
     AnalogueController controller1 = AnalCont_create(ANALOGUE_MODE);
-    AnalCont_setSize(&controller1, 100);
-    AnalCont_setKnobSize(&controller1, 60);
+    AnalCont_setSize(&controller1, SIZE_CONTROLLER_1);
+    AnalCont_setKnobSize(&controller1, SIZE_CONTROLLER_KNOB1);
     AnalCont_setPosition(&controller1, controller1.base.r+10, SCREEN_HEIGHT-controller1.base.r-10);
 
     //second controller
     AnalogueController controller2 = AnalCont_create(ANALOGUE_MODE);
-    AnalCont_setSize(&controller2, 80);
-    AnalCont_setKnobSize(&controller2, 50);
+    AnalCont_setSize(&controller2, SIZE_CONTROLLER_2);
+    AnalCont_setKnobSize(&controller2, SIZE_CONTROLLER_KNOB2);
     AnalCont_setPosition(&controller2, SCREEN_WIDTH-controller2.base.r-10, SCREEN_HEIGHT-controller2.base.r-30);
 
     //thirdd controller
     AnalogueController controller3 = AnalCont_create(ANALOGUE_MODE);
-    AnalCont_setSize(&controller3, 80);
-    AnalCont_setKnobSize(&controller3, 50);
+    AnalCont_setSize(&controller3, SIZE_CONTROLLER_3);
+    AnalCont_setKnobSize(&controller3, SIZE_CONTROLLER_KNOB3);
     AnalCont_setPosition(&controller3, SCREEN_WIDTH-2*controller2.base.r-controller3.base.r-10, SCREEN_HEIGHT-controller3.base.r-10);
 
     //register controllers with touch handler
@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     GameObject player = GO_createGameObject();
     Vec3D playerStartPosition = {250,250,0};
     GO_setPos(&player, playerStartPosition);
-    Circle playerBounds = {0,0,50};
+    Circle playerBounds = {0,0,SIZE_PLAYER_H / 2};
     GO_setBCirc(&player, playerBounds);
     GO_setMass(&player, CONS_MASS_PLAYER);
 
@@ -48,19 +48,19 @@ int main(int argc, char* argv[])
     GameObject ball = GO_createGameObject();
     Vec3D ballStartPosition = {250,500,0};
     GO_setPos(&ball, ballStartPosition);
-    Circle ballBounds = {0,0,25};
+    Circle ballBounds = {0,0,SIZE_BALL_H / 2};
     GO_setBCirc(&ball, ballBounds);
     //GO_setMass(&ball, 5);
 
     //sprite rep of player
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    Sprite_setSpriteInWorldDims(player_s, 100, 100);
+    Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
     Sprite_setSpriteInWorldPosRef(player_s, &player.pos.i, &player.pos.j, NULL);
 
     //sprite rep of ball
     Sprite ball_s = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    Sprite_setSpriteInWorldDims(ball_s, 50, 50);
+    Sprite_setSpriteInWorldDims(ball_s, SIZE_BALL_W, SIZE_BALL_H);
     Sprite_posByCentre(ball_s, true);
     Sprite_setSpriteInWorldPosRef(ball_s, &ball.pos.i, &ball.pos.j, NULL);
 
@@ -95,26 +95,18 @@ int main(int argc, char* argv[])
     Sprite_setSpriteInWorldPosRef(c3Back, &controller3.base.x, &controller3.base.y, NULL);
     Sprite_setSpriteInWorldPosRef(c3Knob, &controller3.knob.x, &controller3.knob.y, NULL);
 
+    //Pitch boundary
+    Rect PitchBoundary = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
     //Main loop flag
     bool quit = false;
-
-    int MaxVx = 10;
 
     //Event handler
     SDL_Event e;
     Vec3D input = VECTOR_ZERO;
     Vec3D delta = VECTOR_ZERO;
 
-    //world boundaries
-    Vec3D tl = {0, 0, 0};
-    Vec3D tr = {SCREEN_WIDTH, 0, 0};
-    Vec3D bl = {0, SCREEN_HEIGHT, 0};
-    Vec3D br = {SCREEN_WIDTH, SCREEN_HEIGHT, 0};
-    Line topWall = {tl, tr};
-    Line bottomWall = {bl, br};
-    Line leftWall = {tl, bl};
-    Line rightWall = {tr, br};
+    Vec3D impulse = VECTOR_ZERO;
 
     //While application is running
     while( !quit )
@@ -132,9 +124,10 @@ int main(int argc, char* argv[])
 
         //get input
         input = AnalCont_getCurrentInput(&controller1);
-        delta = Vec3D_scalarMult(input, MaxVx);
+        delta = Vec3D_scalarMult(input, CONS_MAX_SPEED);
 
         GO_setVel(&player, delta);
+        player.isStationary = Vec3D_equal(GO_getVel(&player), VECTOR_ZERO)?true:false;
 
         delta = Vec3D_add(ball.vel, ball.acc);
 
@@ -147,52 +140,24 @@ int main(int argc, char* argv[])
         GO_move(&ball, GO_getVel(&ball));
 
         //collision detection
-        //screen boundaries
-        //TODO fix this to move bounding circle too
-        if(player.pos.i>=SCREEN_WIDTH-50){player.pos.i=SCREEN_WIDTH-50;player.BCirc.x = player.pos.i;player.vel.i=0;}
-        if(player.pos.j>=SCREEN_HEIGHT-50){player.pos.j=SCREEN_HEIGHT-50; player.BCirc.y = player.pos.j;player.vel.j=0;};
-        if(player.pos.i<=50){player.pos.i=50;player.BCirc.x = player.pos.i;player.vel.i=0;}
-        if(player.pos.j<=50){player.pos.j=50;player.BCirc.y = player.pos.j;player.vel.j=0;}
-
+        //player pitch boundary
+        if(Phys_inCollisionWithBoundary(&player, PitchBoundary)) Phys_boundaryAdjust(&player, PitchBoundary);
         //ball collides with walls
-        if(Phys_inCollisionWithLine(ball, topWall)||Phys_inCollisionWithLine(ball, bottomWall))
-        {
-            ball.vel.j *= -CONS_BALL_WALL_COR;
-            ball.acc.j *= -1;
-            ball.vel.i *= CONS_BALL_WALL_COR;
-        }else if(Phys_inCollisionWithLine(ball, rightWall)||Phys_inCollisionWithLine(ball, leftWall))
-        {
-            ball.vel.j *= CONS_BALL_WALL_COR;
-            ball.vel.i *= -CONS_BALL_WALL_COR;
-            ball.acc.i *= -1;
-        }
-        if(ball.pos.j>=SCREEN_HEIGHT-25)
-        {
-            ball.pos.j=SCREEN_HEIGHT-25;
-            ball.BCirc.y=ball.pos.j;
-        }else if(ball.pos.j<=25)
-        {
-            ball.pos.j=25;
-            ball.BCirc.y=ball.pos.j;
-        }
-        if(ball.pos.i>=SCREEN_WIDTH-25)
-        {
-            ball.pos.i=SCREEN_WIDTH-25;
-            ball.BCirc.x=ball.pos.i;
-        }else if(ball.pos.i<=25)
-        {
-            ball.pos.i=25;
-            ball.BCirc.x=ball.pos.i;
-        }
+        if(Phys_inCollisionWithBoundary(&ball, PitchBoundary)) Phys_boundaryCollision(&ball, PitchBoundary);
 
         //with ball
         if(GO_isInContact(player, ball))
         {
-            input = AnalCont_getCurrentInput(&controller2);
-            if(Vec3D_equal(input, VECTOR_ZERO))
+            input = Vec3D_add(AnalCont_getCurrentInput(&controller2),AnalCont_getCurrentInput(&controller1));
+            impulse = Vec3D_scalarMult(input, CONS_MAX_APPLIED_IMPULSE);
+            //impulse.i = 5;
+            //impulse.j = 5;
+            if(Vec3D_equal(impulse, VECTOR_ZERO))
             {
                 Phys_conservationMomentumCollision2D(&player, &ball, CONS_BALL_PLAYER_COR);
-                //if(!(Vec3D_equal(GO_getVel(&ball), VECTOR_ZERO)))GO_setAcc(&ball, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(&ball)), CONS_BALL_COURT_DEACC));
+            }else
+            {
+                Phys_appliedImpulse2D(&ball, impulse);
             }
         }
 

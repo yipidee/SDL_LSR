@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
-#define Vec3D_subtract(a,b) Vec3D_add((a),Vec3D_scalarMult((b),-1))
+#define Vec3D_subtract(a,b) Vec3D_add((a),Vec3D_scalarMult((b),-1.0))
 #define Vec3D_getNormal(a,b) Vec3D_normalise(Vec3D_crossProduct((a),(b)))
 #define Vec3D_isZero(v) Vec3D_isEqual((v),VECTOR_ZERO)
 
