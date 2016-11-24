@@ -7,6 +7,7 @@
 #include "Constants.h"
 #include "GameObject.h"
 #include "Physics.h"
+#include "PhysicalController.h"
 
 // prototypes
 void releaseResources();
@@ -118,7 +119,29 @@ int main(int argc, char* argv[])
             if( e.type == SDL_QUIT )quit = true;
             else
             {
-                if(e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEMOTION) EH_handleEvent(&e);
+                if(e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEMOTION)
+                {
+                    EH_handleEvent(&e);
+                }else if(e.type == SDL_JOYAXISMOTION || e.type == SDL_JOYBUTTONDOWN || e.type == SDL_JOYBUTTONUP )
+                {
+                    /*if(e.type == SDL_JOYBUTTONDOWN)
+                    {
+                        int button = e.jbutton.button;
+                        printf("button %i pressed\n", button);
+                    }else if(e.type == SDL_JOYAXISMOTION)
+                    {
+                        int axis = e.jaxis.axis;
+                        printf("axis %i pressed\n", axis);
+                    }*/
+                    PhysCont_handleEvent(&e);
+                    Vec3D_print(PhysCont_getLeftStickInput());printf("\n");
+                }else if(e.type == SDL_JOYDEVICEREMOVED)
+                {
+                    PhysCont_deviceRemoved(&e);
+                }else if(e.type == SDL_JOYDEVICEADDED)
+                {
+                    PhysCont_deviceAdded(&e);
+                }
             }
         }
 
@@ -148,10 +171,8 @@ int main(int argc, char* argv[])
         //with ball
         if(GO_isInContact(player, ball))
         {
-            input = Vec3D_add(AnalCont_getCurrentInput(&controller2),AnalCont_getCurrentInput(&controller1));
-            impulse = Vec3D_scalarMult(input, CONS_MAX_APPLIED_IMPULSE);
-            //impulse.i = 5;
-            //impulse.j = 5;
+            //input = Vec3D_add(AnalCont_getCurrentInput(&controller2),AnalCont_getCurrentInput(&controller1));
+            //impulse = Vec3D_scalarMult(input, CONS_MAX_APPLIED_IMPULSE);
             if(Vec3D_equal(impulse, VECTOR_ZERO))
             {
                 Phys_conservationMomentumCollision2D(&player, &ball, CONS_BALL_PLAYER_COR);

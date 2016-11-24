@@ -5,6 +5,8 @@
 #include "Constants.h"
 #include "Physics.h"
 
+//static method prototype
+static makeWalls(Line* L, Line* T, Line* R, Line* B, Rect r);
 
 bool Phys_inCollision(GameObject go1, GameObject go2)
 {
@@ -68,29 +70,7 @@ bool Phys_inCollisionWithBoundary(GameObject* go, Rect r)
     if(GO_isInBounds(*go, r)) return false;
 
     Line T, R, B, L;
-    Vec3D tl, tr, br, bl;
-
-    tl.i = r.x;
-    tl.j = r.y;
-    tl.k = 0;
-    tr.i = r.x + r.w;
-    tr.j = r.y;
-    tr.k = 0;
-    br.i = r.x + r.w;
-    br.j = r.y + r.h;
-    br.k = 0;
-    bl.i = r.x;
-    bl.j = r.y + r.h;
-    bl.k = 0;
-
-    T.p1 = tl;
-    T.p2 = tr;
-    R.p1 = tr;
-    R.p2 = br;
-    B.p1 = br;
-    B.p2 = bl;
-    L.p1 = bl;
-    L.p2 = tl;
+    makeWalls(&T, &R, &B, &L, r);
 
     return (Phys_inCollisionWithLine(go, T)
             ||Phys_inCollisionWithLine(go, R)
@@ -102,29 +82,7 @@ bool Phys_inCollisionWithBoundary(GameObject* go, Rect r)
 void Phys_boundaryCollision(GameObject* go, Rect r)
 {
     Line T, R, B, L;
-    Vec3D tl, tr, br, bl;
-
-    tl.i = r.x;
-    tl.j = r.y;
-    tl.k = 0;
-    tr.i = r.x + r.w;
-    tr.j = r.y;
-    tr.k = 0;
-    br.i = r.x + r.w;
-    br.j = r.y + r.h;
-    br.k = 0;
-    bl.i = r.x;
-    bl.j = r.y + r.h;
-    bl.k = 0;
-
-    T.p1 = tl;
-    T.p2 = tr;
-    R.p1 = tr;
-    R.p2 = br;
-    B.p1 = br;
-    B.p2 = bl;
-    L.p1 = bl;
-    L.p2 = tl;
+    makeWalls(&T, &R, &B, &L, r);
 
     //determine struck wall and adjust accordingly
     if(Phys_inCollisionWithLine(go, T)||Phys_inCollisionWithLine(go, B))
@@ -168,29 +126,7 @@ void Phys_boundaryCollision(GameObject* go, Rect r)
 void Phys_boundaryAdjust(GameObject* go, Rect r)
 {
     Line T, R, B, L;
-    Vec3D tl, tr, br, bl;
-
-    tl.i = r.x;
-    tl.j = r.y;
-    tl.k = 0;
-    tr.i = r.x + r.w;
-    tr.j = r.y;
-    tr.k = 0;
-    br.i = r.x + r.w;
-    br.j = r.y + r.h;
-    br.k = 0;
-    bl.i = r.x;
-    bl.j = r.y + r.h;
-    bl.k = 0;
-
-    T.p1 = tl;
-    T.p2 = tr;
-    R.p1 = tr;
-    R.p2 = br;
-    B.p1 = br;
-    B.p2 = bl;
-    L.p1 = bl;
-    L.p2 = tl;
+    makeWalls(&T, &R, &B, &L, r);
 
     //determine struck wall and adjust accordingly
     if(Phys_inCollisionWithLine(go, T)||Phys_inCollisionWithLine(go, B))
@@ -207,6 +143,8 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
             delta.j = SCREEN_HEIGHT - go->BCirc.r - go->pos.j;
             GO_move(go, delta);
         }
+        go->vel.j = 0;
+        go->acc.j = 0;
     }if(Phys_inCollisionWithLine(go, R)||Phys_inCollisionWithLine(go, L))
     {
         if(go->pos.i < go->BCirc.r)
@@ -221,6 +159,8 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
             delta.i = SCREEN_WIDTH - go->BCirc.r - go->pos.i;
             GO_move(go, delta);
         }
+        go->vel.i = 0;
+        go->acc.i = 0;
     }
 }
 
@@ -252,7 +192,6 @@ void Phys_conservationMomentumCollision1D(GameObject* go1, GameObject* go2, floa
 
 void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, float COR)
 {
-
     Vec3D dirOfCollision = Vec3D_subtract(go2->pos, go1->pos);
     dirOfCollision = Vec3D_normalise(dirOfCollision);
     Vec3D perpToCollision = Vec3D_getUnitNormal(dirOfCollision);
@@ -325,4 +264,31 @@ void Phys_appliedImpulse2D(GameObject* go, Vec3D impulse)
     impulse = Vec3D_scalarMult(impulse, mult);
     GO_setVel(go, Vec3D_add(go->vel, impulse));
     GO_setAcc(go, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go)),CONS_BALL_COURT_DEACC));
+}
+
+static makeWalls(Line* T, Line* R, Line* B, Line* L, Rect r)
+{
+    Vec3D tl, tr, br, bl;
+
+    tl.i = r.x;
+    tl.j = r.y;
+    tl.k = 0;
+    tr.i = r.x + r.w;
+    tr.j = r.y;
+    tr.k = 0;
+    br.i = r.x + r.w;
+    br.j = r.y + r.h;
+    br.k = 0;
+    bl.i = r.x;
+    bl.j = r.y + r.h;
+    bl.k = 0;
+
+    T->p1 = tl;
+    T->p2 = tr;
+    R->p1 = tr;
+    R->p2 = br;
+    B->p1 = br;
+    B->p2 = bl;
+    L->p1 = bl;
+    L->p2 = tl;
 }

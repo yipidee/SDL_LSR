@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL_image.h>
 #include <string.h>
+#include "SDL_Helper.h"
 #include "Draw.h"
 #include "Utility/List.h"
 #include "Constants.h"
@@ -203,7 +204,7 @@ void Sprite_renderSprite(Sprite s)
 bool Draw_init()
 {
     if(!isInitialised){
-        if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+        if(SDL_Helper_init())
         {
             printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
         }
