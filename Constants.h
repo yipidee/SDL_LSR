@@ -15,10 +15,10 @@
 #define SIZE_CONTROLLER_KNOB1 60
 #define SIZE_CONTROLLER_KNOB2 50
 #define SIZE_CONTROLLER_KNOB3 50
-#define SIZE_PLAYER_H 70
-#define SIZE_PLAYER_W 70
-#define SIZE_BALL_H 40
-#define SIZE_BALL_W 40
+#define SIZE_PLAYER_H 50
+#define SIZE_PLAYER_W 50
+#define SIZE_BALL_H 30
+#define SIZE_BALL_W 30
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for paths to art resources                                  //////////
@@ -44,13 +44,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////        Defines for physics constants                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
-#define CONS_MAX_APPLIED_IMPULSE 7
+#define CONS_MAX_APPLIABLE_IMPULSE 25
+#define CONS_MAX_CONTROL_IMPULSE 12
 #define CONS_MAX_SPEED 10
 #define CONS_BALL_WALL_COR 0.8
-#define CONS_BALL_COURT_COR 0.5
-#define CONS_BALL_PLAYER_COR 0.9
+#define CONS_BALL_PLAYER_COR 0.2
 #define CONS_BALL_COURT_DEACC -0.3
-#define CONS_BALL_AIR_DEACC -100
 #define CONS_PLAYER_WALL_COR 100
 #define CONS_PLAYER_PLAYER_COR 0.3
 #define CONS_PLAYER_COURT_COR 100
@@ -58,7 +57,7 @@
 #define CONS_ACC_GRAVITY -100
 #define CONS_PLAYER_HEIGHT 100
 #define CONS_JUMP_HEIGHT 100
-#define CONS_MASS_PLAYER 30
+#define CONS_MASS_PLAYER 10
 
 #define PI 3.14159265358979323846
 

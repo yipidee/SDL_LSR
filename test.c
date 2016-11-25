@@ -109,6 +109,8 @@ int main(int argc, char* argv[])
 
     Vec3D impulse = VECTOR_ZERO;
 
+    bool contacted = false;
+
     //While application is running
     while( !quit )
     {
@@ -124,17 +126,7 @@ int main(int argc, char* argv[])
                     EH_handleEvent(&e);
                 }else if(e.type == SDL_JOYAXISMOTION || e.type == SDL_JOYBUTTONDOWN || e.type == SDL_JOYBUTTONUP )
                 {
-                    /*if(e.type == SDL_JOYBUTTONDOWN)
-                    {
-                        int button = e.jbutton.button;
-                        printf("button %i pressed\n", button);
-                    }else if(e.type == SDL_JOYAXISMOTION)
-                    {
-                        int axis = e.jaxis.axis;
-                        printf("axis %i pressed\n", axis);
-                    }*/
                     PhysCont_handleEvent(&e);
-                    Vec3D_print(PhysCont_getLeftStickInput());printf("\n");
                 }else if(e.type == SDL_JOYDEVICEREMOVED)
                 {
                     PhysCont_deviceRemoved(&e);
@@ -146,9 +138,34 @@ int main(int argc, char* argv[])
         }
 
         //get input
-        input = AnalCont_getCurrentInput(&controller1);
+        //input = AnalCont_getCurrentInput(&controller1);
+        input = PhysCont_getLeftStickInput();
         delta = Vec3D_scalarMult(input, CONS_MAX_SPEED);
 
+        Vec3D knobPos = {controller1.base.x, controller1.base.y, 0};
+        if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getLeftStickInput(), (controller1.base.r - controller1.knob.r)));
+        controller1.knob.x = knobPos.i;
+        controller1.knob.y = knobPos.j;
+
+        if(!PhysCont_getShotMask())
+        {
+            input = PhysCont_getRightStickInput();
+
+            knobPos.i = controller3.base.x;
+            knobPos.j = controller3.base.y;
+            if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (controller3.base.r - controller3.knob.r)));
+            controller3.knob.x = knobPos.i;
+            controller3.knob.y = knobPos.j;
+        }else
+        {
+            input = PhysCont_getRightStickInput();
+
+            knobPos.i = controller2.base.x;
+            knobPos.j = controller2.base.y;
+            if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (controller2.base.r - controller2.knob.r)));
+            controller2.knob.x = knobPos.i;
+            controller2.knob.y = knobPos.j;
+        }
         GO_setVel(&player, delta);
         player.isStationary = Vec3D_equal(GO_getVel(&player), VECTOR_ZERO)?true:false;
 
@@ -171,15 +188,23 @@ int main(int argc, char* argv[])
         //with ball
         if(GO_isInContact(player, ball))
         {
-            //input = Vec3D_add(AnalCont_getCurrentInput(&controller2),AnalCont_getCurrentInput(&controller1));
-            //impulse = Vec3D_scalarMult(input, CONS_MAX_APPLIED_IMPULSE);
-            if(Vec3D_equal(impulse, VECTOR_ZERO))
+            if(!contacted)
             {
-                Phys_conservationMomentumCollision2D(&player, &ball, CONS_BALL_PLAYER_COR);
-            }else
-            {
-                Phys_appliedImpulse2D(&ball, impulse);
+
+                input = PhysCont_getRightStickInput();
+                impulse = PhysCont_getShotMask() ? Vec3D_scalarMult(input, CONS_MAX_APPLIABLE_IMPULSE): Vec3D_scalarMult(input, CONS_MAX_CONTROL_IMPULSE);
+                if(Vec3D_equal(impulse, VECTOR_ZERO))
+                {
+                    Phys_conservationMomentumCollision2D(&player, &ball, CONS_BALL_PLAYER_COR);
+                }else
+                {
+                    Phys_appliedImpulse2D(&ball, impulse);
+                }
             }
+            contacted = true;
+        }else
+        {
+            contacted = false;
         }
 
         //draw result

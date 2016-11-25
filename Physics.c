@@ -6,7 +6,7 @@
 #include "Physics.h"
 
 //static method prototype
-static makeWalls(Line* L, Line* T, Line* R, Line* B, Rect r);
+static void makeWalls(Line* L, Line* T, Line* R, Line* B, Rect r);
 
 bool Phys_inCollision(GameObject go1, GameObject go2)
 {
@@ -266,7 +266,7 @@ void Phys_appliedImpulse2D(GameObject* go, Vec3D impulse)
     GO_setAcc(go, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go)),CONS_BALL_COURT_DEACC));
 }
 
-static makeWalls(Line* T, Line* R, Line* B, Line* L, Rect r)
+static void makeWalls(Line* T, Line* R, Line* B, Line* L, Rect r)
 {
     Vec3D tl, tr, br, bl;
 
