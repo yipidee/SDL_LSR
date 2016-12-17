@@ -106,6 +106,12 @@ bool PhysCont_handleEvent(SDL_Event* e)
             shotMask = false;
             handled = true;
         }
+    }else if(e->type == SDL_JOYDEVICEREMOVED)
+    {
+        PhysCont_deviceRemoved(e);
+    }else if(e->type == SDL_JOYDEVICEADDED)
+    {
+        PhysCont_deviceAdded(e);
     }
     return handled;
 }

@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include "AnalogueController.h"
-
-//helper meta functions to test whether mouse buttons pressed during move
-#define isMouseBL(e) (((e)->motion.state&SDL_BUTTON_LMASK)==SDL_BUTTON_LMASK)
-#define isMouseBR(e) (((e)->motion.state&SDL_BUTTON_RMASK)==SDL_BUTTON_RMASK)
+#include "SDL_Helper.h"
 
 //Protype static functions
 static bool _MouseDown(AnalogueController* ac, SDL_Event* e);

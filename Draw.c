@@ -5,6 +5,7 @@
 #include "Draw.h"
 #include "Utility/List.h"
 #include "Constants.h"
+#include "SDL_Helper.h"
 
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;
@@ -270,7 +271,7 @@ void Draw_quit()
 
         //Quit SDL subsystems
         IMG_Quit();
-        SDL_Quit();
+        SDL_Helper_quit();
     }
 }
 

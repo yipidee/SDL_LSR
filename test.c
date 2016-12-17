@@ -8,6 +8,8 @@
 #include "GameObject.h"
 #include "Physics.h"
 #include "PhysicalController.h"
+#include "SDL_Helper.h"
+#include "Player.h"
 
 // prototypes
 void releaseResources();
@@ -45,19 +47,21 @@ int main(int argc, char* argv[])
     GO_setBCirc(&player, playerBounds);
     GO_setMass(&player, CONS_MASS_PLAYER);
 
+    Player mccoy = Player_create(player);
+
     //logical game object, ball
     GameObject ball = GO_createGameObject();
     Vec3D ballStartPosition = {250,500,0};
     GO_setPos(&ball, ballStartPosition);
     Circle ballBounds = {0,0,SIZE_BALL_H / 2};
     GO_setBCirc(&ball, ballBounds);
-    //GO_setMass(&ball, 5);
+    GO_setMass(&ball, CONS_MASS_BALL);
 
     //sprite rep of player
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
-    Sprite_setSpriteInWorldPosRef(player_s, &player.pos.i, &player.pos.j, NULL);
+    Sprite_setSpriteInWorldPosRef(player_s, &mccoy->go.pos.i, &mccoy->go.pos.j, NULL);
 
     //sprite rep of ball
     Sprite ball_s = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
@@ -121,18 +125,12 @@ int main(int argc, char* argv[])
             if( e.type == SDL_QUIT )quit = true;
             else
             {
-                if(e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEMOTION)
+                if(isMouseEvent(e))
                 {
                     EH_handleEvent(&e);
-                }else if(e.type == SDL_JOYAXISMOTION || e.type == SDL_JOYBUTTONDOWN || e.type == SDL_JOYBUTTONUP )
+                }else if(isJoystickEvent(e))
                 {
                     PhysCont_handleEvent(&e);
-                }else if(e.type == SDL_JOYDEVICEREMOVED)
-                {
-                    PhysCont_deviceRemoved(&e);
-                }else if(e.type == SDL_JOYDEVICEADDED)
-                {
-                    PhysCont_deviceAdded(&e);
                 }
             }
         }
@@ -156,6 +154,8 @@ int main(int argc, char* argv[])
             if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (controller3.base.r - controller3.knob.r)));
             controller3.knob.x = knobPos.i;
             controller3.knob.y = knobPos.j;
+            controller2.knob.x = controller2.base.x;
+            controller2.knob.y = controller2.base.y;
         }else
         {
             input = PhysCont_getRightStickInput();
@@ -165,9 +165,11 @@ int main(int argc, char* argv[])
             if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (controller2.base.r - controller2.knob.r)));
             controller2.knob.x = knobPos.i;
             controller2.knob.y = knobPos.j;
+            controller3.knob.x = controller3.base.x;
+            controller3.knob.y = controller3.base.y;
         }
-        GO_setVel(&player, delta);
-        player.isStationary = Vec3D_equal(GO_getVel(&player), VECTOR_ZERO)?true:false;
+        GO_setVel(&mccoy->go, delta);
+        player.isStationary = Vec3D_equal(GO_getVel(&mccoy->go), VECTOR_ZERO)?true:false;
 
         delta = Vec3D_add(ball.vel, ball.acc);
 
@@ -176,26 +178,25 @@ int main(int argc, char* argv[])
 
         GO_setVel(&ball, delta);
 
-        GO_move(&player, GO_getVel(&player));
+        GO_move(&mccoy->go, GO_getVel(&mccoy->go));
         GO_move(&ball, GO_getVel(&ball));
 
         //collision detection
         //player pitch boundary
-        if(Phys_inCollisionWithBoundary(&player, PitchBoundary)) Phys_boundaryAdjust(&player, PitchBoundary);
+        if(Phys_inCollisionWithBoundary(&mccoy->go, PitchBoundary)) Phys_boundaryAdjust(&mccoy->go, PitchBoundary);
         //ball collides with walls
         if(Phys_inCollisionWithBoundary(&ball, PitchBoundary)) Phys_boundaryCollision(&ball, PitchBoundary);
 
         //with ball
-        if(GO_isInContact(player, ball))
+        if(GO_isInContact(mccoy->go, ball))
         {
             if(!contacted)
             {
-
                 input = PhysCont_getRightStickInput();
                 impulse = PhysCont_getShotMask() ? Vec3D_scalarMult(input, CONS_MAX_APPLIABLE_IMPULSE): Vec3D_scalarMult(input, CONS_MAX_CONTROL_IMPULSE);
                 if(Vec3D_equal(impulse, VECTOR_ZERO))
                 {
-                    Phys_conservationMomentumCollision2D(&player, &ball, CONS_BALL_PLAYER_COR);
+                    Phys_conservationMomentumCollision2D(&mccoy->go, &ball, CONS_BALL_PLAYER_COR);
                 }else
                 {
                     Phys_appliedImpulse2D(&ball, impulse);

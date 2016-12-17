@@ -1,4 +1,3 @@
-#include <SDL2/SDL.h>
 #include "SDL_Helper.h"
 
 static bool isInitialised = false;
@@ -14,4 +13,9 @@ bool SDL_Helper_init()
         }
     }
     return isInitialised;
+}
+
+void SDL_Helper_quit()
+{
+    SDL_Quit();
 }
