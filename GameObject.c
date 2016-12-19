@@ -45,6 +45,13 @@ bool GO_inContactWithBoundary(GameObject* go, Rect r)
     return !Rect_containsCircle(r, go->BCirc);
 }
 
+/*
+bool GO_changesDirectionInNextTick(GameObject go)
+{
+    bool noAcc = Vec3D_equal(go.acc, VECTOR_ZERO)?true:false;
+}
+*/
+
 //setters for physics variables
 void GO_setAcc(GameObject* go, Vec3D a)
 {

@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     AnalCont_setKnobSize(&controller2, SIZE_CONTROLLER_KNOB2);
     AnalCont_setPosition(&controller2, SCREEN_WIDTH-controller2.base.r-10, SCREEN_HEIGHT-controller2.base.r-30);
 
-    //thirdd controller
+    //third controller
     AnalogueController controller3 = AnalCont_create(ANALOGUE_MODE);
     AnalCont_setSize(&controller3, SIZE_CONTROLLER_3);
     AnalCont_setKnobSize(&controller3, SIZE_CONTROLLER_KNOB3);
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
     Sprite_setSpriteInWorldPosRef(c3Knob, &controller3.knob.x, &controller3.knob.y, NULL);
 
     //Pitch boundary
-    Rect PitchBoundary = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    const Rect PitchBoundary = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
     //Main loop flag
     bool quit = false;
@@ -141,6 +141,7 @@ int main(int argc, char* argv[])
         delta = Vec3D_scalarMult(input, CONS_MAX_SPEED);
 
         Vec3D knobPos = {controller1.base.x, controller1.base.y, 0};
+
         if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getLeftStickInput(), (controller1.base.r - controller1.knob.r)));
         controller1.knob.x = knobPos.i;
         controller1.knob.y = knobPos.j;
@@ -168,8 +169,8 @@ int main(int argc, char* argv[])
             controller3.knob.x = controller3.base.x;
             controller3.knob.y = controller3.base.y;
         }
-        GO_setVel(&mccoy->go, delta);
-        player.isStationary = Vec3D_equal(GO_getVel(&mccoy->go), VECTOR_ZERO)?true:false;
+        Player_setVel(mccoy, delta);
+        Player_setIsStationary(mccoy, Vec3D_equal(Player_getVel(mccoy), VECTOR_ZERO));
 
         delta = Vec3D_add(ball.vel, ball.acc);
 
@@ -178,12 +179,12 @@ int main(int argc, char* argv[])
 
         GO_setVel(&ball, delta);
 
-        GO_move(&mccoy->go, GO_getVel(&mccoy->go));
+        Player_move(mccoy, Player_getVel(mccoy));
         GO_move(&ball, GO_getVel(&ball));
 
         //collision detection
         //player pitch boundary
-        if(Phys_inCollisionWithBoundary(&mccoy->go, PitchBoundary)) Phys_boundaryAdjust(&mccoy->go, PitchBoundary);
+        if(Player_isInContactWithBoundary(mccoy, PitchBoundary)) Player_adjustForBoundary(mccoy, PitchBoundary);
         //ball collides with walls
         if(Phys_inCollisionWithBoundary(&ball, PitchBoundary)) Phys_boundaryCollision(&ball, PitchBoundary);
 
