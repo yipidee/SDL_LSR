@@ -39,9 +39,9 @@ int main(int argc, char* argv[])
     EH_registerHandler(controller2.touchableArea, controller2.evHan, true, &controller2);
     EH_registerHandler(controller3.touchableArea, controller3.evHan, true, &controller3);
 
-    //logical game object, player
+    //logical game object, players
     GameObject* player = GO_createGameObject();
-    Vec3D playerStartPosition = {250,250,0};
+    Vec3D playerStartPosition = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - 150, 0};
     GO_setPos(player, playerStartPosition);
     Circle playerBounds = {0,0,SIZE_PLAYER_H / 2};
     GO_setBCirc(player, playerBounds);
@@ -49,19 +49,32 @@ int main(int argc, char* argv[])
 
     Player mccoy = Player_create(player);
 
+    GameObject* player_c = GO_createGameObject();
+    playerStartPosition.j = 150;
+    GO_setPos(player_c, playerStartPosition);
+    GO_setBCirc(player_c, playerBounds);
+    GO_setMass(player_c, CONS_MASS_PLAYER);
+
+    Player calfnuts = Player_create(player_c);
+
     //logical game object, ball
     GameObject* ball = GO_createGameObject();
-    Vec3D ballStartPosition = {250,500,0};
+    Vec3D ballStartPosition = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,0};
     GO_setPos(ball, ballStartPosition);
     Circle ballBounds = {0,0,SIZE_BALL_H / 2};
     GO_setBCirc(ball, ballBounds);
     GO_setMass(ball, CONS_MASS_BALL);
 
-    //sprite rep of player
+    //sprite rep of players
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
     Sprite_setSpriteInWorldPosRef(player_s, &mccoy->go->pos.i, &mccoy->go->pos.j, NULL);
+
+    Sprite player_cs = Sprite_createSprite(PATH_TO_BLUE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);
+    Sprite_posByCentre(player_cs, true);
+    Sprite_setSpriteInWorldPosRef(player_cs, &calfnuts->go->pos.i, &calfnuts->go->pos.j, NULL);
 
     //sprite rep of ball
     Sprite ball_s = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
@@ -170,13 +183,13 @@ int main(int argc, char* argv[])
             controller3.knob.y = controller3.base.y;
         }
         Player_setVel(mccoy, delta);
-        Player_setIsStationary(mccoy, Vec3D_equal(Player_getVel(mccoy), VECTOR_ZERO));
+        //Player_setIsStationary(mccoy, Vec3D_equal(Player_getVel(mccoy), VECTOR_ZERO));
 
         //move below functionality to physics
         GO_zeroReversedDirections(ball);
         delta = Vec3D_add(GO_getVel(ball), GO_getAcc(ball));
-
         GO_setVel(ball, delta);
+
         Player_move(mccoy);
         GO_move(ball, GO_getVel(ball));
 
