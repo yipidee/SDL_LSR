@@ -67,7 +67,7 @@ bool Phys_inCollisionWithLine(const GameObject* go, Line l)
 
 bool Phys_inCollisionWithBoundary(GameObject* go, Rect r)
 {
-    if(GO_isInBounds(*go, r)) return false;
+    if(GO_isInBounds(go, r)) return false;
 
     Line T, R, B, L;
     makeWalls(&T, &R, &B, &L, r);

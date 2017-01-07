@@ -1,11 +1,21 @@
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include "GameObject.h"
+#include "Utility/List.h"
 
 static int id_counter = 0;
+static List GO_LIST;
+static bool GO_LIST_INITIALIZED = false;
 
 // create functions for game object
-GameObject GO_createGameObject()
+GameObject* GO_createGameObject()
 {
+    if(!GO_LIST_INITIALIZED)
+    {
+        List_new(&GO_LIST, sizeof(GameObject), NULL);
+    }
+
     GameObject go;
     go.id = id_counter;
     ++id_counter;
@@ -18,19 +28,32 @@ GameObject GO_createGameObject()
     go.mass = 1;
     go.isStationary = false;
     go.BCirc = Circle_create(0, 0, 1);
-    return go;
+
+    List_append(&GO_LIST, &go);
+    return (GameObject*)GO_LIST.tail->data;
+}
+
+void GO_destroyGameObject(GameObject* go)
+{
+    free(go);
+}
+
+void GO_destroyAllGameObjects()
+{
+    List_destroy(&GO_LIST);
+    GO_LIST_INITIALIZED = false;
 }
 
 //collision detection function
-bool GO_isInContact(GameObject go1, GameObject go2)
+bool GO_isInContact(GameObject* go1, GameObject* go2)
 {
-    return Circle_inCollision(go1.BCirc, go2.BCirc);
+    return Circle_inCollision(go1->BCirc, go2->BCirc);
 }
 
 //returns whether a circle is completely enclosed within a rect
-bool GO_isInBounds(GameObject go, Rect BoundingRect)
+bool GO_isInBounds(GameObject* go, Rect BoundingRect)
 {
-    return Rect_containsCircle(BoundingRect, go.BCirc);
+    return Rect_containsCircle(BoundingRect, go->BCirc);
 }
 
 void GO_move(GameObject* go, Vec3D delta)
@@ -45,12 +68,87 @@ bool GO_inContactWithBoundary(GameObject* go, Rect r)
     return !Rect_containsCircle(r, go->BCirc);
 }
 
-/*
-bool GO_changesDirectionInNextTick(GameObject go)
+bool GO_changesXDirectionInNextTick(const GameObject* go)
 {
-    bool noAcc = Vec3D_equal(go.acc, VECTOR_ZERO)?true:false;
+    bool res = false;
+    if(Vec3D_equal(go->acc, VECTOR_ZERO))
+    {
+        res = false;
+    }else
+    {
+        Vec3D delta = Vec3D_add(go->vel, go->acc);
+        if(((go->vel.i >= 0) && (delta.i <= 0)) || ((go->vel.i <= 0) && (delta.i >= 0))) res = true;
+    }
+    return res;
 }
-*/
+
+bool GO_changesYDirectionInNextTick(const GameObject* go)
+{
+    bool res = false;
+    if(Vec3D_equal(go->acc, VECTOR_ZERO))
+    {
+        res = false;
+    }else
+    {
+        Vec3D delta = Vec3D_add(go->vel, go->acc);
+        if(((go->vel.j >= 0) && (delta.j <= 0)) || ((go->vel.j <= 0) && (delta.j >= 0))) res = true;
+    }
+    return res;
+}
+
+bool GO_changesZDirectionInNextTick(const GameObject* go)
+{
+    bool res = false;
+    if(Vec3D_equal(go->acc, VECTOR_ZERO))
+    {
+        res = false;
+    }else
+    {
+        Vec3D delta = Vec3D_add(go->vel, go->acc);
+        if(((go->vel.k >= 0) && (delta.k <= 0)) || ((go->vel.k <= 0) && (delta.k >= 0))) res = true;
+    }
+    return res;
+}
+
+void GO_zeroXvel(GameObject* go)
+{
+    go->vel.i=0;
+}
+
+void GO_zeroYvel(GameObject* go)
+{
+    go->vel.j=0;
+}
+
+void GO_zeroZvel(GameObject* go)
+{
+    go->vel.k=0;
+}
+
+void GO_zeroXacc(GameObject* go)
+{
+    go->acc.i=0;
+}
+
+void GO_zeroYacc(GameObject* go)
+{
+    go->acc.j=0;
+}
+
+void GO_zeroZacc(GameObject* go)
+{
+    go->acc.k=0;
+}
+
+void GO_zeroReversedDirections(GameObject* go)
+{
+    if(go!=NULL)
+    {
+        if(GO_changesXDirectionInNextTick(go)){GO_zeroXvel(go);GO_zeroXacc(go);}
+        if(GO_changesYDirectionInNextTick(go)){GO_zeroYvel(go);GO_zeroYacc(go);}
+        if(GO_changesZDirectionInNextTick(go)){GO_zeroZvel(go);GO_zeroZacc(go);}
+    }
+}
 
 //setters for physics variables
 void GO_setAcc(GameObject* go, Vec3D a)

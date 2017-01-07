@@ -10,7 +10,7 @@
 #include "Utility/Geometry.h"
 #include "Player.h"
 
-Player Player_create(GameObject go)
+Player Player_create(GameObject* go)
 {
     Player p = malloc(sizeof(struct _Player));
     p->go = go;
@@ -40,7 +40,7 @@ bool Player_touchingBall(Player p)
     return p->touchingBall;
 }
 
-GameObject Player_getGameObject(Player p)
+GameObject* Player_getGameObject(Player p)
 {
     return p->go;
 }

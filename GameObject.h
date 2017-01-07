@@ -21,7 +21,9 @@ typedef struct GameObject
 } GameObject;
 
 // create/destroy functions for game object
-GameObject GO_createGameObject();
+GameObject* GO_createGameObject();
+void GO_destroyGameObject(GameObject* go);
+void GO_destroyAllGameObjects();
 
 //setters for physics variables
 void GO_setAcc(GameObject* go, Vec3D a);
@@ -44,8 +46,14 @@ int GO_getRAcc(const GameObject* go);
 int GO_getMass(const GameObject* go);
 
 //collision detection function
-bool GO_isInContact(GameObject go1, GameObject go2);
-bool GO_isInBounds(GameObject go, Rect BoundingRect);
+bool GO_isInContact(GameObject* go1, GameObject* go2);
+bool GO_isInBounds(GameObject* go, Rect BoundingRect);
+
+//whether a normal physics update will result in a change in direction
+bool GO_changesXDirectionInNextTick(const GameObject* go);
+bool GO_changesYDirectionInNextTick(const GameObject* go);
+bool GO_changesZDirectionInNextTick(const GameObject* go);
+void GO_zeroReversedDirections(GameObject* go);
 
 //movement functions
 void GO_move(GameObject* go, Vec3D delta);

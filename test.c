@@ -40,34 +40,34 @@ int main(int argc, char* argv[])
     EH_registerHandler(controller3.touchableArea, controller3.evHan, true, &controller3);
 
     //logical game object, player
-    GameObject player = GO_createGameObject();
+    GameObject* player = GO_createGameObject();
     Vec3D playerStartPosition = {250,250,0};
-    GO_setPos(&player, playerStartPosition);
+    GO_setPos(player, playerStartPosition);
     Circle playerBounds = {0,0,SIZE_PLAYER_H / 2};
-    GO_setBCirc(&player, playerBounds);
-    GO_setMass(&player, CONS_MASS_PLAYER);
+    GO_setBCirc(player, playerBounds);
+    GO_setMass(player, CONS_MASS_PLAYER);
 
     Player mccoy = Player_create(player);
 
     //logical game object, ball
-    GameObject ball = GO_createGameObject();
+    GameObject* ball = GO_createGameObject();
     Vec3D ballStartPosition = {250,500,0};
-    GO_setPos(&ball, ballStartPosition);
+    GO_setPos(ball, ballStartPosition);
     Circle ballBounds = {0,0,SIZE_BALL_H / 2};
-    GO_setBCirc(&ball, ballBounds);
-    GO_setMass(&ball, CONS_MASS_BALL);
+    GO_setBCirc(ball, ballBounds);
+    GO_setMass(ball, CONS_MASS_BALL);
 
     //sprite rep of player
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
-    Sprite_setSpriteInWorldPosRef(player_s, &mccoy->go.pos.i, &mccoy->go.pos.j, NULL);
+    Sprite_setSpriteInWorldPosRef(player_s, &mccoy->go->pos.i, &mccoy->go->pos.j, NULL);
 
     //sprite rep of ball
     Sprite ball_s = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(ball_s, SIZE_BALL_W, SIZE_BALL_H);
     Sprite_posByCentre(ball_s, true);
-    Sprite_setSpriteInWorldPosRef(ball_s, &ball.pos.i, &ball.pos.j, NULL);
+    Sprite_setSpriteInWorldPosRef(ball_s, &ball->pos.i, &ball->pos.j, NULL);
 
     //create sprites associated with controllers
     Sprite c1Back, c1Knob;
@@ -172,24 +172,22 @@ int main(int argc, char* argv[])
         Player_setVel(mccoy, delta);
         Player_setIsStationary(mccoy, Vec3D_equal(Player_getVel(mccoy), VECTOR_ZERO));
 
-        delta = Vec3D_add(ball.vel, ball.acc);
+        //move below functionality to physics
+        GO_zeroReversedDirections(ball);
+        delta = Vec3D_add(GO_getVel(ball), GO_getAcc(ball));
 
-        if(((ball.vel.i >= 0) && (delta.i <= 0)) || ((ball.vel.i <= 0) && (delta.i >= 0))) {delta.i = 0;ball.acc.i=0;}
-        if(((ball.vel.j >= 0) && (delta.j <= 0)) || ((ball.vel.j <= 0) && (delta.j >= 0))) {delta.j = 0;ball.acc.j=0;}
-
-        GO_setVel(&ball, delta);
-
-        Player_move(mccoy, Player_getVel(mccoy));
-        GO_move(&ball, GO_getVel(&ball));
+        GO_setVel(ball, delta);
+        Player_move(mccoy);
+        GO_move(ball, GO_getVel(ball));
 
         //collision detection
         //player pitch boundary
         if(Player_isInContactWithBoundary(mccoy, PitchBoundary)) Player_adjustForBoundary(mccoy, PitchBoundary);
         //ball collides with walls
-        if(Phys_inCollisionWithBoundary(&ball, PitchBoundary)) Phys_boundaryCollision(&ball, PitchBoundary);
+        if(Phys_inCollisionWithBoundary(ball, PitchBoundary)) Phys_boundaryCollision(ball, PitchBoundary);
 
         //with ball
-        if(GO_isInContact(mccoy->go, ball))
+        if(GO_isInContact(Player_getGameObject(mccoy), ball))
         {
             if(!contacted)
             {
@@ -197,10 +195,10 @@ int main(int argc, char* argv[])
                 impulse = PhysCont_getShotMask() ? Vec3D_scalarMult(input, CONS_MAX_APPLIABLE_IMPULSE): Vec3D_scalarMult(input, CONS_MAX_CONTROL_IMPULSE);
                 if(Vec3D_equal(impulse, VECTOR_ZERO))
                 {
-                    Phys_conservationMomentumCollision2D(&mccoy->go, &ball, CONS_BALL_PLAYER_COR);
+                    Phys_conservationMomentumCollision2D(mccoy->go, ball, CONS_BALL_PLAYER_COR);
                 }else
                 {
-                    Phys_appliedImpulse2D(&ball, impulse);
+                    Phys_appliedImpulse2D(ball, impulse);
                 }
             }
             contacted = true;
@@ -213,10 +211,13 @@ int main(int argc, char* argv[])
         Draw_renderScene();
     }
     releaseResources();
+
+    return 0;
 }
 
 void releaseResources()
 {
     EH_destroy();
+    GO_destroyAllGameObjects();
     Draw_quit();
 }
