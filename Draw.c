@@ -98,6 +98,7 @@ Sprite Sprite_createSprite(char* pathToSpriteSheet, int sW, int sH, int numState
     s->state=NULL;
 
     List_append(&sprites, s);
+    Sprite_destroySprite(s);
 
     return sprites.tail->data;
 }
