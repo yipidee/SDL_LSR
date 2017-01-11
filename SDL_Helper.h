@@ -2,7 +2,6 @@
 #define _SDL_HELPER_H
 
 #include <stdbool.h>
-#include <SDL2/SDL.h>
 
 //defined functions
 #define isMouseEvent(e) ((e).type == SDL_MOUSEBUTTONUP || (e).type == SDL_MOUSEBUTTONDOWN || (e).type == SDL_MOUSEMOTION)

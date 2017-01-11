@@ -10,111 +10,25 @@
 #include "PhysicalController.h"
 #include "SDL_Helper.h"
 #include "Player.h"
+#include "GameState.h"
 
 // prototypes
 void releaseResources();
+void loadSprites();
+
+//globally available pointer to game state
+GameState* gs;
 
 int main(int argc, char* argv[])
 {
-    //first controller
-    AnalogueController controller1 = AnalCont_create(ANALOGUE_MODE);
-    AnalCont_setSize(&controller1, SIZE_CONTROLLER_1);
-    AnalCont_setKnobSize(&controller1, SIZE_CONTROLLER_KNOB1);
-    AnalCont_setPosition(&controller1, controller1.base.r+10, SCREEN_HEIGHT-controller1.base.r-10);
-
-    //second controller
-    AnalogueController controller2 = AnalCont_create(ANALOGUE_MODE);
-    AnalCont_setSize(&controller2, SIZE_CONTROLLER_2);
-    AnalCont_setKnobSize(&controller2, SIZE_CONTROLLER_KNOB2);
-    AnalCont_setPosition(&controller2, SCREEN_WIDTH-controller2.base.r-10, SCREEN_HEIGHT-controller2.base.r-30);
-
-    //third controller
-    AnalogueController controller3 = AnalCont_create(ANALOGUE_MODE);
-    AnalCont_setSize(&controller3, SIZE_CONTROLLER_3);
-    AnalCont_setKnobSize(&controller3, SIZE_CONTROLLER_KNOB3);
-    AnalCont_setPosition(&controller3, SCREEN_WIDTH-2*controller2.base.r-controller3.base.r-10, SCREEN_HEIGHT-controller3.base.r-10);
-
-    //register controllers with touch handler
-    EH_registerHandler(controller1.touchableArea, controller1.evHan, true, &controller1);
-    EH_registerHandler(controller2.touchableArea, controller2.evHan, true, &controller2);
-    EH_registerHandler(controller3.touchableArea, controller3.evHan, true, &controller3);
-
-    //logical game object, players
-    GameObject* player = GO_createGameObject();
-    Vec3D playerStartPosition = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - 150, 0};
-    GO_setPos(player, playerStartPosition);
-    Circle playerBounds = {0,0,SIZE_PLAYER_H / 2};
-    GO_setBCirc(player, playerBounds);
-    GO_setMass(player, CONS_MASS_PLAYER);
-
-    Player mccoy = Player_create(player);
-
-    GameObject* player_c = GO_createGameObject();
-    playerStartPosition.j = 150;
-    GO_setPos(player_c, playerStartPosition);
-    GO_setBCirc(player_c, playerBounds);
-    GO_setMass(player_c, CONS_MASS_PLAYER);
-
-    Player calfnuts = Player_create(player_c);
-
-    //logical game object, ball
-    GameObject* ball = GO_createGameObject();
-    Vec3D ballStartPosition = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,0};
-    GO_setPos(ball, ballStartPosition);
-    Circle ballBounds = {0,0,SIZE_BALL_H / 2};
-    GO_setBCirc(ball, ballBounds);
-    GO_setMass(ball, CONS_MASS_BALL);
-
-    //sprite rep of players
-    Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
-    Sprite_posByCentre(player_s, true);
-    Sprite_setSpriteInWorldPosRef(player_s, &mccoy->go->pos.i, &mccoy->go->pos.j, NULL);
-
-    Sprite player_cs = Sprite_createSprite(PATH_TO_BLUE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);
-    Sprite_posByCentre(player_cs, true);
-    Sprite_setSpriteInWorldPosRef(player_cs, &calfnuts->go->pos.i, &calfnuts->go->pos.j, NULL);
-
-    //sprite rep of ball
-    Sprite ball_s = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    Sprite_setSpriteInWorldDims(ball_s, SIZE_BALL_W, SIZE_BALL_H);
-    Sprite_posByCentre(ball_s, true);
-    Sprite_setSpriteInWorldPosRef(ball_s, &ball->pos.i, &ball->pos.j, NULL);
-
-    //create sprites associated with controllers
-    Sprite c1Back, c1Knob;
-    c1Back = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    c1Knob = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    Sprite_setSpriteInWorldDims(c1Back, controller1.base.r*2, controller1.base.r*2);
-    Sprite_setSpriteInWorldDims(c1Knob, controller1.knob.r*2, controller1.knob.r*2);
-    Sprite_posByCentre(c1Back, true);
-    Sprite_posByCentre(c1Knob, true);
-    Sprite_setSpriteInWorldPosRef(c1Back, &controller1.base.x, &controller1.base.y, NULL);
-    Sprite_setSpriteInWorldPosRef(c1Knob, &controller1.knob.x, &controller1.knob.y, NULL);
-
-    Sprite c2Back, c2Knob;
-    c2Back = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    c2Knob = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    Sprite_setSpriteInWorldDims(c2Back, controller2.base.r*2, controller2.base.r*2);
-    Sprite_setSpriteInWorldDims(c2Knob, controller2.knob.r*2, controller2.knob.r*2);
-    Sprite_posByCentre(c2Back, true);
-    Sprite_posByCentre(c2Knob, true);
-    Sprite_setSpriteInWorldPosRef(c2Back, &controller2.base.x, &controller2.base.y, NULL);
-    Sprite_setSpriteInWorldPosRef(c2Knob, &controller2.knob.x, &controller2.knob.y, NULL);
-
-    Sprite c3Back, c3Knob;
-    c3Back = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    c3Knob = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    Sprite_setSpriteInWorldDims(c3Back, controller3.base.r*2, controller3.base.r*2);
-    Sprite_setSpriteInWorldDims(c3Knob, controller3.knob.r*2, controller3.knob.r*2);
-    Sprite_posByCentre(c3Back, true);
-    Sprite_posByCentre(c3Knob, true);
-    Sprite_setSpriteInWorldPosRef(c3Back, &controller3.base.x, &controller3.base.y, NULL);
-    Sprite_setSpriteInWorldPosRef(c3Knob, &controller3.knob.x, &controller3.knob.y, NULL);
+    Draw_init();
+    gs = GS_initializeGameState();
+    GS_registerTouchHandlers(gs);
+    GS_loadGameObjects(gs);
+    loadSprites();
 
     //Pitch boundary
-    const Rect PitchBoundary = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    gs->pitch = Rect_create(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     //Main loop flag
     bool quit = false;
@@ -149,58 +63,58 @@ int main(int argc, char* argv[])
         }
 
         //get input
-        //input = AnalCont_getCurrentInput(&controller1);
+        //input = AnalCont_getCurrentInput(&gs->controllers[0]);
         input = PhysCont_getLeftStickInput();
         delta = Vec3D_scalarMult(input, CONS_MAX_SPEED);
 
-        Vec3D knobPos = {controller1.base.x, controller1.base.y, 0};
+        Vec3D knobPos = {gs->controllers[0].base.x, gs->controllers[0].base.y, 0};
 
-        if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getLeftStickInput(), (controller1.base.r - controller1.knob.r)));
-        controller1.knob.x = knobPos.i;
-        controller1.knob.y = knobPos.j;
+        if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getLeftStickInput(), (gs->controllers[0].base.r - gs->controllers[0].knob.r)));
+        gs->controllers[0].knob.x = knobPos.i;
+        gs->controllers[0].knob.y = knobPos.j;
 
         if(!PhysCont_getShotMask())
         {
             input = PhysCont_getRightStickInput();
 
-            knobPos.i = controller3.base.x;
-            knobPos.j = controller3.base.y;
-            if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (controller3.base.r - controller3.knob.r)));
-            controller3.knob.x = knobPos.i;
-            controller3.knob.y = knobPos.j;
-            controller2.knob.x = controller2.base.x;
-            controller2.knob.y = controller2.base.y;
+            knobPos.i = gs->controllers[2].base.x;
+            knobPos.j = gs->controllers[2].base.y;
+            if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (gs->controllers[2].base.r - gs->controllers[2].knob.r)));
+            gs->controllers[2].knob.x = knobPos.i;
+            gs->controllers[2].knob.y = knobPos.j;
+            gs->controllers[1].knob.x = gs->controllers[1].base.x;
+            gs->controllers[1].knob.y = gs->controllers[1].base.y;
         }else
         {
             input = PhysCont_getRightStickInput();
 
-            knobPos.i = controller2.base.x;
-            knobPos.j = controller2.base.y;
-            if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (controller2.base.r - controller2.knob.r)));
-            controller2.knob.x = knobPos.i;
-            controller2.knob.y = knobPos.j;
-            controller3.knob.x = controller3.base.x;
-            controller3.knob.y = controller3.base.y;
+            knobPos.i = gs->controllers[1].base.x;
+            knobPos.j = gs->controllers[1].base.y;
+            if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
+            gs->controllers[1].knob.x = knobPos.i;
+            gs->controllers[1].knob.y = knobPos.j;
+            gs->controllers[2].knob.x = gs->controllers[2].base.x;
+            gs->controllers[2].knob.y = gs->controllers[2].base.y;
         }
-        Player_setVel(mccoy, delta);
-        //Player_setIsStationary(mccoy, Vec3D_equal(Player_getVel(mccoy), VECTOR_ZERO));
+        Player_setVel(gs->players[0], delta);
+        //Player_setIsStationary(gs->players[0], Vec3D_equal(Player_getVel(gs->players[0]), VECTOR_ZERO));
 
         //move below functionality to physics
-        GO_zeroReversedDirections(ball);
-        delta = Vec3D_add(GO_getVel(ball), GO_getAcc(ball));
-        GO_setVel(ball, delta);
+        GO_zeroReversedDirections(gs->ball);
+        delta = Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball));
+        GO_setVel(gs->ball, delta);
 
-        Player_move(mccoy);
-        GO_move(ball, GO_getVel(ball));
+        Player_move(gs->players[0]);
+        GO_move(gs->ball, GO_getVel(gs->ball));
 
         //collision detection
         //player pitch boundary
-        if(Player_isInContactWithBoundary(mccoy, PitchBoundary)) Player_adjustForBoundary(mccoy, PitchBoundary);
-        //ball collides with walls
-        if(Phys_inCollisionWithBoundary(ball, PitchBoundary)) Phys_boundaryCollision(ball, PitchBoundary);
+        if(Player_isInContactWithBoundary(gs->players[0], gs->pitch)) Player_adjustForBoundary(gs->players[0], gs->pitch);
+        //gs->ball collides with walls
+        if(Phys_inCollisionWithBoundary(gs->ball, gs->pitch)) Phys_boundaryCollision(gs->ball, gs->pitch);
 
-        //with ball
-        if(GO_isInContact(Player_getGameObject(mccoy), ball))
+        //with gs->ball
+        if(GO_isInContact(Player_getGameObject(gs->players[0]), gs->ball))
         {
             if(!contacted)
             {
@@ -208,10 +122,10 @@ int main(int argc, char* argv[])
                 impulse = PhysCont_getShotMask() ? Vec3D_scalarMult(input, CONS_MAX_APPLIABLE_IMPULSE): Vec3D_scalarMult(input, CONS_MAX_CONTROL_IMPULSE);
                 if(Vec3D_equal(impulse, VECTOR_ZERO))
                 {
-                    Phys_conservationMomentumCollision2D(mccoy->go, ball, CONS_BALL_PLAYER_COR);
+                    Phys_conservationMomentumCollision2D(gs->players[0]->go, gs->ball, CONS_BALL_PLAYER_COR);
                 }else
                 {
-                    Phys_appliedImpulse2D(ball, impulse);
+                    Phys_appliedImpulse2D(gs->ball, impulse);
                 }
             }
             contacted = true;
@@ -231,6 +145,58 @@ int main(int argc, char* argv[])
 void releaseResources()
 {
     EH_destroy();
-    GO_destroyAllGameObjects();
+    GS_destroyGameState(gs);
     Draw_quit();
 }
+
+void loadSprites()
+{
+    //sprite rep of players
+    Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
+    Sprite_posByCentre(player_s, true);
+    Sprite_setSpriteInWorldPosRef(player_s, &gs->players[0]->go->pos.i, &gs->players[0]->go->pos.j, NULL);
+
+    Sprite player_cs = Sprite_createSprite(PATH_TO_BLUE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);
+    Sprite_posByCentre(player_cs, true);
+    Sprite_setSpriteInWorldPosRef(player_cs, &gs->players[1]->go->pos.i, &gs->players[1]->go->pos.j, NULL);
+
+    //sprite rep of ball
+    Sprite ball_s = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(ball_s, SIZE_BALL_W, SIZE_BALL_H);
+    Sprite_posByCentre(ball_s, true);
+    Sprite_setSpriteInWorldPosRef(ball_s, &gs->ball->pos.i, &gs->ball->pos.j, NULL);
+
+    //create sprites associated with controllers
+    Sprite c1Back, c1Knob;
+    c1Back = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    c1Knob = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(c1Back, gs->controllers[0].base.r*2, gs->controllers[0].base.r*2);
+    Sprite_setSpriteInWorldDims(c1Knob, gs->controllers[0].knob.r*2, gs->controllers[0].knob.r*2);
+    Sprite_posByCentre(c1Back, true);
+    Sprite_posByCentre(c1Knob, true);
+    Sprite_setSpriteInWorldPosRef(c1Back, &gs->controllers[0].base.x, &gs->controllers[0].base.y, NULL);
+    Sprite_setSpriteInWorldPosRef(c1Knob, &gs->controllers[0].knob.x, &gs->controllers[0].knob.y, NULL);
+
+    Sprite c2Back, c2Knob;
+    c2Back = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    c2Knob = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(c2Back, gs->controllers[1].base.r*2, gs->controllers[1].base.r*2);
+    Sprite_setSpriteInWorldDims(c2Knob, gs->controllers[1].knob.r*2, gs->controllers[1].knob.r*2);
+    Sprite_posByCentre(c2Back, true);
+    Sprite_posByCentre(c2Knob, true);
+    Sprite_setSpriteInWorldPosRef(c2Back, &gs->controllers[1].base.x, &gs->controllers[1].base.y, NULL);
+    Sprite_setSpriteInWorldPosRef(c2Knob, &gs->controllers[1].knob.x, &gs->controllers[1].knob.y, NULL);
+
+    Sprite c3Back, c3Knob;
+    c3Back = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    c3Knob = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(c3Back, gs->controllers[2].base.r*2, gs->controllers[2].base.r*2);
+    Sprite_setSpriteInWorldDims(c3Knob, gs->controllers[2].knob.r*2, gs->controllers[2].knob.r*2);
+    Sprite_posByCentre(c3Back, true);
+    Sprite_posByCentre(c3Knob, true);
+    Sprite_setSpriteInWorldPosRef(c3Back, &gs->controllers[2].base.x, &gs->controllers[2].base.y, NULL);
+    Sprite_setSpriteInWorldPosRef(c3Knob, &gs->controllers[2].knob.x, &gs->controllers[2].knob.y, NULL);
+}
+

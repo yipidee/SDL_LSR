@@ -98,7 +98,7 @@ Sprite Sprite_createSprite(char* pathToSpriteSheet, int sW, int sH, int numState
     s->state=NULL;
 
     List_append(&sprites, s);
-    Sprite_destroySprite(s);
+    free(s);
 
     return sprites.tail->data;
 }
@@ -206,7 +206,7 @@ void Sprite_renderSprite(Sprite s)
 bool Draw_init()
 {
     if(!isInitialised){
-        if(SDL_Helper_init())
+        if(!SDL_Helper_init())
         {
             printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
         }
