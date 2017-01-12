@@ -41,4 +41,7 @@ void GS_destroyGameState(GameState* gs);
 void GS_loadGameObjects(GameState* gs);
 void GS_registerTouchHandlers(GameState* gs);
 
+//Gamestate physics update
+void GS_updatePhysics(GameState* gs);
+
 #endif // _GAMESTATE_H

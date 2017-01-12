@@ -12,6 +12,8 @@ void PhysCont_deviceRemoved(SDL_Event* e);
 
 void PhysCont_deviceAdded(SDL_Event* e);
 
+#define PhysCont_PhysicalControllerPresent() (SDL_NumJoysticks() > 0)
+
 //handle joystick events
 bool PhysCont_handleEvent(SDL_Event* e);
 

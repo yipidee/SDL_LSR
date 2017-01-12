@@ -8,9 +8,9 @@
 //static method prototype
 static void makeWalls(Line* L, Line* T, Line* R, Line* B, Rect r);
 
-bool Phys_inCollision(GameObject go1, GameObject go2)
+bool Phys_inCollision(GameObject* go1, GameObject* go2)
 {
-    return Circle_inCollision(go1.BCirc, go2.BCirc);
+    return Circle_inCollision(go1->BCirc, go2->BCirc);
 }
 
 Vec3D Phys_getClosestPointFromPointOnLine(Line l, Vec3D p)
@@ -266,6 +266,9 @@ void Phys_appliedImpulse2D(GameObject* go, Vec3D impulse)
     GO_setAcc(go, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go)),CONS_BALL_COURT_DEACC));
 }
 
+
+
+// local static functions
 static void makeWalls(Line* T, Line* R, Line* B, Line* L, Rect r)
 {
     Vec3D tl, tr, br, bl;
