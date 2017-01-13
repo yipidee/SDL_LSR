@@ -11,6 +11,7 @@
 #include "SDL_Helper.h"
 #include "Player.h"
 #include "GameState.h"
+#include "UserInput.h"
 
 // prototypes
 void releaseResources();
@@ -25,6 +26,7 @@ int main(int argc, char* argv[])
     gs = GS_initializeGameState();
     GS_registerTouchHandlers(gs);
     GS_loadGameObjects(gs);
+    UI_setOnscreenControlRef(&gs->controllers[0], &gs->controllers[1], &gs->controllers[2]);
     loadSprites();
 
     //Pitch boundary
@@ -35,7 +37,7 @@ int main(int argc, char* argv[])
 
     //Event handler
     SDL_Event e;
-    Vec3D input = VECTOR_ZERO;
+    Input input;;
     Vec3D delta = VECTOR_ZERO;
 
     Vec3D impulse = VECTOR_ZERO;
@@ -63,34 +65,29 @@ int main(int argc, char* argv[])
         }
 
         //get input
-        //input = AnalCont_getCurrentInput(&gs->controllers[0]);
-        input = PhysCont_getLeftStickInput();
-        delta = Vec3D_scalarMult(input, CONS_MAX_SPEED);
+        input = UI_getUserInput(); //PhysCont_getLeftStickInput();
+        delta = Vec3D_scalarMult(UI_getDirVec(input), CONS_MAX_SPEED);
 
         Vec3D knobPos = {gs->controllers[0].base.x, gs->controllers[0].base.y, 0};
 
-        if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getLeftStickInput(), (gs->controllers[0].base.r - gs->controllers[0].knob.r)));
+        if(!Vec3D_equal(UI_getDirVec(input), VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getDirVec(input), (gs->controllers[0].base.r - gs->controllers[0].knob.r)));
         gs->controllers[0].knob.x = knobPos.i;
         gs->controllers[0].knob.y = knobPos.j;
 
-        if(!PhysCont_getShotMask())
+        if(!Vec3D_equal(UI_getConVec(input),VECTOR_ZERO))
         {
-            input = PhysCont_getRightStickInput();
-
             knobPos.i = gs->controllers[2].base.x;
             knobPos.j = gs->controllers[2].base.y;
-            if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (gs->controllers[2].base.r - gs->controllers[2].knob.r)));
+            if(!Vec3D_equal(UI_getConVec(input), VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getConVec(input), (gs->controllers[2].base.r - gs->controllers[2].knob.r)));
             gs->controllers[2].knob.x = knobPos.i;
             gs->controllers[2].knob.y = knobPos.j;
             gs->controllers[1].knob.x = gs->controllers[1].base.x;
             gs->controllers[1].knob.y = gs->controllers[1].base.y;
         }else
         {
-            input = PhysCont_getRightStickInput();
-
             knobPos.i = gs->controllers[1].base.x;
             knobPos.j = gs->controllers[1].base.y;
-            if(!Vec3D_equal(input, VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(PhysCont_getRightStickInput(), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
+            if(!Vec3D_equal(UI_getShotVec(input), VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getShotVec(input), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
             gs->controllers[1].knob.x = knobPos.i;
             gs->controllers[1].knob.y = knobPos.j;
             gs->controllers[2].knob.x = gs->controllers[2].base.x;
@@ -118,8 +115,7 @@ int main(int argc, char* argv[])
         {
             if(!contacted)
             {
-                input = PhysCont_getRightStickInput();
-                impulse = PhysCont_getShotMask() ? Vec3D_scalarMult(input, CONS_MAX_APPLIABLE_IMPULSE): Vec3D_scalarMult(input, CONS_MAX_CONTROL_IMPULSE);
+                impulse = Vec3D_equal(UI_getConVec(input), VECTOR_ZERO) ? Vec3D_scalarMult(UI_getShotVec(input), CONS_MAX_APPLIABLE_IMPULSE): Vec3D_scalarMult(UI_getConVec(input), CONS_MAX_CONTROL_IMPULSE);
                 if(Vec3D_equal(impulse, VECTOR_ZERO))
                 {
                     Phys_conservationMomentumCollision2D(gs->players[0]->go, gs->ball, CONS_BALL_PLAYER_COR);
@@ -167,6 +163,7 @@ void loadSprites()
     Sprite_setSpriteInWorldDims(ball_s, SIZE_BALL_W, SIZE_BALL_H);
     Sprite_posByCentre(ball_s, true);
     Sprite_setSpriteInWorldPosRef(ball_s, &gs->ball->pos.i, &gs->ball->pos.j, NULL);
+
 
     //create sprites associated with controllers
     Sprite c1Back, c1Knob;

@@ -11,7 +11,6 @@ GameState* GS_initializeGameState()
     gs->players[0] = NULL;
     gs->players[1] = NULL;
     gs->pitch = RECT_NULL;
-    gs->gamepad = NULL;
     //gs->controllers[0] = NULL;
     return gs;
 }

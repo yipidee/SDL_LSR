@@ -29,7 +29,6 @@ typedef struct GameState
     //Input elements
     //union controller
     AnalogueController controllers[3]; //TODO: collect this into single structure with "getInput" function
-    PhysicalController* gamepad;
 
 }GameState;
 
