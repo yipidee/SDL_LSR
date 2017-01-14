@@ -1,14 +1,14 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
-#include <math.h>
+//#include <math.h>
 #include "EventHandler.h"
-#include "AnalogueController.h"
+//#include "AnalogueController.h"
 #include "Draw.h"
 #include "Constants.h"
 #include "GameObject.h"
 #include "Physics.h"
-#include "PhysicalController.h"
-#include "SDL_Helper.h"
+//#include "PhysicalController.h"
+//#include "SDL_Helper.h"
 #include "Player.h"
 #include "GameState.h"
 #include "UserInput.h"
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     UI_setOnscreenControlRef(&gs->controllers[0], &gs->controllers[1], &gs->controllers[2]);
     loadSprites();
 
-    //Pitch boundary
+    //Pitch boundary TODO: Move to gamestate initialisation
     gs->pitch = Rect_create(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     //Main loop flag
@@ -37,8 +37,8 @@ int main(int argc, char* argv[])
 
     //Event handler
     SDL_Event e;
-    Input input;;
-    Vec3D delta = VECTOR_ZERO;
+    Input input;
+    //Vec3D delta = VECTOR_ZERO;
 
     Vec3D impulse = VECTOR_ZERO;
 
@@ -65,8 +65,8 @@ int main(int argc, char* argv[])
         }
 
         //get input
-        input = UI_getUserInput(); //PhysCont_getLeftStickInput();
-        delta = Vec3D_scalarMult(UI_getDirVec(input), CONS_MAX_SPEED);
+        input = UI_getUserInput();
+        //delta = Vec3D_scalarMult(UI_getDirVec(input), CONS_MAX_SPEED);
 
         Vec3D knobPos = {gs->controllers[0].base.x, gs->controllers[0].base.y, 0};
 
@@ -93,13 +93,12 @@ int main(int argc, char* argv[])
             gs->controllers[2].knob.x = gs->controllers[2].base.x;
             gs->controllers[2].knob.y = gs->controllers[2].base.y;
         }
-        Player_setVel(gs->players[0], delta);
-        //Player_setIsStationary(gs->players[0], Vec3D_equal(Player_getVel(gs->players[0]), VECTOR_ZERO));
-
+        Player_setVel(gs->players[0], Vec3D_scalarMult(UI_getDirVec(input), CONS_MAX_SPEED));
+        
         //move below functionality to physics
         GO_zeroReversedDirections(gs->ball);
-        delta = Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball));
-        GO_setVel(gs->ball, delta);
+        //delta = Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball));
+        GO_setVel(gs->ball, Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball)));
 
         Player_move(gs->players[0]);
         GO_move(gs->ball, GO_getVel(gs->ball));
