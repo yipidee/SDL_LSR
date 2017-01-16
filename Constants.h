@@ -7,6 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for physical dimensions                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
+
 #define SCREEN_WIDTH 480
 #define SCREEN_HEIGHT 640
 #define SIZE_CONTROLLER_1 100
@@ -19,6 +20,7 @@
 #define SIZE_PLAYER_W 60
 #define SIZE_BALL_H 32
 #define SIZE_BALL_W 32
+#define SIZE_PITCH 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for paths to art resources                                  //////////
@@ -46,7 +48,7 @@
 /////////        Defines for physics constants                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
 #define CONS_MAX_APPLIABLE_IMPULSE 80
-#define CONS_MAX_CONTROL_IMPULSE 35
+#define CONS_MAX_CONTROL_IMPULSE 45
 #define CONS_MAX_SPEED 10
 #define CONS_BALL_WALL_COR 0.8
 #define CONS_BALL_PLAYER_COR 0.1

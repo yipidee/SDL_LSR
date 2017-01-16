@@ -16,6 +16,7 @@
 #include <SDL2/SDL.h>
 #include "Utility/Geometry.h"
 #include "Utility/List.h"
+#include "SDL_Helper.h"
 
 typedef bool (*EventHandler)(void*, SDL_Event*);
 

@@ -10,8 +10,7 @@ GameState* GS_initializeGameState()
     gs->ball = NULL;
     gs->players[0] = NULL;
     gs->players[1] = NULL;
-    gs->pitch = RECT_NULL;
-    //gs->controllers[0] = NULL;
+    gs->pitch = Rect_create(SIZE_PITCH);
     return gs;
 }
 
@@ -50,8 +49,6 @@ void GS_loadGameObjects(GameState* gs)
 
     Player calfnuts = Player_create(player_c);
     gs->players[1] = calfnuts;
-    //memcpy(&gs->players[1], calfnuts, sizeof(struct _Player));
-    //Player_destroy(calfnuts);
 
     //logical game object, ball
     GameObject* ball = GO_createGameObject();

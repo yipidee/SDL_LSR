@@ -1,17 +1,18 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
-//#include <math.h>
 #include "EventHandler.h"
-//#include "AnalogueController.h"
 #include "Draw.h"
 #include "Constants.h"
 #include "GameObject.h"
 #include "Physics.h"
-//#include "PhysicalController.h"
-//#include "SDL_Helper.h"
 #include "Player.h"
 #include "GameState.h"
 #include "UserInput.h"
+
+//defined functions
+#define getVelFromInput(i) Vec3D_scalarMult(UI_getDirVec((i)), CONS_MAX_SPEED)
+#define getConFromInput(i) Vec3D_scalarMult(UI_getConVec((i)), CONS_MAX_CONTROL_IMPULSE)
+#define getShotFromInput(i) Vec3D_scalarMult(UI_getShotVec((i)), CONS_MAX_APPLIABLE_IMPULSE)
 
 // prototypes
 void releaseResources();
@@ -29,17 +30,12 @@ int main(int argc, char* argv[])
     UI_setOnscreenControlRef(&gs->controllers[0], &gs->controllers[1], &gs->controllers[2]);
     loadSprites();
 
-    //Pitch boundary TODO: Move to gamestate initialisation
-    gs->pitch = Rect_create(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
     //Main loop flag
     bool quit = false;
 
     //Event handler
     SDL_Event e;
     Input input;
-    //Vec3D delta = VECTOR_ZERO;
-
     Vec3D impulse = VECTOR_ZERO;
 
     bool contacted = false;
@@ -66,19 +62,18 @@ int main(int argc, char* argv[])
 
         //get input
         input = UI_getUserInput();
-        //delta = Vec3D_scalarMult(UI_getDirVec(input), CONS_MAX_SPEED);
 
         Vec3D knobPos = {gs->controllers[0].base.x, gs->controllers[0].base.y, 0};
 
-        if(!Vec3D_equal(UI_getDirVec(input), VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getDirVec(input), (gs->controllers[0].base.r - gs->controllers[0].knob.r)));
+        if(!Vec3D_isZero(UI_getDirVec(input)))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getDirVec(input), (gs->controllers[0].base.r - gs->controllers[0].knob.r)));
         gs->controllers[0].knob.x = knobPos.i;
         gs->controllers[0].knob.y = knobPos.j;
 
-        if(!Vec3D_equal(UI_getConVec(input),VECTOR_ZERO))
+        if(!Vec3D_isZero(UI_getConVec(input)))
         {
             knobPos.i = gs->controllers[2].base.x;
             knobPos.j = gs->controllers[2].base.y;
-            if(!Vec3D_equal(UI_getConVec(input), VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getConVec(input), (gs->controllers[2].base.r - gs->controllers[2].knob.r)));
+            if(!Vec3D_isZero(UI_getConVec(input)))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getConVec(input), (gs->controllers[2].base.r - gs->controllers[2].knob.r)));
             gs->controllers[2].knob.x = knobPos.i;
             gs->controllers[2].knob.y = knobPos.j;
             gs->controllers[1].knob.x = gs->controllers[1].base.x;
@@ -87,14 +82,14 @@ int main(int argc, char* argv[])
         {
             knobPos.i = gs->controllers[1].base.x;
             knobPos.j = gs->controllers[1].base.y;
-            if(!Vec3D_equal(UI_getShotVec(input), VECTOR_ZERO))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getShotVec(input), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
+            if(!Vec3D_isZero(UI_getShotVec(input)))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getShotVec(input), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
             gs->controllers[1].knob.x = knobPos.i;
             gs->controllers[1].knob.y = knobPos.j;
             gs->controllers[2].knob.x = gs->controllers[2].base.x;
             gs->controllers[2].knob.y = gs->controllers[2].base.y;
         }
-        Player_setVel(gs->players[0], Vec3D_scalarMult(UI_getDirVec(input), CONS_MAX_SPEED));
-        
+        Player_setVel(gs->players[0], getVelFromInput(input));
+
         //move below functionality to physics
         GO_zeroReversedDirections(gs->ball);
         //delta = Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball));
@@ -114,8 +109,8 @@ int main(int argc, char* argv[])
         {
             if(!contacted)
             {
-                impulse = Vec3D_equal(UI_getConVec(input), VECTOR_ZERO) ? Vec3D_scalarMult(UI_getShotVec(input), CONS_MAX_APPLIABLE_IMPULSE): Vec3D_scalarMult(UI_getConVec(input), CONS_MAX_CONTROL_IMPULSE);
-                if(Vec3D_equal(impulse, VECTOR_ZERO))
+                impulse = Vec3D_isZero(UI_getConVec(input)) ? getShotFromInput(input): getConFromInput(input);
+                if(Vec3D_isZero(impulse))
                 {
                     Phys_conservationMomentumCollision2D(gs->players[0]->go, gs->ball, CONS_BALL_PLAYER_COR);
                 }else
@@ -195,4 +190,3 @@ void loadSprites()
     Sprite_setSpriteInWorldPosRef(c3Back, &gs->controllers[2].base.x, &gs->controllers[2].base.y, NULL);
     Sprite_setSpriteInWorldPosRef(c3Knob, &gs->controllers[2].knob.x, &gs->controllers[2].knob.y, NULL);
 }
-
