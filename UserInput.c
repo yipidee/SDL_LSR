@@ -71,16 +71,8 @@ static Input getInputFromAnalCont()
     if(onscreenRefsSet)
     {
         i.direction = AnalCont_getCurrentInput(ac1);
-        Vec3D cont = AnalCont_getCurrentInput(ac2);
-        if(Vec3D_equal(cont, VECTOR_ZERO))
-        {
-            i.control = cont;
-            i.shot = VECTOR_ZERO;
-        }else
-        {
-            i.shot = cont;
-            i.control = VECTOR_ZERO;
-        }
+        i.control = AnalCont_getCurrentInput(ac2);
+        i.shot = AnalCont_getCurrentInput(ac3);
     }else
     {
         printf("no onscreen control referenced");

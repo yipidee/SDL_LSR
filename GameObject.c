@@ -44,6 +44,11 @@ void GO_destroyAllGameObjects()
     GO_LIST_INITIALIZED = false;
 }
 
+int GO_getNumGO()
+{
+    return id_counter;
+}
+
 //collision detection function
 bool GO_isInContact(GameObject* go1, GameObject* go2)
 {
@@ -232,4 +237,9 @@ int GO_getRAcc(const GameObject* go)
 int GO_getMass(const GameObject* go)
 {
     return go->mass;
+}
+
+bool GO_isStationary(const GameObject* go)
+{
+    return go->isStationary;
 }

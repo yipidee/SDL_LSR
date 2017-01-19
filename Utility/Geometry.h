@@ -15,6 +15,7 @@
 #define Vec3D_subtract(a,b) Vec3D_add((a),Vec3D_scalarMult((b),-1.0))
 #define Vec3D_getNormal(a,b) Vec3D_normalise(Vec3D_crossProduct((a),(b)))
 #define Vec3D_isZero(v) Vec3D_equal((v),VECTOR_ZERO)
+#define Vec3D_negate(v) Vec3D_scalarMult((v), -1)
 
 //////////////////////////////////////////////////
 ////   Vector related code

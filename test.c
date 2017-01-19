@@ -17,6 +17,10 @@
 // prototypes
 void releaseResources();
 void loadSprites();
+void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input in, bool* contacted);
+void collisionWithEnergisedObject(GameObject* go1, GameObject* go2);
+void drawControlsOnScreen(Input input);
+Input AI_getUserInput();
 
 //globally available pointer to game state
 GameState* gs;
@@ -35,10 +39,7 @@ int main(int argc, char* argv[])
 
     //Event handler
     SDL_Event e;
-    Input input;
-    Vec3D impulse = VECTOR_ZERO;
-
-    bool contacted = false;
+    Input input1, input2;
 
     //While application is running
     while( !quit )
@@ -60,76 +61,149 @@ int main(int argc, char* argv[])
             }
         }
 
-        //get input
-        input = UI_getUserInput();
+        //Step 1: get input from user
+        input1 = UI_getUserInput();
+        if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
+        input2 = AI_getUserInput();
 
-        Vec3D knobPos = {gs->controllers[0].base.x, gs->controllers[0].base.y, 0};
-
-        if(!Vec3D_isZero(UI_getDirVec(input)))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getDirVec(input), (gs->controllers[0].base.r - gs->controllers[0].knob.r)));
-        gs->controllers[0].knob.x = knobPos.i;
-        gs->controllers[0].knob.y = knobPos.j;
-
-        if(!Vec3D_isZero(UI_getConVec(input)))
+        //Step 2: Update physics
+        //update positions
+        Player_setVel(gs->players[0], getVelFromInput(input1));
+        if(Vec3D_isZero(Player_getVel(gs->players[0])))
         {
-            knobPos.i = gs->controllers[2].base.x;
-            knobPos.j = gs->controllers[2].base.y;
-            if(!Vec3D_isZero(UI_getConVec(input)))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getConVec(input), (gs->controllers[2].base.r - gs->controllers[2].knob.r)));
-            gs->controllers[2].knob.x = knobPos.i;
-            gs->controllers[2].knob.y = knobPos.j;
-            gs->controllers[1].knob.x = gs->controllers[1].base.x;
-            gs->controllers[1].knob.y = gs->controllers[1].base.y;
+            Player_setIsStationary(gs->players[0], true);
         }else
         {
-            knobPos.i = gs->controllers[1].base.x;
-            knobPos.j = gs->controllers[1].base.y;
-            if(!Vec3D_isZero(UI_getShotVec(input)))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getShotVec(input), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
-            gs->controllers[1].knob.x = knobPos.i;
-            gs->controllers[1].knob.y = knobPos.j;
-            gs->controllers[2].knob.x = gs->controllers[2].base.x;
-            gs->controllers[2].knob.y = gs->controllers[2].base.y;
+            Player_setIsStationary(gs->players[0], false);
         }
-        Player_setVel(gs->players[0], getVelFromInput(input));
-
-        //move below functionality to physics
-        GO_zeroReversedDirections(gs->ball);
-        //delta = Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball));
-        GO_setVel(gs->ball, Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball)));
-
         Player_move(gs->players[0]);
+        Player_setVel(gs->players[1], getVelFromInput(input2));
+        if(Vec3D_isZero(Player_getVel(gs->players[1])))
+        {
+            Player_setIsStationary(gs->players[1], true);
+        }else
+        {
+            Player_setIsStationary(gs->players[1], false);
+        }
+        Player_move(gs->players[1]);
+
+        //update ball physics
+        GO_setVel(gs->ball, Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball)));
+        GO_zeroReversedDirections(gs->ball);
         GO_move(gs->ball, GO_getVel(gs->ball));
 
         //collision detection
-        //player pitch boundary
+        //player/ball pitch boundary
         if(Player_isInContactWithBoundary(gs->players[0], gs->pitch)) Player_adjustForBoundary(gs->players[0], gs->pitch);
-        //gs->ball collides with walls
+        if(Player_isInContactWithBoundary(gs->players[1], gs->pitch)) Player_adjustForBoundary(gs->players[1], gs->pitch);
         if(Phys_inCollisionWithBoundary(gs->ball, gs->pitch)) Phys_boundaryCollision(gs->ball, gs->pitch);
 
-        //with gs->ball
-        if(GO_isInContact(Player_getGameObject(gs->players[0]), gs->ball))
-        {
-            if(!contacted)
-            {
-                impulse = Vec3D_isZero(UI_getConVec(input)) ? getShotFromInput(input): getConFromInput(input);
-                if(Vec3D_isZero(impulse))
-                {
-                    Phys_conservationMomentumCollision2D(gs->players[0]->go, gs->ball, CONS_BALL_PLAYER_COR);
-                }else
-                {
-                    Phys_appliedImpulse2D(gs->ball, impulse);
-                }
-            }
-            contacted = true;
-        }else
-        {
-            contacted = false;
-        }
+        //check and rectify for collisions
+        // Player1 and ball
+        static bool p1BallContact = false;
+        collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &p1BallContact);
 
-        //draw result
+        // Player2 and ball
+        static bool p2BallContact = false;
+        collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input2, &p2BallContact);
+
+        collisionWithEnergisedObject(Player_getGameObject(gs->players[0]), Player_getGameObject(gs->players[1]));
+
+        //Step 3: draw result
         Draw_renderScene();
     }
     releaseResources();
 
     return 0;
+}
+
+Input AI_getUserInput()
+{
+    Input i;
+    i.direction = VECTOR_ZERO;
+    i.control = VECTOR_ZERO;
+    i.shot = VECTOR_ZERO;
+    return i;
+}
+
+void collisionWithEnergisedObject(GameObject* go1, GameObject* go2)
+{
+    if(GO_isInContact(go1, go2))
+    {
+        Vec3D vec = Vec3D_subtract(GO_getPos(go2), GO_getPos(go1));
+        double distanceBetweenCentres = Vec3D_getMagnitude(vec);
+        double minAllowableDistance = Circle_getR(&go1->BCirc) + Circle_getR(&go2->BCirc);
+        double distToMove = minAllowableDistance - distanceBetweenCentres;
+
+        if(GO_isStationary(go1) && GO_isStationary(go2))
+        {
+            distToMove/=2;
+            distToMove+=1;
+            GO_setPos(go2, Vec3D_add(GO_getPos(go2), Vec3D_scalarMult(Vec3D_normalise(vec), distToMove)));
+            GO_setPos(go1, Vec3D_add(GO_getPos(go1), Vec3D_negate(Vec3D_scalarMult(Vec3D_normalise(vec), distToMove))));
+        }else if(GO_isStationary(go1))
+        {
+            GO_setPos(go1, Vec3D_add(GO_getPos(go1), Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go2)), distToMove)));
+        }else if(GO_isStationary(go2))
+        {
+            GO_setPos(go2, Vec3D_add(GO_getPos(go2), Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go1)), distToMove)));
+        }
+    }
+}
+
+void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input input, bool* contacted)
+{
+    //static bool contacted = false;
+    Vec3D impulse = VECTOR_ZERO;
+
+    //with gs->ball
+    if(GO_isInContact(go1, go2))
+    {
+        if(!*contacted)
+        {
+            impulse = Vec3D_isZero(UI_getConVec(input)) ? getShotFromInput(input): getConFromInput(input);
+            if(Vec3D_isZero(impulse))
+            {
+                Phys_conservationMomentumCollision2D(go1, go2, CONS_BALL_PLAYER_COR);
+            }else
+            {
+                Phys_appliedImpulse2D(go2, impulse);
+            }
+        }
+        *contacted = true;
+    }else
+    {
+        *contacted = false;
+    }
+}
+
+void drawControlsOnScreen(Input input)
+{
+    Vec3D knobPos = {gs->controllers[0].base.x, gs->controllers[0].base.y, 0};
+
+    if(!Vec3D_isZero(UI_getDirVec(input)))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getDirVec(input), (gs->controllers[0].base.r - gs->controllers[0].knob.r)));
+    gs->controllers[0].knob.x = knobPos.i;
+    gs->controllers[0].knob.y = knobPos.j;
+
+    if(Vec3D_isZero(UI_getShotVec(input)))
+    {
+        knobPos.i = gs->controllers[2].base.x;
+        knobPos.j = gs->controllers[2].base.y;
+        if(!Vec3D_isZero(UI_getConVec(input)))knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getConVec(input), (gs->controllers[2].base.r - gs->controllers[2].knob.r)));
+        gs->controllers[2].knob.x = knobPos.i;
+        gs->controllers[2].knob.y = knobPos.j;
+        gs->controllers[1].knob.x = gs->controllers[1].base.x;
+        gs->controllers[1].knob.y = gs->controllers[1].base.y;
+    }else
+    {
+        knobPos.i = gs->controllers[1].base.x;
+        knobPos.j = gs->controllers[1].base.y;
+        /*if(!Vec3D_isZero(UI_getShotVec(input)))*/knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getShotVec(input), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
+        gs->controllers[1].knob.x = knobPos.i;
+        gs->controllers[1].knob.y = knobPos.j;
+        gs->controllers[2].knob.x = gs->controllers[2].base.x;
+        gs->controllers[2].knob.y = gs->controllers[2].base.y;
+    }
 }
 
 void releaseResources()

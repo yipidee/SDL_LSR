@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include "Utility/Geometry.h"
 
+#define GO_backupOneTick(go) GO_move((go), Vec3D_scalarMult(GO_getVel((go)), -1))
+
 typedef struct GameObject
 {
     int id;                 //id assigned on creation
@@ -24,6 +26,7 @@ typedef struct GameObject
 GameObject* GO_createGameObject();
 void GO_destroyGameObject(GameObject* go);
 void GO_destroyAllGameObjects();
+int GO_getNumGO();
 
 //setters for physics variables
 void GO_setAcc(GameObject* go, Vec3D a);
@@ -44,6 +47,7 @@ int GO_getRPos(const GameObject* go);
 int GO_getRVel(const GameObject* go);
 int GO_getRAcc(const GameObject* go);
 int GO_getMass(const GameObject* go);
+bool GO_isStationary(const GameObject* go);
 
 //collision detection function
 bool GO_isInContact(GameObject* go1, GameObject* go2);

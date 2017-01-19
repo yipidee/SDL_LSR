@@ -38,8 +38,6 @@ void GS_loadGameObjects(GameState* gs)
 
     Player mccoy = Player_create(player);
     gs->players[0] = mccoy;
-    //memcpy(&gs->players[0], mccoy, sizeof(struct _Player));
-    //Player_destroy(mccoy);
 
     GameObject* player_c = GO_createGameObject();
     playerStartPosition.j = 150;
