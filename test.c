@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "GameState.h"
 #include "UserInput.h"
+#include "AI.h"
 
 //defined functions
 #define getVelFromInput(i) Vec3D_scalarMult(UI_getDirVec((i)), CONS_MAX_SPEED)
@@ -20,7 +21,6 @@ void loadSprites();
 void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input in, bool* contacted);
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2);
 void drawControlsOnScreen(Input input);
-Input AI_getUserInput();
 
 //globally available pointer to game state
 GameState* gs;
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
         //Step 1: get input from user
         input1 = UI_getUserInput();
         if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
-        input2 = AI_getUserInput();
+        input2 = AI_getUserInput(gs, 1, AI_init());
 
         //Step 2: Update physics
         //update positions
@@ -117,15 +117,6 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-Input AI_getUserInput()
-{
-    Input i;
-    i.direction = VECTOR_ZERO;
-    i.control = VECTOR_ZERO;
-    i.shot = VECTOR_ZERO;
-    return i;
-}
-
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2)
 {
     if(GO_isInContact(go1, go2))
@@ -138,15 +129,14 @@ void collisionWithEnergisedObject(GameObject* go1, GameObject* go2)
         if(GO_isStationary(go1) && GO_isStationary(go2))
         {
             distToMove/=2;
-            distToMove+=1;
             GO_setPos(go2, Vec3D_add(GO_getPos(go2), Vec3D_scalarMult(Vec3D_normalise(vec), distToMove)));
             GO_setPos(go1, Vec3D_add(GO_getPos(go1), Vec3D_negate(Vec3D_scalarMult(Vec3D_normalise(vec), distToMove))));
         }else if(GO_isStationary(go1))
         {
-            GO_setPos(go1, Vec3D_add(GO_getPos(go1), Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go2)), distToMove)));
+            GO_setPos(go1, Vec3D_add(GO_getPos(go1), Vec3D_negate(Vec3D_scalarMult(Vec3D_normalise(vec), distToMove))));
         }else if(GO_isStationary(go2))
         {
-            GO_setPos(go2, Vec3D_add(GO_getPos(go2), Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go1)), distToMove)));
+            GO_setPos(go2, Vec3D_add(GO_getPos(go2), Vec3D_scalarMult(Vec3D_normalise(vec), distToMove)));
         }
     }
 }
