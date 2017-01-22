@@ -10,12 +10,13 @@ typedef struct Input
     Vec3D direction, control, shot;
 }Input;
 
-extern bool usingPhysicalController;
+static const Input INPUT_NULL = {{0,0,0}, {0,0,0}, {0,0,0}};
 
 //get functions for input components
 Vec3D UI_getDirVec(Input i);
 Vec3D UI_getConVec(Input i);
 Vec3D UI_getShotVec(Input i);
+bool UI_noInput(Input i);
 
 //get user input from control system
 Input UI_getUserInput();

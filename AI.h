@@ -12,9 +12,9 @@
 #include "GameState.h"
 #include "UserInput.h"
 
-typedef struct decisionTreeNode* Node;
+typedef struct decisionTreeNode* DecisionTree;
 
-Node AI_init();
-Input AI_getUserInput(GameState* gs, int id, Node start);
+DecisionTree AI_init();
+Input AI_getUserInput(GameState* gs, int id, DecisionTree dt);
 
 #endif // _AI_H

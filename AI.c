@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 #include "AI.h"
 
+typedef struct decisionTreeNode* Node;
 typedef Input (*LeafNodeFunc)(GameState*, int);
 typedef bool (*BranchNodeFunc)(GameState*, int);
 
@@ -11,26 +13,40 @@ typedef enum NodeType
     LeafNode
 }NodeType;
 
-union funcType
+typedef struct bNode
 {
-    BranchNodeFunc b;
-    LeafNodeFunc l;
+    BranchNodeFunc func;
+    Node yes, no;
+}bNode;
+
+typedef struct lNode
+{
+    LeafNodeFunc func;
+}lNode;
+
+union Nodes
+{
+    bNode b;
+    lNode l;
 };
 
 struct decisionTreeNode
 {
     int id;
     NodeType type;
-    union funcType func;
-    Node yes, no;
+    union Nodes node;
 };
 
 Node makeDT();
 Node AI_makeDTNode(int id);
+void AI_makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no);
 void AI_makeLeafNode(Node n, LeafNodeFunc func);
+Input runToBall(GameState* gs, int i);
+bool returnRandBool(GameState* gs, int i);
 
 Node AI_init()
 {
+    srand((int)time(NULL));
     return makeDT();
 }
 
@@ -41,30 +57,49 @@ Input AI_getUserInput(GameState* gs, int id, Node start)
 
     if(start->type == BranchNode)
     {
-        Node next = start->func.b(gs, id) ? start->yes : start->no;
+        Node next = start->node.b.func(gs, id) ? start->node.b.yes : start->node.b.no;
         return (AI_getUserInput(gs, id, next));
     }else
     {
-        return start->func.l(gs, id);
+        return start->node.l.func(gs, id);
     }
 }
 
 
 /*** for testing, delete when complete!!!!!*/
-Input dummyFunc(GameState* gs, int id)
+Input stop(GameState* gs, int id)
 {
-    Input i;
-    i.direction = Vec3D_scalarMult(VECTOR_S, 0.1);
-    i.control = VECTOR_ZERO;
-    i.shot = VECTOR_ZERO;
+    Input i = INPUT_NULL;
+    i.shot = VECTOR_N;
     return i;
 }
 
 Node makeDT()
 {
-    Node n = AI_makeDTNode(0);
-    AI_makeLeafNode(n, &dummyFunc);
-    return n;
+    Node n0 = AI_makeDTNode(0);
+    Node n1 = AI_makeDTNode(1);
+    Node n2 = AI_makeDTNode(2);
+    AI_makeBranchNode(n0, &returnRandBool, n1, n2);
+    AI_makeLeafNode(n1, &stop);
+    AI_makeLeafNode(n2, &runToBall);
+    return n0;
+}
+
+bool returnRandBool(GameState* gs, int i)
+{
+    double r = rand();
+    r /= RAND_MAX;
+    bool res = (r > 0.5);
+    return res;
+}
+
+Input runToBall(GameState* gs, int i)
+{
+    Input in = INPUT_NULL;
+    Vec3D toBall = Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[1]));
+    toBall = Vec3D_scalarMult(Vec3D_normalise(toBall), 0.1);
+    in.direction = toBall;
+    return in;
 }
 
 /********************************************/
@@ -73,22 +108,20 @@ Node AI_makeDTNode(int id)
 {
     Node n = malloc(sizeof(struct decisionTreeNode));
     n->id = id;
-    n->yes = NULL;
-    n->no = NULL;
     return n;
 }
 
 void AI_makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no)
 {
     n->type = BranchNode;
-    n->func.b = func;
-    n->yes = yes;
-    n->no = no;
+    n->node.b.func = func;
+    n->node.b.yes = yes;
+    n->node.b.no = no;
 }
 
 void AI_makeLeafNode(Node n, LeafNodeFunc func)
 {
     n->type = LeafNode;
-    n->func.l = func;
+    n->node.l.func = func;
 }
 

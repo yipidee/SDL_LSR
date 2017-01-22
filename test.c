@@ -62,9 +62,10 @@ int main(int argc, char* argv[])
         }
 
         //Step 1: get input from user
+        DecisionTree dt = AI_init();
         input1 = UI_getUserInput();
         if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
-        input2 = AI_getUserInput(gs, 1, AI_init());
+        input2 = AI_getUserInput(gs, 1, dt);
 
         //Step 2: Update physics
         //update positions

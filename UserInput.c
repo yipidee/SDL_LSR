@@ -21,6 +21,8 @@ Input UI_getUserInput()
     return getInput();
 }
 
+
+/***DOES NOT BELONG HERE!!!!!!!!!***/
 void UI_setOnscreenControlRef(AnalogueController* a1, AnalogueController* a2, AnalogueController* a3)
 {
     ac1 = a1;
@@ -43,6 +45,13 @@ Vec3D UI_getShotVec(Input i)
 {
     return i.shot;
 }
+
+bool UI_noInput(Input i)
+{
+    return ((Vec3D_equal(i.direction, INPUT_NULL.direction))&&(Vec3D_equal(i.control, INPUT_NULL.control))
+            &&(Vec3D_equal(i.shot, INPUT_NULL.shot)));
+}
+
 
 ///////////////////////////////////////////////////
 ////////     local functions
