@@ -1,0 +1,17 @@
+@author = "Adrian Connolly"
+@version = 1
+
+numnodes = 3
+
+branchnode 0:
+    func = rand
+    yes = 1
+    no = 2
+
+leafnode 1:
+    func = stop
+
+leafnode 2:
+    func = runToBall
+
+end

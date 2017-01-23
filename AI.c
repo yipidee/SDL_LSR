@@ -58,6 +58,7 @@ Input AI_getUserInput(GameState* gs, int id, Node start)
     if(start->type == BranchNode)
     {
         Node next = start->node.b.func(gs, id) ? start->node.b.yes : start->node.b.no;
+        if(next == NULL) return INPUT_NULL;
         return (AI_getUserInput(gs, id, next));
     }else
     {

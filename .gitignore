@@ -41,3 +41,6 @@ bin/*
 # Custom
 *.ignore
 *.swp
+*.tab.*
+*.yy.*
+test_parser
