@@ -25,7 +25,7 @@ end             {return END;}
 	yylval.sval = strdup(yytext);
 	return STRING;
 }
-\n		{++line_num; return ENDL;}
+\n		{++line_num;}
 =               {return '=';}
 :               {return ':';}
 \"              {return '\"';}
