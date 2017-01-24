@@ -48,7 +48,7 @@ body:
     ;
 
 numnodes:
-    NUMNODES INT {$$=$2;}
+    NUMNODES '=' INT {$$=$3;}
     ;
 
 nodedefinitions:
