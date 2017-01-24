@@ -2,11 +2,13 @@
 #include <string.h>
 #include "AI.h"
 #include "DTparser.tab.h"
+
+int line_num = 1;
 %}
 
 %%
 
-[ \t\n]           ;
+[ \t]           ;
 @author         {return AUTHOR;}
 @datecreated    {return CREATEDATE;}
 @version        {return VERSION;}
@@ -23,8 +25,9 @@ end             {return END;}
 	yylval.sval = strdup(yytext);
 	return STRING;
 }
+\n		{++line_num; return ENDL;}
 =               {return '=';}
 :               {return ':';}
-\"               {return '\"';}
-.                ;
+\"              {return '\"';}
+.               ;
 %%
