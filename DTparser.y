@@ -6,6 +6,7 @@ int yylex();
 int yyparse();
 void yyerror(const char* s);
 FILE* yyin;
+extern int line_num;
 %}
 
 %union {
@@ -101,7 +102,7 @@ int main(int n, char** args) {
 }
 
 void yyerror(const char *s) {
-    printf("Some godforsaken error has occured...");
+    printf("Some godforsaken error has occured on line %i", line_num);
 	// might as well halt now:
 	exit(-1);
 }
