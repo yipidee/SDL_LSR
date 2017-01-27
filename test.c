@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
     //Event handler
     SDL_Event e;
     Input input1, input2;
+    DecisionTree dt = AI_init();
 
     //While application is running
     while( !quit )
@@ -62,7 +63,6 @@ int main(int argc, char* argv[])
         }
 
         //Step 1: get input from user
-        DecisionTree dt = AI_init();
         input1 = UI_getUserInput();
         if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
         input2 = AI_getUserInput(gs, 1, dt);
@@ -113,6 +113,7 @@ int main(int argc, char* argv[])
         //Step 3: draw result
         Draw_renderScene();
     }
+    AI_freeDecisionTree(dt);
     releaseResources();
 
     return 0;

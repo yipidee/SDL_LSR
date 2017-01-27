@@ -1,11 +1,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <string.h>
 #include "AI.h"
 
 typedef struct decisionTreeNode* Node;
-typedef Input (*LeafNodeFunc)(GameState*, int);
-typedef bool (*BranchNodeFunc)(GameState*, int);
 
 typedef enum NodeType
 {
@@ -37,17 +36,29 @@ struct decisionTreeNode
     union Nodes node;
 };
 
-Node makeDT();
-Node AI_makeDTNode(int id);
-void AI_makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no);
-void AI_makeLeafNode(Node n, LeafNodeFunc func);
-Input runToBall(GameState* gs, int i);
-bool returnRandBool(GameState* gs, int i);
+struct BFuncEntry BFuncList[] = {
+            {"randomTrueFalse", &returnRandBool},
+            {"END", NULL}
+            };
+
+struct LFuncEntry LFuncList[] = {
+            {"runToBall", &runToBall},
+            {"stop", &stop},
+            {"END", NULL}
+            };
+
+size_t NodeSize;
+
+void _makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no);
+void _makeLeafNode(Node n, LeafNodeFunc func);
+BranchNodeFunc lookupBFunc(char* funcName);
+LeafNodeFunc lookupLFunc(char* funcName);
 
 Node AI_init()
 {
+    NodeSize = sizeof(struct decisionTreeNode);
     srand((int)time(NULL));
-    return makeDT();
+    return AI_parseDecisionTree("Assets/decision_trees/_default_.dt");
 }
 
 // function that traverses decision tree and return AI input
@@ -75,17 +86,6 @@ Input stop(GameState* gs, int id)
     return i;
 }
 
-Node makeDT()
-{
-    Node n0 = AI_makeDTNode(0);
-    Node n1 = AI_makeDTNode(1);
-    Node n2 = AI_makeDTNode(2);
-    AI_makeBranchNode(n0, &returnRandBool, n1, n2);
-    AI_makeLeafNode(n1, &stop);
-    AI_makeLeafNode(n2, &runToBall);
-    return n0;
-}
-
 bool returnRandBool(GameState* gs, int i)
 {
     double r = rand();
@@ -105,14 +105,16 @@ Input runToBall(GameState* gs, int i)
 
 /********************************************/
 
-Node AI_makeDTNode(int id)
+void AI_makeBranchNode(DecisionTree dt, int id, char* func, int yes, int no)
 {
-    Node n = malloc(sizeof(struct decisionTreeNode));
-    n->id = id;
-    return n;
+    if(!func || !dt) {printf("Null pointer for func name or tree when making Decision tree");exit(-1);}
+    Node n = dt + id*NodeSize;
+    BranchNodeFunc f = lookupBFunc(func);
+    Node yesn = dt + yes*NodeSize;
+    Node non = dt + no*NodeSize;
+    _makeBranchNode(n, f, yesn, non);
 }
-
-void AI_makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no)
+void _makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no)
 {
     n->type = BranchNode;
     n->node.b.func = func;
@@ -120,9 +122,53 @@ void AI_makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no)
     n->node.b.no = no;
 }
 
-void AI_makeLeafNode(Node n, LeafNodeFunc func)
+void AI_makeLeafNode(DecisionTree dt, int id, char* func)
+{
+    if(!func || !dt) {printf("Null pointer for func name or tree when making Decision tree");exit(-1);}
+    Node n = dt + id*NodeSize;
+    LeafNodeFunc f = lookupLFunc(func);
+    _makeLeafNode(n, f);
+}
+
+void _makeLeafNode(Node n, LeafNodeFunc func)
 {
     n->type = LeafNode;
     n->node.l.func = func;
 }
 
+void AI_freeDecisionTree(DecisionTree dt)
+{
+    free(dt);
+}
+
+BranchNodeFunc lookupBFunc(char* funcName)
+{
+    if(funcName!=NULL)
+    {
+        int i = 0;
+        struct BFuncEntry b = BFuncList[i];
+        while(b.func)
+        {
+            if(!strcmp(funcName, b.name)) return b.func;
+            ++i;
+            b = BFuncList[i];
+        }
+    }
+    return NULL;
+}
+
+LeafNodeFunc lookupLFunc(char* funcName)
+{
+    if(funcName!=NULL)
+    {
+        int i = 0;
+        struct LFuncEntry l = LFuncList[i];
+        while(l.func)
+        {
+            if(!strcmp(funcName, l.name)) return l.func;
+            ++i;
+            l = LFuncList[i];
+        }
+    }
+    return NULL;
+}

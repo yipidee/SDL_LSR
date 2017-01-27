@@ -1,12 +1,21 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include "AI.h"
 
-int yylex();
-int yyparse();
+extern int yylex();
+extern int yyparse();
+
 void yyerror(const char* s);
+
 FILE* yyin;
 extern int line_num;
+
+DecisionTree dt = NULL;
+int curr_node;
+int curr_yes;
+int curr_no;
+char* curr_func;
 %}
 
 %union {
@@ -15,7 +24,6 @@ extern int line_num;
 }
 
 %type <ival> numnodes
-%type <sval> nodetype
 
 %token AUTHOR CREATEDATE VERSION
 %token NUMNODES BRANCH LEAF FUNC YES NO
@@ -45,7 +53,8 @@ propertyline:
     ;
 
 body:
-    numnodes {printf("Creating decision tree of %i nodes\n", $1);} nodedefinitions
+    numnodes {printf("Creating decision tree of %i nodes\n", $1);
+	      dt = malloc(NodeSize * $1);} nodedefinitions
     ;
 
 numnodes:
@@ -58,12 +67,8 @@ nodedefinitions:
     ;
 
 nodedefinition:
-    nodetype INT ':' {printf("Defining %s node %i\n" $1, $2);} assignments
-    ;
-
-nodetype:
-    BRANCH {$$="branch";}
-    | LEAF {$$="leaf";}
+    '&' INT ':' assignments	{AI_makeBranchNode(dt, $2, curr_func, curr_yes, curr_no);printf("Created a branch node, id %i \n",$2);}
+    | '#' INT ':' assignment	{AI_makeLeafNode(dt, $2, curr_func);printf("Created a leaf node, id %i \n",$2);}
     ;
 
 assignments:
@@ -72,9 +77,9 @@ assignments:
     ;
 
 assignment:
-    FUNC '=' STRING
-    | YES '=' INT
-    | NO '=' INT
+    FUNC '=' STRING	{curr_func = $3;}
+    | YES '=' INT	{curr_yes = $3;}
+    | NO '=' INT	{curr_no = $3;}
     ;
 
 footer:
@@ -83,9 +88,9 @@ footer:
 
 %%
 
-int main(int n, char** args) {
+DecisionTree AI_parseDecisionTree(char* DTfile) {
 	// open a file handle to a particular file:
-	FILE *myfile = fopen("Assets/decision_trees/_default_.dt", "r");
+	FILE *myfile = fopen(DTfile, "r");
 	// make sure it's valid:
 	if (!myfile) {
         printf("Can't open decision tree");
@@ -99,10 +104,11 @@ int main(int n, char** args) {
 		yyparse();
 	} while (!feof(yyin));
 
+	return dt;
 }
 
 void yyerror(const char *s) {
-    printf("Some godforsaken error has occured on line %i", line_num);
+    printf("Some godforsaken error has occured on line %i\n", line_num);
 	// might as well halt now:
 	exit(-1);
 }
