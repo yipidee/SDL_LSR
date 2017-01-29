@@ -1,14 +1,11 @@
 @author = "Adrian"
 @version = "1"
 
-numnodes = 3
+numnodes = 4
 
-&0:func = randomTrueFalse
-   yes = 1
-   no = 2
-
-#1:func = stop
-
-#2:func = runToBall   
+&0:func = inOwnHalf yes = 1 no = 3
+&1:func = hasTouches yes = 2 no = 3
+#2:func = runToBall
+#3:func = stop
 
 end

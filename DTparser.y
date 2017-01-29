@@ -12,10 +12,12 @@ FILE* yyin;
 extern int line_num;
 
 DecisionTree dt = NULL;
-int curr_node;
+int node_count = 0;
+int tree_size;
 int curr_yes;
 int curr_no;
 char* curr_func;
+char curr_type;
 %}
 
 %union {
@@ -34,7 +36,11 @@ char* curr_func;
 %%
 
 decisiontreefile:
-    header body footer {printf("Decision Tree successfully parsed!\n");}
+    header body footer {
+			if(node_count > tree_size)yyerror("More nodes defined than tree contains.");
+			if(node_count < tree_size)yyerror("Less nodes defined than tree contains.");
+			printf("Decision Tree successfully parsed!\n");
+			}
     ;
 
 header:
@@ -53,12 +59,12 @@ propertyline:
     ;
 
 body:
-    numnodes {printf("Creating decision tree of %i nodes\n", $1);
+    numnodes {printf("Creating decision tree of %i nodes\n", tree_size);
 	      dt = malloc(NodeSize * $1);} nodedefinitions
     ;
 
 numnodes:
-    NUMNODES '=' INT {$$=$3;}
+    NUMNODES '=' INT {tree_size=$3;}
     ;
 
 nodedefinitions:
@@ -67,8 +73,8 @@ nodedefinitions:
     ;
 
 nodedefinition:
-    '&' INT ':' assignments	{AI_makeBranchNode(dt, $2, curr_func, curr_yes, curr_no);printf("Created a branch node, id %i \n",$2);}
-    | '#' INT ':' assignment	{AI_makeLeafNode(dt, $2, curr_func);printf("Created a leaf node, id %i \n",$2);}
+    '&' INT {curr_type = 'b';} ':' assignments	{AI_makeBranchNode(dt, $2, curr_func, curr_yes, curr_no);printf("Created a branch node, id %i \n",$2);++node_count;}
+    | '#' INT {curr_type = 'l';} ':' assignment	{AI_makeLeafNode(dt, $2, curr_func);printf("Created a leaf node, id %i \n",$2);++node_count;}
     ;
 
 assignments:
@@ -78,8 +84,14 @@ assignments:
 
 assignment:
     FUNC '=' STRING	{curr_func = $3;}
-    | YES '=' INT	{curr_yes = $3;}
-    | NO '=' INT	{curr_no = $3;}
+    | YES '=' INT	{
+			if(curr_type=='l')yyerror("addressing child from leaf node.");
+			curr_yes = $3;
+			}
+    | NO '=' INT	{
+			if(curr_type=='l')yyerror("addressing child from leaf node.");
+			curr_no = $3;
+			}
     ;
 
 footer:
@@ -108,7 +120,7 @@ DecisionTree AI_parseDecisionTree(char* DTfile) {
 }
 
 void yyerror(const char *s) {
-    printf("Some godforsaken error has occured on line %i\n", line_num);
+    printf("Error on line %i: %s\n", line_num, s);
 	// might as well halt now:
 	exit(-1);
 }

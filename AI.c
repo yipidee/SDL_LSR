@@ -38,6 +38,8 @@ struct decisionTreeNode
 
 struct BFuncEntry BFuncList[] = {
             {"randomTrueFalse", &returnRandBool},
+            {"inOwnHalf", &inOwnHalf},
+            {"hasTouches", &hasTouches},
             {"END", NULL}
             };
 
@@ -54,11 +56,15 @@ void _makeLeafNode(Node n, LeafNodeFunc func);
 BranchNodeFunc lookupBFunc(char* funcName);
 LeafNodeFunc lookupLFunc(char* funcName);
 
-Node AI_init()
+void AI_init()
 {
     NodeSize = sizeof(struct decisionTreeNode);
     srand((int)time(NULL));
-    return AI_parseDecisionTree("Assets/decision_trees/_default_.dt");
+}
+
+void AI_freeDecisionTree(DecisionTree dt)
+{
+    free(dt);
 }
 
 // function that traverses decision tree and return AI input
@@ -77,15 +83,10 @@ Input AI_getUserInput(GameState* gs, int id, Node start)
     }
 }
 
-
-/*** for testing, delete when complete!!!!!*/
-Input stop(GameState* gs, int id)
-{
-    Input i = INPUT_NULL;
-    i.shot = VECTOR_N;
-    return i;
-}
-
+/*************************************************************
+****************   Branch Node Functions
+*************************************************************/
+//return True or False randomly
 bool returnRandBool(GameState* gs, int i)
 {
     double r = rand();
@@ -94,16 +95,40 @@ bool returnRandBool(GameState* gs, int i)
     return res;
 }
 
+//returns true if player in own half of court
+bool inOwnHalf(GameState* gs, int i)
+{
+    return Player_isInOwnHalf(gs->players[i]);
+}
+
+//returns true if player has more than 0 touches remaining
+bool hasTouches(GameState* gs, int i)
+{
+    return (Player_getTouches(gs->players[i]) > 0);
+}
+
+/*************************************************************
+****************   Leaf Node Functions
+*************************************************************/
+//returns Input moving AI in direction of ball
 Input runToBall(GameState* gs, int i)
 {
     Input in = INPUT_NULL;
     Vec3D toBall = Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[1]));
-    toBall = Vec3D_scalarMult(Vec3D_normalise(toBall), 0.1);
+    toBall = Vec3D_normalise(toBall);
     in.direction = toBall;
     return in;
 }
+//returns NULL input (stops player)
+Input stop(GameState* gs, int id)
+{
+    Input i = INPUT_NULL;
+    return i;
+}
 
-/********************************************/
+/***************************************************************
+***********   functions for building decision trees
+***************************************************************/
 
 void AI_makeBranchNode(DecisionTree dt, int id, char* func, int yes, int no)
 {
@@ -134,11 +159,6 @@ void _makeLeafNode(Node n, LeafNodeFunc func)
 {
     n->type = LeafNode;
     n->node.l.func = func;
-}
-
-void AI_freeDecisionTree(DecisionTree dt)
-{
-    free(dt);
 }
 
 BranchNodeFunc lookupBFunc(char* funcName)

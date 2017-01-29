@@ -10,11 +10,6 @@
 #include "UserInput.h"
 #include "AI.h"
 
-//defined functions
-#define getVelFromInput(i) Vec3D_scalarMult(UI_getDirVec((i)), CONS_MAX_SPEED)
-#define getConFromInput(i) Vec3D_scalarMult(UI_getConVec((i)), CONS_MAX_CONTROL_IMPULSE)
-#define getShotFromInput(i) Vec3D_scalarMult(UI_getShotVec((i)), CONS_MAX_APPLIABLE_IMPULSE)
-
 // prototypes
 void releaseResources();
 void loadSprites();
@@ -32,6 +27,7 @@ int main(int argc, char* argv[])
     GS_registerTouchHandlers(gs);
     GS_loadGameObjects(gs);
     UI_setOnscreenControlRef(&gs->controllers[0], &gs->controllers[1], &gs->controllers[2]);
+    AI_init();
     loadSprites();
 
     //Main loop flag
@@ -40,7 +36,7 @@ int main(int argc, char* argv[])
     //Event handler
     SDL_Event e;
     Input input1, input2;
-    DecisionTree dt = AI_init();
+    DecisionTree dt = AI_parseDecisionTree("Assets/decision_trees/_default_.dt");
 
     //While application is running
     while( !quit )
@@ -102,11 +98,15 @@ int main(int argc, char* argv[])
         //check and rectify for collisions
         // Player1 and ball
         static bool p1BallContact = false;
+        bool lastTickContact = p1BallContact;
         collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &p1BallContact);
+        if((lastTickContact == false)&&(p1BallContact == true)) --gs->players[0]->touches;
 
         // Player2 and ball
         static bool p2BallContact = false;
+        lastTickContact = p1BallContact;
         collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input2, &p2BallContact);
+        if((lastTickContact == false)&&(p2BallContact == true)) --gs->players[1]->touches;
 
         collisionWithEnergisedObject(Player_getGameObject(gs->players[0]), Player_getGameObject(gs->players[1]));
 

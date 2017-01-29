@@ -37,6 +37,8 @@ void GS_loadGameObjects(GameState* gs)
     GO_setMass(player, CONS_MASS_PLAYER);
 
     Player mccoy = Player_create(player);
+    Player_setOwnHalf(mccoy, Rect_create(PLAYER_HALF_BOTTOM));
+    mccoy->touches = 2;
     gs->players[0] = mccoy;
 
     GameObject* player_c = GO_createGameObject();
@@ -46,6 +48,8 @@ void GS_loadGameObjects(GameState* gs)
     GO_setMass(player_c, CONS_MASS_PLAYER);
 
     Player calfnuts = Player_create(player_c);
+    Player_setOwnHalf(calfnuts, Rect_create(PLAYER_HALF_TOP));
+    calfnuts->touches = 2;
     gs->players[1] = calfnuts;
 
     //logical game object, ball

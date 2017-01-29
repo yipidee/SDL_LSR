@@ -61,6 +61,12 @@
 #define CONS_MASS_PLAYER 12
 #define CONS_MASS_BALL 3
 
+//////////////////////////////////////////////////////////////////////////////////////////
+/////////        Defines for players                                  //////////
+//////////////////////////////////////////////////////////////////////////////////////////
+#define PLAYER_HALF_TOP 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2
+#define PLAYER_HALF_BOTTOM 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT
+
 #define PI 3.14159265358979323846
 
 #endif // CONSTANTS_H_

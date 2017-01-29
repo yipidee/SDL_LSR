@@ -1,0 +1,14 @@
+@author = "Adrian"
+@version = "1"
+
+numnodes = 3
+
+&0:func = randomTrueFalse
+   yes = 1
+   no = 2
+
+#1:func = stop
+
+#2:func = runToBall   
+
+end

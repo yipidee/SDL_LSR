@@ -34,7 +34,7 @@
 #define Player_getMass(p) GO_getMass((p)->go)
 
 //function defs for readablity of higher level code
-#define Player_isInOwnHalf(p) Rect_containsPoint((p)->ownHalf, (p)->go.pos.i, (p)->go.pos.j)
+#define Player_isInOwnHalf(p) Rect_containsPoint((p)->ownHalf, (p)->go->pos.i, (p)->go->pos.j)
 
 typedef struct _Player* Player;
 
