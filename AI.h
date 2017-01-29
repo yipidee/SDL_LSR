@@ -52,6 +52,8 @@ Input AI_getUserInput(GameState* gs, int id, DecisionTree dt);
 bool returnRandBool(GameState* gs, int i);
 bool inOwnHalf(GameState* gs, int i);
 bool hasTouches(GameState* gs, int i);
+//returns true if ball in player's half
+bool ballInOwnHalf(GameState* gs, int i);
 
 /*************************************************************
 ****************   Branch Node Functions
@@ -60,5 +62,7 @@ bool hasTouches(GameState* gs, int i);
 Input runToBall(GameState* gs, int i);
 //returns NULL input (stops player)
 Input stop(GameState* gs, int id);
+//returns Input returning player to own half
+Input returnToOwnHalf(GameState* gs, int id);
 
 #endif // _AI_H

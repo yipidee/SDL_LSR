@@ -49,7 +49,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 #define CONS_MAX_APPLIABLE_IMPULSE 80
 #define CONS_MAX_CONTROL_IMPULSE 45
-#define CONS_MAX_SPEED 10
+#define CONS_MAX_SPEED 8
 #define CONS_BALL_WALL_COR 0.8
 #define CONS_BALL_PLAYER_COR 0.1
 #define CONS_BALL_COURT_DEACC -0.3
@@ -62,10 +62,11 @@
 #define CONS_MASS_BALL 3
 
 //////////////////////////////////////////////////////////////////////////////////////////
-/////////        Defines for players                                  //////////
+/////////        Defines for Player/AI                                //////////
 //////////////////////////////////////////////////////////////////////////////////////////
 #define PLAYER_HALF_TOP 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT / 2
 #define PLAYER_HALF_BOTTOM 0, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT
+#define DT_DEFAULT "Assets/decision_trees/_default_.dt"
 
 #define PI 3.14159265358979323846
 

@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     //Event handler
     SDL_Event e;
     Input input1, input2;
-    DecisionTree dt = AI_parseDecisionTree("Assets/decision_trees/_default_.dt");
+    DecisionTree dt = AI_parseDecisionTree(DT_DEFAULT);
 
     //While application is running
     while( !quit )
@@ -100,13 +100,21 @@ int main(int argc, char* argv[])
         static bool p1BallContact = false;
         bool lastTickContact = p1BallContact;
         collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &p1BallContact);
-        if((lastTickContact == false)&&(p1BallContact == true)) --gs->players[0]->touches;
+        if((lastTickContact == false)&&(p1BallContact == true))
+        {
+            --gs->players[0]->touches;
+            gs->players[1]->touches = 2;
+        }
 
         // Player2 and ball
         static bool p2BallContact = false;
-        lastTickContact = p1BallContact;
+        lastTickContact = p2BallContact;
         collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input2, &p2BallContact);
-        if((lastTickContact == false)&&(p2BallContact == true)) --gs->players[1]->touches;
+        if((lastTickContact == false)&&(p2BallContact == true))
+        {
+            --gs->players[1]->touches;
+            gs->players[0]->touches = 2;
+        }
 
         collisionWithEnergisedObject(Player_getGameObject(gs->players[0]), Player_getGameObject(gs->players[1]));
 

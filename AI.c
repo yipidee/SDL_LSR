@@ -39,6 +39,7 @@ struct decisionTreeNode
 struct BFuncEntry BFuncList[] = {
             {"randomTrueFalse", &returnRandBool},
             {"inOwnHalf", &inOwnHalf},
+            {"ballInOwnHalf", &ballInOwnHalf},
             {"hasTouches", &hasTouches},
             {"END", NULL}
             };
@@ -46,6 +47,7 @@ struct BFuncEntry BFuncList[] = {
 struct LFuncEntry LFuncList[] = {
             {"runToBall", &runToBall},
             {"stop", &stop},
+            {"returnToOwnHalf", &returnToOwnHalf},
             {"END", NULL}
             };
 
@@ -74,6 +76,7 @@ Input AI_getUserInput(GameState* gs, int id, Node start)
 
     if(start->type == BranchNode)
     {
+
         Node next = start->node.b.func(gs, id) ? start->node.b.yes : start->node.b.no;
         if(next == NULL) return INPUT_NULL;
         return (AI_getUserInput(gs, id, next));
@@ -107,6 +110,12 @@ bool hasTouches(GameState* gs, int i)
     return (Player_getTouches(gs->players[i]) > 0);
 }
 
+//returns true if ball in player's half
+bool ballInOwnHalf(GameState* gs, int i)
+{
+    return (Rect_containsPoint(gs->players[i]->ownHalf, gs->ball->pos.i, gs->ball->pos.j));
+}
+
 /*************************************************************
 ****************   Leaf Node Functions
 *************************************************************/
@@ -119,10 +128,19 @@ Input runToBall(GameState* gs, int i)
     in.direction = toBall;
     return in;
 }
+
 //returns NULL input (stops player)
 Input stop(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
+    return i;
+}
+
+//returns Input returning player to own half
+Input returnToOwnHalf(GameState* gs, int id)
+{
+    Input i = INPUT_NULL;
+    i.direction = id == 0 ? VECTOR_S : VECTOR_N;
     return i;
 }
 

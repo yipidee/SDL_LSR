@@ -260,15 +260,14 @@ void Draw_quit()
 {
     if(isInitialised)
     {
-        //Destroy window
-        SDL_DestroyRenderer( gRenderer );
-        SDL_DestroyWindow( gWindow );
-        gWindow = NULL;
-        gRenderer = NULL;
-
-
         List_destroy(&loadedTextures);
         List_destroy(&sprites);
+
+        //Destroy window
+        SDL_DestroyRenderer( gRenderer );
+        gRenderer = NULL;
+        SDL_DestroyWindow( gWindow );
+        gWindow = NULL;
 
         //Quit SDL subsystems
         IMG_Quit();

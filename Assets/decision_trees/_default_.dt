@@ -1,11 +1,47 @@
+// ***************************************************
+// ***************************************************
+//
+//                  ==============
+//                  HEADER SECTION
+//                  ==============
+//
+// The Header section contains meta data of no real
+// importance to AI behaviour but possibly of interest
+// to players and authors
+// ***************************************************
+// ***************************************************
+
+// author of this decision tree (spaces (currently )not
+// allowed)
 @author = "Adrian"
+
+// version of this tree
 @version = "1"
 
-numnodes = 4
+// ***************************************************
+// ***************************************************
+//
+//                  ============
+//                  BODY SECTION
+//                  ============
+//
+// The Body section contains all the information
+// needed to build a decision tree in memory. There is
+// no technical difference between a "tree" and a
+// "node" so trees can easily be linked together. This
+// functionality is not yet present in the parser, but
+// can be done in code.
+// ***************************************************
+// ***************************************************
 
-&0:func = inOwnHalf yes = 1 no = 3
-&1:func = hasTouches yes = 2 no = 3
-#2:func = runToBall
-#3:func = stop
+// need to presepecify the total number of nodes in
+// in a decision tree for memory management purposes
+numnodes = 6
 
-end
+// The actual node definitions and there interlinking
+&0:func = inOwnHalf yes = 2 no = 4
+&1:func = ballInOwnHalf yes = 3 no = 5
+&2:func = hasTouches yes = 1 no = 5
+#3:func = runToBall
+#4:func = returnToOwnHalf
+#5:func = stop
