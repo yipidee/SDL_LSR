@@ -15,6 +15,7 @@
 #include "PhysicalController.h"
 #include "AnalogueController.h"
 #include "EventHandler.h"
+#include "Goal.h"
 
 #define PhysicalController SDL_Joystick
 
@@ -24,10 +25,9 @@ typedef struct GameState
     Player players[2];
     GameObject* ball;
     Rect pitch;
-
+    Goal goals[2];
 
     //Input elements
-    //union controller
     AnalogueController controllers[3]; //TODO: collect this into single structure with "getInput" function
 
 }GameState;

@@ -2,8 +2,6 @@
 #include <SDL2/SDL.h>
 #include "EventHandler.h"
 #include "Draw.h"
-#include "Constants.h"
-#include "GameObject.h"
 #include "Physics.h"
 #include "Player.h"
 #include "GameState.h"
@@ -16,6 +14,7 @@ void loadSprites();
 void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input in, bool* contacted);
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2);
 void drawControlsOnScreen(Input input);
+void updatePhysics(GameState* gs, Input input1, Input input2);
 
 //globally available pointer to game state
 GameState* gs;
@@ -60,63 +59,12 @@ int main(int argc, char* argv[])
 
         //Step 1: get input from user
         input1 = UI_getUserInput();
-        if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
         input2 = AI_getUserInput(gs, 1, dt);
+        if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
 
         //Step 2: Update physics
         //update positions
-        Player_setVel(gs->players[0], getVelFromInput(input1));
-        if(Vec3D_isZero(Player_getVel(gs->players[0])))
-        {
-            Player_setIsStationary(gs->players[0], true);
-        }else
-        {
-            Player_setIsStationary(gs->players[0], false);
-        }
-        Player_move(gs->players[0]);
-        Player_setVel(gs->players[1], getVelFromInput(input2));
-        if(Vec3D_isZero(Player_getVel(gs->players[1])))
-        {
-            Player_setIsStationary(gs->players[1], true);
-        }else
-        {
-            Player_setIsStationary(gs->players[1], false);
-        }
-        Player_move(gs->players[1]);
-
-        //update ball physics
-        GO_setVel(gs->ball, Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball)));
-        GO_zeroReversedDirections(gs->ball);
-        GO_move(gs->ball, GO_getVel(gs->ball));
-
-        //collision detection
-        //player/ball pitch boundary
-        if(Player_isInContactWithBoundary(gs->players[0], gs->pitch)) Player_adjustForBoundary(gs->players[0], gs->pitch);
-        if(Player_isInContactWithBoundary(gs->players[1], gs->pitch)) Player_adjustForBoundary(gs->players[1], gs->pitch);
-        if(Phys_inCollisionWithBoundary(gs->ball, gs->pitch)) Phys_boundaryCollision(gs->ball, gs->pitch);
-
-        //check and rectify for collisions
-        // Player1 and ball
-        static bool p1BallContact = false;
-        bool lastTickContact = p1BallContact;
-        collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &p1BallContact);
-        if((lastTickContact == false)&&(p1BallContact == true))
-        {
-            --gs->players[0]->touches;
-            gs->players[1]->touches = 2;
-        }
-
-        // Player2 and ball
-        static bool p2BallContact = false;
-        lastTickContact = p2BallContact;
-        collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input2, &p2BallContact);
-        if((lastTickContact == false)&&(p2BallContact == true))
-        {
-            --gs->players[1]->touches;
-            gs->players[0]->touches = 2;
-        }
-
-        collisionWithEnergisedObject(Player_getGameObject(gs->players[0]), Player_getGameObject(gs->players[1]));
+        updatePhysics(gs, input1, input2);
 
         //Step 3: draw result
         Draw_renderScene();
@@ -125,6 +73,90 @@ int main(int argc, char* argv[])
     releaseResources();
 
     return 0;
+}
+
+void updatePhysics(GameState* gs, Input input1, Input input2)
+{
+    //Move Player 1
+    Player_setVel(gs->players[0], getVelFromInput(input1));
+    if(Vec3D_isZero(Player_getVel(gs->players[0])))
+    {
+        Player_setIsStationary(gs->players[0], true);
+    }else
+    {
+        Player_setIsStationary(gs->players[0], false);
+    }
+    Player_move(gs->players[0]);
+
+    //Move Player 2
+    Player_setVel(gs->players[1], getVelFromInput(input2));
+    if(Vec3D_isZero(Player_getVel(gs->players[1])))
+    {
+        Player_setIsStationary(gs->players[1], true);
+    }else
+    {
+        Player_setIsStationary(gs->players[1], false);
+    }
+    Player_move(gs->players[1]);
+
+    //update ball physics
+    GO_setVel(gs->ball, Vec3D_add(GO_getVel(gs->ball), GO_getAcc(gs->ball)));
+    GO_zeroReversedDirections(gs->ball);
+    GO_move(gs->ball, GO_getVel(gs->ball));
+
+    //collision detection
+    //player/ball pitch boundary
+    if(Player_isInContactWithBoundary(gs->players[0], gs->pitch)) Player_adjustForBoundary(gs->players[0], gs->pitch);
+    if(Player_isInContactWithBoundary(gs->players[1], gs->pitch)) Player_adjustForBoundary(gs->players[1], gs->pitch);
+    if(Phys_inCollisionWithBoundary(gs->ball, gs->pitch)) Phys_boundaryCollision(gs->ball, gs->pitch);
+
+    //collisions between ball and goals posts
+    if(GO_isInContact(Goal_getLPost(gs->goals[0]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getLPost(gs->goals[0]), gs->ball, CONS_BALL_WALL_COR);}
+    else if(GO_isInContact(Goal_getRPost(gs->goals[0]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getRPost(gs->goals[0]), gs->ball, CONS_BALL_WALL_COR);}
+    else if(GO_isInContact(Goal_getLPost(gs->goals[1]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getLPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);}
+    else if(GO_isInContact(Goal_getRPost(gs->goals[1]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getRPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);}
+
+    //collisions between players and goal posts
+    if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[0])))
+    {
+        GameObject* go1, *go2;
+        go1 = Player_getGameObject(gs->players[0]);
+        go2 = Goal_getLPost(gs->goals[0]);
+        Vec3D d = Vec3D_subtract(go1->pos, go2->pos);
+        d = Vec3D_normalise(d);
+        GO_setPos(go1, Vec3D_add(go2->pos, Vec3D_scalarMult(d, go1->BCirc.r + go2->BCirc.r)));
+    }
+    if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[0])))GO_move(Player_getGameObject(gs->players[0]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[0]))));
+    if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[1])))GO_move(Player_getGameObject(gs->players[0]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[0]))));
+    if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[1])))GO_move(Player_getGameObject(gs->players[0]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[0]))));
+    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[0])))GO_move(Player_getGameObject(gs->players[1]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[1]))));
+    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[0])))GO_move(Player_getGameObject(gs->players[1]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[1]))));
+    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1])))GO_move(Player_getGameObject(gs->players[1]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[1]))));
+    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[1])))GO_move(Player_getGameObject(gs->players[1]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[1]))));
+
+    //check and rectify for collisions
+    // Player1 and ball
+    static bool p1BallContact = false;
+    bool lastTickContact = p1BallContact;
+    collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &p1BallContact);
+    if((lastTickContact == false)&&(p1BallContact == true))
+    {
+        --gs->players[0]->touches;
+        gs->players[1]->touches = 2;
+    }
+
+    // Player2 and ball
+    static bool p2BallContact = false;
+    lastTickContact = p2BallContact;
+    collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input2, &p2BallContact);
+    if((lastTickContact == false)&&(p2BallContact == true))
+    {
+        --gs->players[1]->touches;
+        gs->players[0]->touches = 2;
+    }
+
+    collisionWithEnergisedObject(Player_getGameObject(gs->players[0]), Player_getGameObject(gs->players[1]));
+
 }
 
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2)
@@ -232,6 +264,26 @@ void loadSprites()
     Sprite_posByCentre(ball_s, true);
     Sprite_setSpriteInWorldPosRef(ball_s, &gs->ball->pos.i, &gs->ball->pos.j, NULL);
 
+    //sprites for posts of goals
+    Sprite post1_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(post1_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
+    Sprite_posByCentre(post1_s, true);
+    Sprite_setSpriteInWorldPosRef(post1_s, &Goal_getLPost(gs->goals[0])->pos.i, &Goal_getLPost(gs->goals[0])->pos.j, NULL);
+
+    Sprite post2_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(post2_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
+    Sprite_posByCentre(post2_s, true);
+    Sprite_setSpriteInWorldPosRef(post2_s, &Goal_getRPost(gs->goals[0])->pos.i, &Goal_getRPost(gs->goals[0])->pos.j, NULL);
+
+    Sprite post3_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(post3_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
+    Sprite_posByCentre(post3_s, true);
+    Sprite_setSpriteInWorldPosRef(post3_s, &Goal_getLPost(gs->goals[1])->pos.i, &Goal_getLPost(gs->goals[1])->pos.j, NULL);
+
+    Sprite post4_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite_setSpriteInWorldDims(post4_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
+    Sprite_posByCentre(post4_s, true);
+    Sprite_setSpriteInWorldPosRef(post4_s, &Goal_getRPost(gs->goals[1])->pos.i, &Goal_getRPost(gs->goals[1])->pos.j, NULL);
 
     //create sprites associated with controllers
     Sprite c1Back, c1Knob;

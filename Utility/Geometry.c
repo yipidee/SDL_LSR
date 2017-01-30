@@ -10,6 +10,16 @@
 ////  3D Vectors
 /////////////////////////////////////
 
+//make vector from input
+Vec3D Vec3D_makeVector(double i, double j, double k)
+{
+    Vec3D v;
+    v.i = i;
+    v.j = j;
+    v.k = k;
+    return v;
+}
+
 //2d vector addition
 Vec3D Vec3D_add(Vec3D v1, Vec3D v2)
 {

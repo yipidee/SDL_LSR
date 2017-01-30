@@ -39,10 +39,18 @@ extern struct BFuncEntry BFuncList[];
 extern struct LFuncEntry LFuncList[];
 extern size_t NodeSize;
 
+//prototypes for decision tree building
 DecisionTree AI_parseDecisionTree(char* DTfile);
 void AI_makeBranchNode(DecisionTree dt, int id, char* func, int yes, int no);
-void AI_freeDecisionTree(DecisionTree dt);
+void AI_makeLeafNode(DecisionTree dt, int id, char* func);
+
+//init AI unit
 void AI_init();
+
+//free memory associated with decision tree
+void AI_freeDecisionTree(DecisionTree dt);
+
+// function that return AI user input
 Input AI_getUserInput(GameState* gs, int id, DecisionTree dt);
 
 /*************************************************************

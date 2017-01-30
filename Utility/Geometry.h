@@ -36,6 +36,9 @@ static const Vec3D VECTOR_W = {-1,0,0};
 static const Vec3D VECTOR_UP = {0,0,1};
 static const Vec3D VECTOR_DOWN = {0,0,-1};
 
+//make vector from input
+Vec3D Vec3D_makeVector(double i, double j, double k);
+
 //3d vector addition
 Vec3D Vec3D_add(Vec3D v1, Vec3D v2);
 

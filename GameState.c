@@ -10,6 +10,8 @@ GameState* GS_initializeGameState()
     gs->ball = NULL;
     gs->players[0] = NULL;
     gs->players[1] = NULL;
+    gs->goals[0] = NULL;
+    gs->goals[1] = NULL;
     gs->pitch = Rect_create(SIZE_PITCH);
     return gs;
 }
@@ -19,8 +21,8 @@ void GS_destroyGameState(GameState* gs)
     if(gs)
     {
         int i;
-        for(i=0;i<2;++i)Player_destroy(gs->players[i]);
         GO_destroyAllGameObjects();
+        for(i=0;i<2;++i)Player_destroy(gs->players[i]);
         free(gs);
     }
 }
@@ -60,6 +62,10 @@ void GS_loadGameObjects(GameState* gs)
     GO_setBCirc(ball, ballBounds);
     GO_setMass(ball, CONS_MASS_BALL);
     gs->ball = ball;
+
+    //logical game object
+    gs->goals[0] = Goal_createGoal(Vec3D_makeVector(POS_S_GOAL_L),Vec3D_makeVector(POS_S_GOAL_R),SIZE_POST_DIAMETER);
+    gs->goals[1] = Goal_createGoal(Vec3D_makeVector(POS_N_GOAL_L),Vec3D_makeVector(POS_N_GOAL_R),SIZE_POST_DIAMETER);
 }
 
 void GS_registerTouchHandlers(GameState* gs)

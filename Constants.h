@@ -16,11 +16,18 @@
 #define SIZE_CONTROLLER_KNOB1 60
 #define SIZE_CONTROLLER_KNOB2 50
 #define SIZE_CONTROLLER_KNOB3 50
-#define SIZE_PLAYER_H 60
-#define SIZE_PLAYER_W 60
-#define SIZE_BALL_H 32
-#define SIZE_BALL_W 32
+#define SIZE_PLAYER_H 50
+#define SIZE_PLAYER_W 50
+#define SIZE_BALL_H 28
+#define SIZE_BALL_W 28
 #define SIZE_PITCH 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT
+#define SIZE_BEHIND_GOAL_AREA 60
+#define SIZE_POST_DIAMETER 8
+#define SIZE_GOAL_WIDTH 100
+#define POS_S_GOAL_R (SCREEN_WIDTH-SIZE_GOAL_WIDTH)/2, SCREEN_HEIGHT-SIZE_BEHIND_GOAL_AREA, 0
+#define POS_S_GOAL_L (SCREEN_WIDTH+SIZE_GOAL_WIDTH)/2, (SCREEN_HEIGHT-SIZE_BEHIND_GOAL_AREA), 0
+#define POS_N_GOAL_L (SCREEN_WIDTH-SIZE_GOAL_WIDTH)/2, SIZE_BEHIND_GOAL_AREA, 0
+#define POS_N_GOAL_R (SCREEN_WIDTH+SIZE_GOAL_WIDTH)/2, SIZE_BEHIND_GOAL_AREA, 0
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for paths to art resources                                  //////////
@@ -28,6 +35,7 @@
 #define PATH_TO_ORANGE_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/orange.png"
 #define PATH_TO_RED_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/red.png"
 #define PATH_TO_BLUE_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/blue.png"
+#define PATH_TO_POST_ART "/home/adrian/dev/SDL/TT_LSR/Assets/blue.png"
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for colours                                  //////////
@@ -47,17 +55,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////        Defines for physics constants                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
-#define CONS_MAX_APPLIABLE_IMPULSE 80
-#define CONS_MAX_CONTROL_IMPULSE 45
-#define CONS_MAX_SPEED 8
-#define CONS_BALL_WALL_COR 0.8
+#define CONS_MAX_APPLIABLE_IMPULSE 65
+#define CONS_MAX_CONTROL_IMPULSE 35
+#define CONS_MAX_SPEED 7
+#define CONS_BALL_WALL_COR 0.65
 #define CONS_BALL_PLAYER_COR 0.1
 #define CONS_BALL_COURT_DEACC -0.3
-#define CONS_PLAYER_WALL_COR 100
-#define CONS_PLAYER_PLAYER_COR 0.3
-#define CONS_ACC_GRAVITY -100
-#define CONS_PLAYER_HEIGHT 100
-#define CONS_JUMP_HEIGHT 100
+//#define CONS_ACC_GRAVITY -100
+//#define CONS_PLAYER_HEIGHT 100
+//#define CONS_JUMP_HEIGHT 100
 #define CONS_MASS_PLAYER 12
 #define CONS_MASS_BALL 3
 

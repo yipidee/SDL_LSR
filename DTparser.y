@@ -101,7 +101,7 @@ DecisionTree AI_parseDecisionTree(char* DTfile) {
 	// make sure it's valid:
 	if (!myfile) {
         printf("Can't open decision tree");
-		return -1;
+		return NULL;
 	}
 	// set flex to read from it instead of defaulting to STDIN:
 	yyin = myfile;
