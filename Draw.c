@@ -278,7 +278,7 @@ void Draw_quit()
 //Image handling functions
 SDL_Texture* Draw_loadTexture(char* pathToImage)
 {
-    if(gRenderer == NULL) Draw_init();
+    if(!isInitialised) Draw_init();
     SDL_Surface* s = NULL;
     SDL_Texture* t = getTextureRef(pathToImage);
 
