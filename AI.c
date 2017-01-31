@@ -124,7 +124,12 @@ Input runToBall(GameState* gs, int i)
 {
     Input in = INPUT_NULL;
     Vec3D toBall = Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[1]));
+    int mag = Vec3D_getMagnitude(toBall);
     toBall = Vec3D_normalise(toBall);
+    if(mag<CONS_MAX_SPEED)
+    {
+        toBall = Vec3D_scalarMult(toBall, mag / CONS_MAX_SPEED);
+    }
     in.direction = toBall;
     return in;
 }

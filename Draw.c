@@ -264,9 +264,9 @@ void Draw_quit()
         List_destroy(&sprites);
 
         //Destroy window
-        SDL_DestroyRenderer( gRenderer );
+        if(!gRenderer)SDL_DestroyRenderer( gRenderer );
         gRenderer = NULL;
-        SDL_DestroyWindow( gWindow );
+        if(!gWindow)SDL_DestroyWindow( gWindow );
         gWindow = NULL;
 
         //Quit SDL subsystems

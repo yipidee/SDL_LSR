@@ -116,23 +116,35 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     else if(GO_isInContact(Goal_getLPost(gs->goals[1]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getLPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);}
     else if(GO_isInContact(Goal_getRPost(gs->goals[1]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getRPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);}
 
-    //collisions between players and goal posts
+    //collisions between player 1 and goal posts
     if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[0])))
     {
-        GameObject* go1, *go2;
-        go1 = Player_getGameObject(gs->players[0]);
-        go2 = Goal_getLPost(gs->goals[0]);
-        Vec3D d = Vec3D_subtract(go1->pos, go2->pos);
-        d = Vec3D_normalise(d);
-        GO_setPos(go1, Vec3D_add(go2->pos, Vec3D_scalarMult(d, go1->BCirc.r + go2->BCirc.r)));
+        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[0]));
+    } else if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[0])))
+    {
+        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[0]));
+    } else if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[1])))
+    {
+        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[1]));
+    } else if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[1])))
+    {
+        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[1]));
     }
-    if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[0])))GO_move(Player_getGameObject(gs->players[0]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[0]))));
-    if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[1])))GO_move(Player_getGameObject(gs->players[0]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[0]))));
-    if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[1])))GO_move(Player_getGameObject(gs->players[0]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[0]))));
-    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[0])))GO_move(Player_getGameObject(gs->players[1]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[1]))));
-    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[0])))GO_move(Player_getGameObject(gs->players[1]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[1]))));
-    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1])))GO_move(Player_getGameObject(gs->players[1]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[1]))));
-    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[1])))GO_move(Player_getGameObject(gs->players[1]), Vec3D_negate(GO_getVel(Player_getGameObject(gs->players[1]))));
+
+    //collisions between player 1 and goal posts
+    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1])))
+    {
+        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1]));
+    } else if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[1])))
+    {
+        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[1]));
+    } else if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[0])))
+    {
+        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[0]));
+    } else if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[0])))
+    {
+        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[0]));
+    }
 
     //check and rectify for collisions
     // Player1 and ball
@@ -159,6 +171,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
 
 }
 
+//TODO move this to Physics
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2)
 {
     if(GO_isInContact(go1, go2))

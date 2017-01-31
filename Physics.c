@@ -266,7 +266,12 @@ void Phys_appliedImpulse2D(GameObject* go, Vec3D impulse)
     GO_setAcc(go, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go)),CONS_BALL_COURT_DEACC));
 }
 
-
+void Phys_adjustForCollisionWithStatObject(GameObject* go1, GameObject* go2)
+{
+        Vec3D d = Vec3D_subtract(go1->pos, go2->pos);
+        d = Vec3D_normalise(d);
+        GO_setPos(go1, Vec3D_add(go2->pos, Vec3D_scalarMult(d, go1->BCirc.r + go2->BCirc.r)));
+}
 
 // local static functions
 static void makeWalls(Line* T, Line* R, Line* B, Line* L, Rect r)
