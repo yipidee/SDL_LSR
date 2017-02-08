@@ -1,10 +1,11 @@
 #include "Goal.h"
+#include "Constants.h"
 
 struct _Goal
 {
     GameObject* posts[2];
     int diameter;
-
+    Rect net;
     //useful properties probably better to calc once
     Vec3D normalToGoal;
     int goalWidth; //considers diameter of posts
@@ -31,7 +32,24 @@ Goal Goal_createGoal(Vec3D p1, Vec3D p2, int d)
     //calc properties
     Vec3D l2rVec = Vec3D_subtract(p2, p1);
     g->normalToGoal = Vec3D_getNormal(l2rVec, VECTOR_UP);
+    //Vec3D_print(g->normalToGoal);printf("\n");
     g->goalWidth = (int)Vec3D_getMagnitude(l2rVec);
+
+    Rect goalArea;
+    if(Vec3D_equal(g->normalToGoal, VECTOR_S))
+    {
+        goalArea.x = GO_getPos(g->posts[0]).i;
+        goalArea.y = GO_getPos(g->posts[0]).j - 50;
+        goalArea.w = g->goalWidth;
+        goalArea.h = 50;
+    }else
+    {
+        goalArea.x = GO_getPos(g->posts[1]).i;
+        goalArea.y = GO_getPos(g->posts[1]).j;
+        goalArea.w = g->goalWidth;
+        goalArea.h = 50;
+    }
+    g->net = goalArea;
 
     return g;
 }
@@ -40,6 +58,15 @@ Goal Goal_createGoal(Vec3D p1, Vec3D p2, int d)
 void Goal_destroyGoal(Goal g)
 {
     if(g)free(g);
+}
+
+bool Goal_scored(Goal g, GameObject* ball)
+{
+    bool res = false;
+
+    if(Rect_containsCircle(g->net, ball->BCirc)) {res=true;}
+
+    return res;
 }
 
 int Goal_getWidth(Goal g)

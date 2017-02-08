@@ -18,6 +18,9 @@ int Goal_getWidth(Goal g);
 // get a vector normal to the goal
 Vec3D Goal_getNormal(Goal g);
 
+//determine if goal scored
+bool Goal_scored(Goal g, GameObject* ball);
+
 // get the gameobject representing left post
 GameObject* Goal_getLPost(Goal g);
 
