@@ -58,6 +58,8 @@ Player Player_create(GameObject* go);
 void Player_destroy(Player p);
 void Player_setOwnHalf(Player p, Rect r);
 int Player_getTouches(Player p);
+void Player_decrementTouches(Player p);
+void Player_resetTouches(Player p);
 bool Player_touchingBall(Player p);
 GameObject* Player_getGameObject(Player p);
 

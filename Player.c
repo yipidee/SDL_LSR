@@ -9,6 +9,7 @@
 #include "GameObject.h"
 #include "Utility/Geometry.h"
 #include "Player.h"
+#include "Constants.h"
 
 Player Player_create(GameObject* go)
 {
@@ -38,6 +39,16 @@ int Player_getTouches(Player p)
 bool Player_touchingBall(Player p)
 {
     return p->touchingBall;
+}
+
+void Player_decrementTouches(Player p)
+{
+    --p->touches;
+}
+
+void Player_resetTouches(Player p)
+{
+    p->touches = CONS_MAX_TOUCHES;
 }
 
 GameObject* Player_getGameObject(Player p)

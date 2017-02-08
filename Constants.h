@@ -66,6 +66,7 @@
 //#define CONS_JUMP_HEIGHT 100
 #define CONS_MASS_PLAYER 12
 #define CONS_MASS_BALL 3
+#define CONS_MAX_TOUCHES 2
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////        Defines for Player/AI                                //////////

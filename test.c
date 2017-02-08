@@ -66,6 +66,9 @@ int main(int argc, char* argv[])
         //update positions
         updatePhysics(gs, input1, input2);
 
+        if(Goal_scored(gs->goals[0], gs->ball))printf("McDoodle smashes one in!\n");
+        if(Goal_scored(gs->goals[1], gs->ball))printf("Calfnuts smashes one in!\n");
+
         //Step 3: draw result
         Draw_renderScene();
     }
@@ -148,27 +151,24 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
 
     //check and rectify for collisions
     // Player1 and ball
-    static bool p1BallContact = false;
-    bool lastTickContact = p1BallContact;
-    collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &p1BallContact);
-    if((lastTickContact == false)&&(p1BallContact == true))
+    bool lastTickContact = Player_touchingBall(gs->players[0]);
+    collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &gs->players[0]->touchingBall);
+    if((lastTickContact == false)&&(Player_touchingBall(gs->players[0]) == true))
     {
-        --gs->players[0]->touches;
-        gs->players[1]->touches = 2;
+        Player_decrementTouches(gs->players[0]);
+        Player_resetTouches(gs->players[1]);
     }
 
     // Player2 and ball
-    static bool p2BallContact = false;
-    lastTickContact = p2BallContact;
-    collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input2, &p2BallContact);
-    if((lastTickContact == false)&&(p2BallContact == true))
+    lastTickContact = Player_touchingBall(gs->players[1]);
+    collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input1, &gs->players[1]->touchingBall);
+    if((lastTickContact == false)&&(Player_touchingBall(gs->players[1]) == true))
     {
-        --gs->players[1]->touches;
-        gs->players[0]->touches = 2;
+        Player_decrementTouches(gs->players[1]);
+        Player_resetTouches(gs->players[0]);
     }
 
     collisionWithEnergisedObject(Player_getGameObject(gs->players[0]), Player_getGameObject(gs->players[1]));
-
 }
 
 //TODO move this to Physics

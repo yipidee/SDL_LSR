@@ -137,8 +137,7 @@ Input runToBall(GameState* gs, int i)
 //returns NULL input (stops player)
 Input stop(GameState* gs, int id)
 {
-    Input i = INPUT_NULL;
-    return i;
+    return INPUT_NULL;
 }
 
 //returns Input returning player to own half
