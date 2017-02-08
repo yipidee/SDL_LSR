@@ -15,6 +15,7 @@ void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input in, bool* c
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2);
 void drawControlsOnScreen(Input input);
 void updatePhysics(GameState* gs, Input input1, Input input2);
+void printScore(GameState* gs);
 
 //globally available pointer to game state
 GameState* gs;
@@ -66,8 +67,15 @@ int main(int argc, char* argv[])
         //update positions
         updatePhysics(gs, input1, input2);
 
-        if(Goal_scored(gs->goals[0], gs->ball))printf("McDoodle smashes one in!\n");
-        if(Goal_scored(gs->goals[1], gs->ball))printf("Calfnuts smashes one in!\n");
+
+        static bool updateScore = false;
+        if(Goal_scored(gs->goals[0], gs->ball)){Player_incrementScore(gs->players[1]);updateScore=true;}
+        if(Goal_scored(gs->goals[1], gs->ball)){Player_incrementScore(gs->players[0]);updateScore=true;}
+        if(updateScore)
+        {
+            printScore(gs);
+            updateScore = false;
+        }
 
         //Step 3: draw result
         Draw_renderScene();
@@ -76,6 +84,11 @@ int main(int argc, char* argv[])
     releaseResources();
 
     return 0;
+}
+
+void printScore(GameState* gs)
+{
+    printf("McDoodle %i %i Calfnuts\n", gs->players[0]->score, gs->players[1]->score);
 }
 
 void updatePhysics(GameState* gs, Input input1, Input input2)

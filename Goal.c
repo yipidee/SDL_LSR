@@ -1,3 +1,4 @@
+#include <math.h>
 #include "Goal.h"
 #include "Constants.h"
 
@@ -61,10 +62,16 @@ void Goal_destroyGoal(Goal g)
 }
 
 bool Goal_scored(Goal g, GameObject* ball)
+/* Goal deemed legit if in net and has a j component of velocity
+   in same direction as goal normal
+*/
 {
     bool res = false;
 
-    if(Rect_containsCircle(g->net, ball->BCirc)) {res=true;}
+    if(Rect_containsCircle(g->net, ball->BCirc) && (GO_getVel(ball).j != 0))
+    {
+        if((fabs(g->normalToGoal.j) + fabs(GO_getVel(ball).j)) != fabs(g->normalToGoal.j + GO_getVel(ball).j))res = true;
+    }
 
     return res;
 }

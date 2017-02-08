@@ -49,6 +49,7 @@ struct _Player
 {
     GameObject* go;
     int touches;
+    int score;
     Rect ownHalf;
     bool touchingBall;
     PlayerState state;
@@ -60,6 +61,7 @@ void Player_setOwnHalf(Player p, Rect r);
 int Player_getTouches(Player p);
 void Player_decrementTouches(Player p);
 void Player_resetTouches(Player p);
+void Player_incrementScore(Player p);
 bool Player_touchingBall(Player p);
 GameObject* Player_getGameObject(Player p);
 

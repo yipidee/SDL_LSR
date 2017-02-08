@@ -51,6 +51,11 @@ void Player_resetTouches(Player p)
     p->touches = CONS_MAX_TOUCHES;
 }
 
+void Player_incrementScore(Player p)
+{
+    ++p->score;
+}
+
 GameObject* Player_getGameObject(Player p)
 {
     return p->go;
