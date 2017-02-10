@@ -19,6 +19,7 @@
 
 typedef struct _Spritesheet* Spritesheet;
 typedef struct _Sprite* Sprite;
+typedef struct _TextLabel* TextLabel;
 
 //initialise/quit drawing utilities
 bool Draw_init();
@@ -34,7 +35,34 @@ void Sprite_setSpriteInWorldPosRef(Sprite s, double* x, double* y, double* z);
 void Sprite_setSpriteStateRef(Sprite s, int* state);
 void Sprite_renderSprite(Sprite s);
 
+//text label methods
+//Creates a label with text at pos x and y
+TextLabel TL_createTextLabel(char* text, int x, int y);
+//Releases resources used by text label
+void TL_destroyTextLabel(TextLabel tl);
+//Render label to screen
+void TL_renderTextLabel(TextLabel tl);
+//Sets tl's text data
+void TL_setText(TextLabel tl, char* text);
+//Set the font to be used for the TextLabel
+void TL_setFont(TextLabel tl, char* pathToFont);
+//Get pointer to bounding rect
+SDL_Rect TL_getBoundRect(TextLabel tl);
+//Set font size
+void TL_setFontSize(TextLabel tl, int fSize);
+//set x
+void TL_setX(TextLabel tl, int x);
+//set y
+void TL_setY(TextLabel tl, int y);
+//get x
+int TL_getX(TextLabel tl);
+//get y
+int TL_getY(TextLabel tl);
+//get width of text label
+int TL_getWidth(TextLabel tl);
+//get Height of text label
+int TL_getHeight(TextLabel tl);
+
 //render all visible sprites to screen in order of creation
 void Draw_renderScene();
-
 #endif // _DRAW_H_
