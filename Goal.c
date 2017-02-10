@@ -63,7 +63,7 @@ void Goal_destroyGoal(Goal g)
 
 bool Goal_scored(Goal g, GameObject* ball)
 /* Goal deemed legit if in net and has a j component of velocity
-   in same direction as goal normal
+   in opposite direction of goal normal
 */
 {
     bool res = false;

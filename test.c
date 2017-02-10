@@ -35,8 +35,17 @@ int main(int argc, char* argv[])
 
     //Event handler
     SDL_Event e;
+
+    //each player's input
     Input input1, input2;
+
+    //AI decision tree to use
     DecisionTree dt = AI_parseDecisionTree(DT_DEFAULT);
+
+    //labels
+    TextLabel scoreboard = TL_createTextLabel("The big game!", 5, 5);
+    TL_setFont(scoreboard, NULL);
+    TL_setFontSize(scoreboard, 25);
 
     //While application is running
     while( !quit )
@@ -79,6 +88,11 @@ int main(int argc, char* argv[])
 
         //Step 3: draw result
         Draw_renderScene();
+        static char sbText[50];
+        snprintf(sbText, 50, "McDoodle %i : %i Calfnuts", gs->players[0]->score, gs->players[1]->score);
+        TL_setText(scoreboard, sbText);
+        TL_renderTextLabel(scoreboard);
+
     }
     AI_freeDecisionTree(dt);
     releaseResources();
