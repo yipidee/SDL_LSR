@@ -428,11 +428,14 @@ TextLabel TL_createTextLabel(char* text, int x, int y)
 {
     TextLabel tl = malloc(sizeof(struct _TextLabel));
     _initTL(tl);
-    int length = strlen(text);
-    strcpy(tl->mText, text);
-    tl->mCurrLength = length;
+    if(text!=NULL)
+    {
+        int length = strlen(text);
+        strcpy(tl->mText, text);
+        tl->mCurrLength = length;
+    }
     tl->x = x; tl->y = y;
-    _renderTextToSurface(tl);
+    if(text!=NULL)_renderTextToSurface(tl);
     return tl;
 }
 
