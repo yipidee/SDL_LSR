@@ -13,58 +13,6 @@ bool Phys_inCollision(GameObject* go1, GameObject* go2)
     return Circle_inCollision(go1->BCirc, go2->BCirc);
 }
 
-Vec3D Phys_getClosestPointFromPointOnLine(Line l, Vec3D p)
-{
-    Vec3D closestP = VECTOR_ZERO;
-    if(Line_isVertical(l))
-    {
-        closestP.i = l.p1.i;
-        closestP.j = p.j;
-        closestP.k = p.k;
-        return closestP;
-    }else if(Line_isHorizontal(l))
-    {
-        closestP.j = l.p1.j;
-        closestP.i = p.i;
-        closestP.k = p.k;
-        return closestP;
-    }else
-    {
-        double grad = Line_getGradient(l);
-        double closestYonLine = 0;
-        double closestXonLine = 0;
-        closestXonLine = (p.j-l.p1.j)/2/grad + l.p1.i - p.i;
-        closestYonLine = p.j-grad*(closestXonLine-p.i);
-        closestP.i = closestXonLine;
-        closestP.j = closestYonLine;
-        closestP.k = p.k;
-        return closestP;
-    }
-}
-
-double Phys_getDistanceOfPointFromLine(Line l, Vec3D p)
-{
-    if(Line_isVertical(l))
-    {
-        return (fabs(l.p1.i-p.i));
-    }else if(Line_isHorizontal(l))
-    {
-        return (fabs(l.p1.j-p.j));
-    }else
-    {
-        Vec3D closestP = Phys_getClosestPointFromPointOnLine(l, p);
-        Vec3D closestVec = Vec3D_subtract(closestP, p);
-        return Vec3D_getMagnitude(closestVec);
-    }
-}
-
-bool Phys_inCollisionWithLine(const GameObject* go, Line l)
-{
-    Circle c = go->BCirc;
-    Vec3D p = {c.x,c.y,0};
-    return (c.r >= Phys_getDistanceOfPointFromLine(l, p));
-}
-
 bool Phys_inCollisionWithBoundary(GameObject* go, Rect r)
 {
     if(GO_isInBounds(go, r)) return false;
@@ -72,10 +20,10 @@ bool Phys_inCollisionWithBoundary(GameObject* go, Rect r)
     Line T, R, B, L;
     makeWalls(&T, &R, &B, &L, r);
 
-    return (Phys_inCollisionWithLine(go, T)
-            ||Phys_inCollisionWithLine(go, R)
-            ||Phys_inCollisionWithLine(go, B)
-            ||Phys_inCollisionWithLine(go, L)
+    return (Circle_inCollisionWithLine(go->BCirc, T)
+            ||Circle_inCollisionWithLine(go->BCirc, R)
+            ||Circle_inCollisionWithLine(go->BCirc, B)
+            ||Circle_inCollisionWithLine(go->BCirc, L)
             );
 }
 
@@ -85,7 +33,7 @@ void Phys_boundaryCollision(GameObject* go, Rect r)
     makeWalls(&T, &R, &B, &L, r);
 
     //determine struck wall and adjust accordingly
-    if(Phys_inCollisionWithLine(go, T)||Phys_inCollisionWithLine(go, B))
+    if(Circle_inCollisionWithLine(go->BCirc, T)||Circle_inCollisionWithLine(go->BCirc, B))
     {
         go->vel.j *= -CONS_BALL_WALL_COR;
         go->acc.j *= -1;
@@ -103,7 +51,7 @@ void Phys_boundaryCollision(GameObject* go, Rect r)
             GO_move(go, delta);
         }
     }
-    if(Phys_inCollisionWithLine(go, R)||Phys_inCollisionWithLine(go, L))
+    if(Circle_inCollisionWithLine(go->BCirc, R)||Circle_inCollisionWithLine(go->BCirc, L))
     {
         go->vel.i *= -CONS_BALL_WALL_COR;
         go->acc.i *= -1;
@@ -129,7 +77,7 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
     makeWalls(&T, &R, &B, &L, r);
 
     //determine struck wall and adjust accordingly
-    if(Phys_inCollisionWithLine(go, T)||Phys_inCollisionWithLine(go, B))
+    if(Circle_inCollisionWithLine(go->BCirc, T)||Circle_inCollisionWithLine(go->BCirc, B))
     {
         if(go->pos.j < go->BCirc.r)
         {
@@ -145,7 +93,7 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
         }
         go->vel.j = 0;
         go->acc.j = 0;
-    }if(Phys_inCollisionWithLine(go, R)||Phys_inCollisionWithLine(go, L))
+    }if(Circle_inCollisionWithLine(go->BCirc, R)||Circle_inCollisionWithLine(go->BCirc, L))
     {
         if(go->pos.i < go->BCirc.r)
         {

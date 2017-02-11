@@ -166,7 +166,6 @@ bool Circle_inCollision(Circle c1, Circle c2);
 //circle-square collision
 bool Circle_inCollisionRect(Circle c, Rect r);
 
-
 ///////////////////////////////////////////////////
 ////           Line
 ///////////////////////////////////////////////////
@@ -179,6 +178,8 @@ typedef struct Line
     Vec3D p2;
 }Line;
 
+bool Circle_inCollisionWithLine(Circle c, Line l);
+
 double Line_getLength(Line l);
 
 double Line_getGradient(Line l);
@@ -186,5 +187,10 @@ double Line_getGradient(Line l);
 bool Line_isVertical(Line l);
 
 bool Line_isHorizontal(Line l);
+
+Vec3D Line_getClosestPointFromPointOnLine(Line l, Vec3D p);
+
+double Line_getDistanceOfPointFromLine(Line l, Vec3D p);
+
 
 #endif // _GEOMETRY_H

@@ -326,6 +326,11 @@ bool Circle_inCollisionRect(Circle c, Rect r)
     return false;
 }
 
+bool Circle_inCollisionWithLine(Circle c, Line l)
+{
+    Vec3D p = {c.x,c.y,0};
+    return (c.r >= Line_getDistanceOfPointFromLine(l, p));
+}
 
 ///////////////////////////////////////////////////
 ////                   Line
@@ -353,4 +358,49 @@ bool Line_isVertical(Line l)
 bool Line_isHorizontal(Line l)
 {
     return (l.p1.j == l.p2.j);
+}
+
+Vec3D Line_getClosestPointFromPointOnLine(Line l, Vec3D p)
+{
+    Vec3D closestP = VECTOR_ZERO;
+    if(Line_isVertical(l))
+    {
+        closestP.i = l.p1.i;
+        closestP.j = p.j;
+        closestP.k = p.k;
+        return closestP;
+    }else if(Line_isHorizontal(l))
+    {
+        closestP.j = l.p1.j;
+        closestP.i = p.i;
+        closestP.k = p.k;
+        return closestP;
+    }else
+    {
+        double grad = Line_getGradient(l);
+        double closestYonLine = 0;
+        double closestXonLine = 0;
+        closestXonLine = (p.j-l.p1.j)/2/grad + l.p1.i - p.i;
+        closestYonLine = p.j-grad*(closestXonLine-p.i);
+        closestP.i = closestXonLine;
+        closestP.j = closestYonLine;
+        closestP.k = p.k;
+        return closestP;
+    }
+}
+
+double Line_getDistanceOfPointFromLine(Line l, Vec3D p)
+{
+    if(Line_isVertical(l))
+    {
+        return (fabs(l.p1.i-p.i));
+    }else if(Line_isHorizontal(l))
+    {
+        return (fabs(l.p1.j-p.j));
+    }else
+    {
+        Vec3D closestP = Line_getClosestPointFromPointOnLine(l, p);
+        Vec3D closestVec = Vec3D_subtract(closestP, p);
+        return Vec3D_getMagnitude(closestVec);
+    }
 }

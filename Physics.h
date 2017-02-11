@@ -15,8 +15,5 @@ void Phys_adjustForCollisionWithStatObject(GameObject* go1, GameObject* go2);
 
 //Game object geometry
 bool Phys_inCollisionWithBoundary(GameObject* go, Rect r);
-bool Phys_inCollisionWithLine(const GameObject* go, Line l);
-double Phys_getDistanceOfPointFromLine(Line l, Vec3D p);
-Vec3D Phys_getClosestPointFromPointOnLine(Line l, Vec3D p);
 
 #endif // PHYSICS_H_
