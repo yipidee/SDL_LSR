@@ -43,7 +43,8 @@ int main(int argc, char* argv[])
     DecisionTree dt = AI_parseDecisionTree(DT_DEFAULT);
 
     //labels
-    TextLabel scoreboard = TL_createTextLabel("The big game!", 5, 5);
+    char sbText[50];
+    TextLabel scoreboard = TL_createTextLabel(NULL, 5, 5);
     TL_setFont(scoreboard, NULL);
     TL_setFontSize(scoreboard, 25);
 
@@ -70,39 +71,27 @@ int main(int argc, char* argv[])
         //Step 1: get input from user
         input1 = UI_getUserInput();
         input2 = AI_getUserInput(gs, 1, dt);
-        if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
+        if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input2);
 
         //Step 2: Update physics
         //update positions
         updatePhysics(gs, input1, input2);
 
-
-        static bool updateScore = false;
-        if(Goal_scored(gs->goals[0], gs->ball)){Player_incrementScore(gs->players[1]);updateScore=true;}
-        if(Goal_scored(gs->goals[1], gs->ball)){Player_incrementScore(gs->players[0]);updateScore=true;}
-        if(updateScore)
-        {
-            printScore(gs);
-            updateScore = false;
-        }
+        if(Goal_scored(gs->goals[0], gs->ball))Player_incrementScore(gs->players[1]);
+        if(Goal_scored(gs->goals[1], gs->ball))Player_incrementScore(gs->players[0]);
 
         //Step 3: draw result
         Draw_renderScene();
-        static char sbText[50];
         snprintf(sbText, 50, "McDoodle %i : %i Calfnuts", gs->players[0]->score, gs->players[1]->score);
         TL_setText(scoreboard, sbText);
         TL_renderTextLabel(scoreboard);
 
     }
     AI_freeDecisionTree(dt);
+    TL_destroyTextLabel(scoreboard);
     releaseResources();
 
     return 0;
-}
-
-void printScore(GameState* gs)
-{
-    printf("McDoodle %i %i Calfnuts\n", gs->players[0]->score, gs->players[1]->score);
 }
 
 void updatePhysics(GameState* gs, Input input1, Input input2)
@@ -270,7 +259,7 @@ void drawControlsOnScreen(Input input)
     {
         knobPos.i = gs->controllers[1].base.x;
         knobPos.j = gs->controllers[1].base.y;
-        /*if(!Vec3D_isZero(UI_getShotVec(input)))*/knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getShotVec(input), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
+        knobPos = Vec3D_add(knobPos, Vec3D_scalarMult(UI_getShotVec(input), (gs->controllers[1].base.r - gs->controllers[1].knob.r)));
         gs->controllers[1].knob.x = knobPos.i;
         gs->controllers[1].knob.y = knobPos.j;
         gs->controllers[2].knob.x = gs->controllers[2].base.x;
@@ -305,22 +294,22 @@ void loadSprites()
     Sprite_setSpriteInWorldPosRef(ball_s, &gs->ball->pos.i, &gs->ball->pos.j, NULL);
 
     //sprites for posts of goals
-    Sprite post1_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite post1_s = Sprite_createSprite(PATH_TO_BLUE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post1_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
     Sprite_posByCentre(post1_s, true);
     Sprite_setSpriteInWorldPosRef(post1_s, &Goal_getLPost(gs->goals[0])->pos.i, &Goal_getLPost(gs->goals[0])->pos.j, NULL);
 
-    Sprite post2_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite post2_s = Sprite_createSprite(PATH_TO_BLUE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post2_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
     Sprite_posByCentre(post2_s, true);
     Sprite_setSpriteInWorldPosRef(post2_s, &Goal_getRPost(gs->goals[0])->pos.i, &Goal_getRPost(gs->goals[0])->pos.j, NULL);
 
-    Sprite post3_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite post3_s = Sprite_createSprite(PATH_TO_BLUE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post3_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
     Sprite_posByCentre(post3_s, true);
     Sprite_setSpriteInWorldPosRef(post3_s, &Goal_getLPost(gs->goals[1])->pos.i, &Goal_getLPost(gs->goals[1])->pos.j, NULL);
 
-    Sprite post4_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite post4_s = Sprite_createSprite(PATH_TO_BLUE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post4_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
     Sprite_posByCentre(post4_s, true);
     Sprite_setSpriteInWorldPosRef(post4_s, &Goal_getRPost(gs->goals[1])->pos.i, &Goal_getRPost(gs->goals[1])->pos.j, NULL);

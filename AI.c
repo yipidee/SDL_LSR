@@ -41,6 +41,8 @@ struct BFuncEntry BFuncList[] = {
             {"inOwnHalf", &inOwnHalf},
             {"ballInOwnHalf", &ballInOwnHalf},
             {"hasTouches", &hasTouches},
+            {"touchingBall", &touchingBall},
+            {"canScore", &canScore},
             {"END", NULL}
             };
 
@@ -48,6 +50,7 @@ struct LFuncEntry LFuncList[] = {
             {"runToBall", &runToBall},
             {"stop", &stop},
             {"returnToOwnHalf", &returnToOwnHalf},
+            {"shoot", &shoot},
             {"END", NULL}
             };
 
@@ -116,6 +119,62 @@ bool ballInOwnHalf(GameState* gs, int i)
     return (Rect_containsPoint(gs->players[i]->ownHalf, gs->ball->pos.i, gs->ball->pos.j));
 }
 
+//returns true if player has site of goal
+bool canScore(GameState* gs, int i)
+{
+
+    int targetGoal = i == 0 ? 1 : 0;
+    Vec3D target = GO_getPos(Goal_getLPost(gs->goals[targetGoal]));
+    Line l = {GO_getPos(gs->players[i]),target};
+    Circle oppBCirc = Player_getGameObject(gs->players[targetGoal])->BCirc;
+    if(Circle_inCollisionWithLine(oppBCirc, l))
+    {
+        // no view of left post
+        l.p2 = GO_getPos(Goal_getRPost(gs->goals[targetGoal]));
+        if(Circle_inCollisionWithLine(oppBCirc, l))
+        {
+            // no view of either left or right post
+            return false;
+        }else
+        {
+            // view of right post
+            Vec3D p = GO_getPos(Player_getGameObject(gs->players[targetGoal]));
+            Vec3D pClosestL = Line_getClosestPointFromPointOnLine(l, p);
+            Vec3D edge = Vec3D_add(p, Vec3D_scalarMult(Vec3D_normalise(Vec3D_subtract(pClosestL, p)), SIZE_PLAYER_W / 2));
+            Vec3D farEdge;
+            farEdge.k = 0;
+            farEdge.j = edge.j;
+            farEdge.i = 1 / Line_getGradient(l) * (farEdge.j - l.p1.j) + l.p1.i;
+            if(Vec3D_getMagnitude(Vec3D_subtract(farEdge, edge)) >= SIZE_BALL_W) return true;
+        }
+    }else
+    {
+        // view of left post
+        Line farPostSite = l;
+        farPostSite.p2 = GO_getPos(Goal_getRPost(gs->goals[targetGoal]));
+        if(Circle_inCollisionWithLine(oppBCirc, farPostSite))
+        {
+            Vec3D p = GO_getPos(Player_getGameObject(gs->players[targetGoal]));
+            Vec3D pClosestL = Line_getClosestPointFromPointOnLine(farPostSite, p);
+            Vec3D edge = Vec3D_add(p, Vec3D_scalarMult(Vec3D_normalise(Vec3D_subtract(pClosestL, p)), SIZE_PLAYER_W / 2));
+            Vec3D farEdge;
+            farEdge.k = 0;
+            farEdge.j = edge.j;
+            farEdge.i = 1 / Line_getGradient(l) * (farEdge.j - l.p1.j) + l.p1.i;
+            if(Vec3D_getMagnitude(Vec3D_subtract(farEdge, edge)) >= SIZE_BALL_W) return true;
+        }else return true;
+    }
+    return false;
+}
+
+bool touchingBall(GameState* gs, int i)
+{
+    GameObject tempGO = *Player_getGameObject(gs->players[i]);
+    GO_setPos(&tempGO, Vec3D_add(GO_getPos(&tempGO), GO_getVel(&tempGO)));
+    return GO_isInContact(&tempGO, gs->ball);
+}
+
+
 /*************************************************************
 ****************   Leaf Node Functions
 *************************************************************/
@@ -145,6 +204,13 @@ Input returnToOwnHalf(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
     i.direction = id == 0 ? VECTOR_S : VECTOR_N;
+    return i;
+}
+
+Input shoot(GameState* gs, int id)
+{
+    Input i = INPUT_NULL;
+    i.shot = VECTOR_S;
     return i;
 }
 

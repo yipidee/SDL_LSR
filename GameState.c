@@ -22,7 +22,10 @@ void GS_destroyGameState(GameState* gs)
     {
         int i;
         GO_destroyAllGameObjects();
-        for(i=0;i<2;++i)Player_destroy(gs->players[i]);
+        for(i=0;i<2;++i){
+            Player_destroy(gs->players[i]);
+            Goal_destroyGoal(gs->goals[i]);
+        }
         free(gs);
     }
 }

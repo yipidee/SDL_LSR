@@ -21,7 +21,7 @@ void List_destroy(List* list)
         current = list->head;
         list->head=current->next;
 
-        if(list->freeFn) list->freeFn(current->data);
+        if(list->freeFn && current->data) list->freeFn(current->data);
 
         free(current->data);
         free(current);

@@ -23,7 +23,7 @@ Player Player_create(GameObject* go)
 
 void Player_destroy(Player p)
 {
-    free(p);
+    if(p)free(p);
 }
 
 void Player_setOwnHalf(Player p, Rect r)

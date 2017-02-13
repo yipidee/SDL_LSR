@@ -272,6 +272,7 @@ void Draw_quit()
         gWindow = NULL;
 
         //Quit SDL subsystems
+        TTF_Quit();
         IMG_Quit();
         SDL_Helper_quit();
     }
@@ -517,7 +518,8 @@ int TL_getHeight(TextLabel tl)
 static void freeListedTexture(void* data)
 {
     struct textureListItem* img = data;
-    SDL_DestroyTexture(img->texture);
+    printf("destroying texture %s\n", img->name);
+    if(img->texture!=NULL)SDL_DestroyTexture(img->texture);
 }
 
 static SDL_Texture* getTextureRef(char* pathToImg)
