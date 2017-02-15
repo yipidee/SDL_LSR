@@ -61,6 +61,7 @@ Spritesheet Spritesheet_create(char* pathToImg, int w, int h, int noStates, int*
 
 void Spritesheet_destroy(Spritesheet s)
 {
+    printf("texture destroyed here\n");
     SDL_DestroyTexture(s->spritesheet);
     free(s);
 }
@@ -262,7 +263,7 @@ void Draw_quit()
 {
     if(isInitialised)
     {
-        List_destroy(&loadedTextures);
+        //List_destroy(&loadedTextures);
         List_destroy(&sprites);
 
         //Destroy window
@@ -299,11 +300,6 @@ SDL_Texture* Draw_loadTexture(char* pathToImage)
         }
     }
     return t;
-}
-
-void Draw_freeImage(SDL_Texture* img)
-{
-    if(img!=NULL) SDL_DestroyTexture(img);
 }
 
 
@@ -444,7 +440,8 @@ void TL_destroyTextLabel(TextLabel tl)
 {
     TTF_CloseFont(tl->mFont);
     if(tl->textSurf != NULL) {SDL_FreeSurface(tl->textSurf); tl->textSurf=NULL;}
-    free(tl);
+    if(tl)free(tl);
+    tl = NULL;
 }
 
 //Sets tl's text data
@@ -518,8 +515,8 @@ int TL_getHeight(TextLabel tl)
 static void freeListedTexture(void* data)
 {
     struct textureListItem* img = data;
-    printf("destroying texture %s\n", img->name);
-    if(img->texture!=NULL)SDL_DestroyTexture(img->texture);
+    printf("destroying texture %s 0x%08x\n", img->name, img->texture);
+    if(img->texture)SDL_DestroyTexture(img->texture);
 }
 
 static SDL_Texture* getTextureRef(char* pathToImg)

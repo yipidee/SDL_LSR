@@ -14,6 +14,7 @@ GameObject* GO_createGameObject()
     if(!GO_LIST_INITIALIZED)
     {
         List_new(&GO_LIST, sizeof(GameObject), NULL);
+        GO_LIST_INITIALIZED = true;
     }
 
     GameObject go;

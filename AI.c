@@ -70,6 +70,7 @@ void AI_init()
 void AI_freeDecisionTree(DecisionTree dt)
 {
     free(dt);
+    dt = NULL;
 }
 
 // function that traverses decision tree and return AI input

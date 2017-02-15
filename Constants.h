@@ -35,7 +35,7 @@
 #define PATH_TO_ORANGE_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/orange.png"
 #define PATH_TO_RED_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/red.png"
 #define PATH_TO_BLUE_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/blue.png"
-//#define PATH_TO_POST_ART PATH_TO_BLUE_CONTROLLER
+#define PATH_TO_POST_ART PATH_TO_RED_CONTROLLER
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for colours                                  //////////
