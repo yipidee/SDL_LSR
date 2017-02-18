@@ -58,6 +58,7 @@
 #define COLOUR_BLUE 0x00, 0x00, 0xFF, 0xFF
 #define COLOUR_YELLOW 0xFF, 0xFF, 0x00, 0xFF
 
+#define RGB_BLACK {0, 0, 0}
 #define RGB_YELLOW {255, 255, 0}
 
 //////////////////////////////////////////////////////////////////////////////////////////

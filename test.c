@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <math.h>
 #include <SDL2/SDL.h>
 #include "EventHandler.h"
 #include "Draw.h"
@@ -44,15 +45,65 @@ int main(int argc, char* argv[])
 
     //AI decision tree to use
     DecisionTree dt = AI_parseDecisionTree(DT_DEFAULT);
-    //DecisionTree celebrationTree = AI_parseDecisionTree(DT_DEFAULT);
+    DecisionTree celebrationTree = dt;//AI_parseDecisionTree(DT_DEFAULT);
 
     //labels
-    char sbText[50];
-    TextLabel scoreboard = TL_createTextLabel(NULL, 5, 5);
-    TL_setFont(scoreboard, NULL);
-    TL_setFontSize(scoreboard, 25);
+    char p1score[20];
+    char p2score[20];
+    char p1touches[20];
+    char p2touches[20];
 
+    TextLabel p1Name = TL_createTextLabel("McDoodle", 0, 0);
+    TL_setFont(p1Name, NULL);
+    TL_setFontSize(p1Name, 20);
+
+    TextLabel p2Name = TL_createTextLabel("Calfnuts", 0, 0);
+    TL_setFont(p2Name, NULL);
+    TL_setFontSize(p2Name, 20);
+
+    TextLabel p1Score = TL_createTextLabel(NULL, 0, 0);
+    TL_setFont(p1Score, NULL);
+    TL_setFontSize(p1Score, 20);
+
+    TextLabel p2Score = TL_createTextLabel(NULL, 0, 0);
+    TL_setFont(p2Score, NULL);
+    TL_setFontSize(p2Score, 20);
+
+    TextLabel p1Touches = TL_createTextLabel(NULL, 0, 0);
+    TL_setFont(p1Touches, NULL);
+    TL_setFontSize(p1Touches, 20);
+    
+    TextLabel p2Touches = TL_createTextLabel(NULL, 0, 0);
+    TL_setFont(p2Touches, NULL);
+    TL_setFontSize(p2Touches, 20);
+
+    //Set label positions
+    int a = TL_getWidth(p1Name);
+    int b = TL_getWidth(p2Name);
+    int c = fmax(a, b);
+    c = SCREEN_WIDTH - c - 15;
+    TL_setX(p1Name, c);
+    TL_setX(p2Name, c);
+    TL_setX(p1Score, c);
+    TL_setX(p2Score, c);
+    TL_setX(p1Touches, c);
+    TL_setX(p2Touches, c);
+
+    a = TL_getHeight(p1Name);
+    b = TL_getHeight(p2Name);
+    c = fmax(a, b);
+    TL_setY(p2Name, 5);
+    TL_setY(p2Score, TL_getY(p2Name) + TL_getHeight(p2Name));
+    TL_setY(p2Touches, TL_getY(p2Score) + TL_getHeight(p2Name));
+    TL_setY(p1Name, SCREEN_HEIGHT - 105 - 3 * c);
+    TL_setY(p1Score, TL_getY(p1Name) + TL_getHeight(p1Name));
+    TL_setY(p1Touches, TL_getY(p1Score) + TL_getHeight(p1Name));
+ 
     bool resetPositions = true;
+
+    /*************************************************************
+    *********              GAME LOOP           *******************
+    *************************************************************/
 
     //While application is running
     while( !quit )
@@ -74,6 +125,23 @@ int main(int argc, char* argv[])
             }
         }
 
+        //for info only, prints out current state of play for tick
+        switch(gs->currPlayState)
+        {
+            case NORMAL_PLAY:
+                printf("normal play\n");
+                break;
+            case GOAL_SCORED:
+                printf("goal\n");
+                break;
+            case PENALTY:
+                printf("penalty\n");
+                break;
+            case GAME_OVER:
+                printf("game over...\n");
+                break;
+        }
+
         //Step 0: check for reset or change in positions
         if(resetPositions){
             resetGamePositions(gs);
@@ -89,9 +157,18 @@ int main(int argc, char* argv[])
             if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
         }else if(gs->currPlayState == GOAL_SCORED)
         {
-            input1 = AI_getUserInput(gs, 0, dt);
-            input2 = AI_getUserInput(gs, 1, dt);
-//            if(PhysCont_PhysicalControllerPresent())hideControls();
+            static int goalStateTickCounter = 0;
+            input1 = AI_getUserInput(gs, 0, celebrationTree);
+            input2 = AI_getUserInput(gs, 1, celebrationTree);
+            if(PhysCont_PhysicalControllerPresent())hideControls();
+
+            ++goalStateTickCounter;
+            if(goalStateTickCounter > 200)
+            {
+                gs->currPlayState = NORMAL_PLAY;
+                resetPositions = true;
+                goalStateTickCounter = 0;
+            }
         }
 
         //Step 2: Update physics
@@ -118,18 +195,40 @@ int main(int argc, char* argv[])
         }else
         {
             //do penalty related stuff here
+
         }
 
         //Step 3: draw result
         Draw_renderScene();
-        snprintf(sbText, 50, "McDoodle %i : %i Calfnuts", gs->players[0]->score, gs->players[1]->score);
-        TL_setText(scoreboard, sbText);
-        TL_renderTextLabel(scoreboard);
+        snprintf(p1score, 20, "goals %i", gs->players[0]->score);
+        snprintf(p2score, 20, "goals %i", gs->players[1]->score);
+        snprintf(p1touches, 20, "touches %i", gs->players[0]->touches);
+        snprintf(p2touches, 20, "touches %i", gs->players[1]->touches);
+        TL_setText(p1Score, p1score);
+        TL_setText(p2Score, p2score);
+        TL_setText(p1Touches, p1touches);
+        TL_setText(p2Touches, p2touches);
+        TL_renderTextLabel(p1Name);
+        TL_renderTextLabel(p2Name);
+        TL_renderTextLabel(p1Score);
+        TL_renderTextLabel(p2Score);
+        TL_renderTextLabel(p1Touches);
+        TL_renderTextLabel(p2Touches);
     }
     AI_freeDecisionTree(dt);
     dt = NULL;
-    TL_destroyTextLabel(scoreboard);
-    scoreboard = NULL;
+    TL_destroyTextLabel(p1Name);
+    TL_destroyTextLabel(p2Name);
+    TL_destroyTextLabel(p1Score);
+    TL_destroyTextLabel(p2Score);
+    TL_destroyTextLabel(p1Touches);
+    TL_destroyTextLabel(p2Touches);
+    p1Name = NULL;
+    p2Name = NULL;
+    p1Score = NULL;
+    p2Score = NULL;
+    p1Touches = NULL;
+    p2Touches = NULL;
     releaseResources();
 
     return 0;
@@ -156,17 +255,27 @@ void checkRules(GameState* gs)
     }
 
     //Check 2: outside own half when opposition has touches
-    if(!Player_isInOwnHalf(gs->players[0]) && (Player_getTouches(gs->players[1]) > 0))
+    if(Rect_containsCircle(gs->players[1]->ownHalf, gs->ball->BCirc)&&!Player_hasTouches(gs->players[1]))
+        Player_setCanLeaveHalf(gs->players[0], true);
+    if(Rect_containsCircle(gs->players[0]->ownHalf, gs->ball->BCirc)&&!Player_hasTouches(gs->players[0]))
+        Player_setCanLeaveHalf(gs->players[1], true);
+
+    if(!Player_isInOwnHalf(gs->players[0]) && !Player_canLeaveOwnHalf(gs->players[0]))
     {
         Player_setPenaltyFlag(gs->players[0]);
         gs->currPlayState = PENALTY;
         return;
-    }else if(!Player_isInOwnHalf(gs->players[1]) && (Player_getTouches(gs->players[0]) > 0))
+    }else if(!Player_isInOwnHalf(gs->players[1]) && !Player_canLeaveOwnHalf(gs->players[1]))
     {
         Player_setPenaltyFlag(gs->players[1]);
         gs->currPlayState = PENALTY;
         return;
     }
+
+    if(Player_isInOwnHalf(gs->players[0]) && Player_hasTouches(gs->players[1]))
+        Player_setCanLeaveHalf(gs->players[0], false);
+    if(Player_isInOwnHalf(gs->players[1]) && Player_hasTouches(gs->players[0]))
+        Player_setCanLeaveHalf(gs->players[1], false);
 }
 
 void resetGamePositions(GameState* gs)
@@ -249,7 +358,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
         Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[1]));
     }
 
-    //collisions between player 1 and goal posts
+    //collisions between player 2 and goal posts
     if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1])))
     {
         Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1]));
@@ -268,7 +377,9 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     // Player1 and ball
     bool lastTickContact = Player_touchingBall(gs->players[0]);
     collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &gs->players[0]->touchingBall);
-    if((lastTickContact == false)&&(Player_touchingBall(gs->players[0]) == true))
+    if(((lastTickContact == false)&&(Player_touchingBall(gs->players[0]) == true)) || 
+            ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[0]))&&
+            Circle_containsPoint(Player_getGameObject(gs->players[0])->BCirc, GO_getPos(gs->ball).i,GO_getPos(gs->ball).j)))
     {
         Player_decrementTouches(gs->players[0]);
         Player_resetTouches(gs->players[1]);
@@ -277,7 +388,9 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     // Player2 and ball
     lastTickContact = Player_touchingBall(gs->players[1]);
     collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input1, &gs->players[1]->touchingBall);
-    if((lastTickContact == false)&&(Player_touchingBall(gs->players[1]) == true))
+    if(((lastTickContact == false)&&(Player_touchingBall(gs->players[1]) == true)) || 
+            ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[1]))&&
+            Circle_containsPoint(Player_getGameObject(gs->players[1])->BCirc, GO_getPos(gs->ball).i,GO_getPos(gs->ball).j)))
     {
         Player_decrementTouches(gs->players[1]);
         Player_resetTouches(gs->players[0]);

@@ -384,7 +384,7 @@ void TL_setFont(TextLabel tl, char* pathToFont)
 void _initTL(TextLabel tl)
 {
     tl->mCurrLength = 0;
-    SDL_Color c = RGB_YELLOW;
+    SDL_Color c = RGB_BLACK;
     tl->mFontColour = c;
     tl->mTextSize = DEFAULT_TEXT_SIZE;
     TL_setFont(tl, NULL);
@@ -515,7 +515,6 @@ int TL_getHeight(TextLabel tl)
 static void freeListedTexture(void* data)
 {
     struct textureListItem* img = data;
-    printf("destroying texture %s 0x%08x\n", img->name, img->texture);
     if(img->texture)SDL_DestroyTexture(img->texture);
 }
 

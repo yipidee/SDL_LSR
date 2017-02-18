@@ -35,6 +35,7 @@
 
 //function defs for readablity of higher level code
 #define Player_isInOwnHalf(p) Rect_containsPoint((p)->ownHalf, (p)->go->pos.i, (p)->go->pos.j)
+#define Player_hasTouches(p) (Player_getTouches((p)) > 0)
 
 typedef struct _Player* Player;
 
@@ -51,7 +52,7 @@ struct _Player
     int touches;
     int score;
     Rect ownHalf;
-    bool touchingBall, lastScorer, concededPenalty;
+    bool touchingBall, lastScorer, concededPenalty, canLeaveOwnHalf;
     PlayerState state;
 };
 
@@ -69,5 +70,7 @@ bool Player_isLastScorer(Player p);
 void Player_setPenaltyFlag(Player p);
 void Player_clearPenaltyFlag(Player p);
 bool Player_concededPenalty(Player p);
+void Player_setCanLeaveHalf(Player p, bool b);
+bool Player_canLeaveOwnHalf(Player p);
 
 #endif // _PLAYER_H_

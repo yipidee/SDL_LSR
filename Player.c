@@ -87,3 +87,13 @@ GameObject* Player_getGameObject(Player p)
 {
     return p->go;
 }
+
+void Player_setCanLeaveHalf(Player p, bool b)
+{
+    p->canLeaveOwnHalf = b;
+}
+
+bool Player_canLeaveOwnHalf(Player p)
+{
+    return p->canLeaveOwnHalf;
+}
