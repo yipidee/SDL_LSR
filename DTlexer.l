@@ -23,6 +23,7 @@ numnodes        {return NUMNODES;}
 func            {return FUNC;}
 yes             {return YES;}
 no              {return NO;}
+end             {return END;line_num=1;}
 [0-9]+          {yylval.ival = atoi(yytext); return INT;}
 [a-zA-Z0-9]+    {yylval.sval = strdup(yytext);return STRING;}
 \n		{++line_num;}

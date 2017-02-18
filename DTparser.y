@@ -28,17 +28,18 @@ char curr_type;
 %type <ival> numnodes
 
 %token AUTHOR CREATEDATE VERSION
-%token NUMNODES BRANCH LEAF FUNC YES NO
+%token NUMNODES BRANCH LEAF FUNC YES NO END
 %token <ival> INT
 %token <sval> STRING
 
 %%
 
 decisiontreefile:
-    header body {
+    header body footer{
 			if(node_count > tree_size)yyerror("More nodes defined than tree contains.");
 			if(node_count < tree_size)yyerror("Less nodes defined than tree contains.");
 			printf("Decision Tree successfully parsed!\n");
+            node_count = 0;
 			}
     ;
 
@@ -92,6 +93,9 @@ assignment:
 			curr_no = $3;
 			}
     ;
+
+footer:
+    END
 
 %%
 
