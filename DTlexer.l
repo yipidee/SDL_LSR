@@ -1,9 +1,12 @@
-%option noyywrap
+%option nounput
+%option noinput
 
 %{
 #include <string.h>
 #include <math.h>
 #include "DTparser.tab.h"
+
+int yywrap(void) {return 1;}
 
 int line_num = 1;
 %}
