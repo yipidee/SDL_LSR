@@ -15,7 +15,10 @@ void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input in, bool* c
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2);
 void drawControlsOnScreen(Input input);
 void updatePhysics(GameState* gs, Input input1, Input input2);
-void printScore(GameState* gs);
+void checkRules(GameState* gs);
+void resetGamePositions(GameState* gs);
+void takePenaltyPositions(GameState* gs);
+void hideControls();
 
 //globally available pointer to game state
 GameState* gs;
@@ -41,12 +44,15 @@ int main(int argc, char* argv[])
 
     //AI decision tree to use
     DecisionTree dt = AI_parseDecisionTree(DT_DEFAULT);
+    //DecisionTree celebrationTree = AI_parseDecisionTree(DT_DEFAULT);
 
     //labels
     char sbText[50];
     TextLabel scoreboard = TL_createTextLabel(NULL, 5, 5);
     TL_setFont(scoreboard, NULL);
     TL_setFontSize(scoreboard, 25);
+
+    bool resetPositions = true;
 
     //While application is running
     while( !quit )
@@ -68,30 +74,123 @@ int main(int argc, char* argv[])
             }
         }
 
-        //Step 1: get input from user
-        input1 = UI_getUserInput();
-        input2 = AI_getUserInput(gs, 1, dt);
-        if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input2);
+        //Step 0: check for reset or change in positions
+        if(resetPositions){
+            resetGamePositions(gs);
+            resetPositions = false;
+        }
+        if(gs->currPlayState==PENALTY)takePenaltyPositions(gs);
+
+        //Step 1: get input from user (if in playstate requiring input)
+        if(gs->currPlayState==NORMAL_PLAY || gs->currPlayState==PENALTY)
+        {
+            input1 = UI_getUserInput();
+            input2 = AI_getUserInput(gs, 1, dt);
+            if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
+        }else if(gs->currPlayState == GOAL_SCORED)
+        {
+            input1 = AI_getUserInput(gs, 0, dt);
+            input2 = AI_getUserInput(gs, 1, dt);
+//            if(PhysCont_PhysicalControllerPresent())hideControls();
+        }
 
         //Step 2: Update physics
         //update positions
         updatePhysics(gs, input1, input2);
+        if(gs->currPlayState == NORMAL_PLAY)checkRules(gs);
 
-        if(Goal_scored(gs->goals[0], gs->ball))Player_incrementScore(gs->players[1]);
-        if(Goal_scored(gs->goals[1], gs->ball))Player_incrementScore(gs->players[0]);
+        if(gs->currPlayState != PENALTY)
+        {
+            if(Goal_scored(gs->goals[0], gs->ball))
+            {
+                Player_incrementScore(gs->players[1]);
+                Player_setLastScorer(gs->players[1], true);
+                Player_setLastScorer(gs->players[0], false);
+                gs->currPlayState = GOAL_SCORED;
+            }
+            else if(Goal_scored(gs->goals[1], gs->ball))
+            {
+                Player_incrementScore(gs->players[0]);
+                Player_setLastScorer(gs->players[0], true);
+                Player_setLastScorer(gs->players[1], false);
+                gs->currPlayState = GOAL_SCORED;
+            }
+        }else
+        {
+            //do penalty related stuff here
+        }
 
         //Step 3: draw result
         Draw_renderScene();
         snprintf(sbText, 50, "McDoodle %i : %i Calfnuts", gs->players[0]->score, gs->players[1]->score);
         TL_setText(scoreboard, sbText);
         TL_renderTextLabel(scoreboard);
-
     }
     AI_freeDecisionTree(dt);
+    dt = NULL;
     TL_destroyTextLabel(scoreboard);
+    scoreboard = NULL;
     releaseResources();
 
     return 0;
+}
+
+void hideControls()
+{
+    ;
+}
+
+void checkRules(GameState* gs)
+{
+    //Check 1: too many touches
+    if(Player_getTouches(gs->players[0]) < 0)
+    {
+        Player_setPenaltyFlag(gs->players[0]);
+        gs->currPlayState = PENALTY;
+        return;
+    }else if(Player_getTouches(gs->players[1]) < 0)
+    {
+        Player_setPenaltyFlag(gs->players[1]);
+        gs->currPlayState = PENALTY;
+        return;
+    }
+
+    //Check 2: outside own half when opposition has touches
+    if(!Player_isInOwnHalf(gs->players[0]) && (Player_getTouches(gs->players[1]) > 0))
+    {
+        Player_setPenaltyFlag(gs->players[0]);
+        gs->currPlayState = PENALTY;
+        return;
+    }else if(!Player_isInOwnHalf(gs->players[1]) && (Player_getTouches(gs->players[0]) > 0))
+    {
+        Player_setPenaltyFlag(gs->players[1]);
+        gs->currPlayState = PENALTY;
+        return;
+    }
+}
+
+void resetGamePositions(GameState* gs)
+{
+    Player_setPos(gs->players[0], Vec3D_makeVector(POS_PLAYER1_START));
+    Player_setPos(gs->players[1], Vec3D_makeVector(POS_PLAYER2_START));
+    GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
+}
+
+void takePenaltyPositions(GameState* gs)
+{
+    if(Player_concededPenalty(gs->players[0]))
+    {
+        Player_setPos(gs->players[0], Vec3D_makeVector(POS_PENALTY_S_RECEIVER));
+        Player_setPos(gs->players[1], Vec3D_makeVector(POS_PENALTY_S_TAKER));
+        GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
+    }else
+    {
+        Player_setPos(gs->players[0], Vec3D_makeVector(POS_PENALTY_N_TAKER));
+        Player_setPos(gs->players[1], Vec3D_makeVector(POS_PENALTY_N_RECEIVER));
+        GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
+    }
+    Player_clearPenaltyFlag(gs->players[0]);
+    Player_clearPenaltyFlag(gs->players[1]);
 }
 
 void updatePhysics(GameState* gs, Input input1, Input input2)

@@ -126,7 +126,7 @@ bool canScore(GameState* gs, int i)
 
     int targetGoal = i == 0 ? 1 : 0;
     Vec3D target = GO_getPos(Goal_getLPost(gs->goals[targetGoal]));
-    Line l = {GO_getPos(gs->players[i]),target};
+    Line l = {GO_getPos(Player_getGameObject(gs->players[i])),target};
     Circle oppBCirc = Player_getGameObject(gs->players[targetGoal])->BCirc;
     if(Circle_inCollisionWithLine(oppBCirc, l))
     {

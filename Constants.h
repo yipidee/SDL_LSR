@@ -24,10 +24,21 @@
 #define SIZE_BEHIND_GOAL_AREA 60
 #define SIZE_POST_DIAMETER 8
 #define SIZE_GOAL_WIDTH 100
+
+//////////////////////////////////////////////////////////////////////////////////////////
+/////////   Defines for positions of objects                                    //////////
+//////////////////////////////////////////////////////////////////////////////////////////
 #define POS_S_GOAL_R (SCREEN_WIDTH-SIZE_GOAL_WIDTH)/2, SCREEN_HEIGHT-SIZE_BEHIND_GOAL_AREA, 0
 #define POS_S_GOAL_L (SCREEN_WIDTH+SIZE_GOAL_WIDTH)/2, (SCREEN_HEIGHT-SIZE_BEHIND_GOAL_AREA), 0
 #define POS_N_GOAL_L (SCREEN_WIDTH-SIZE_GOAL_WIDTH)/2, SIZE_BEHIND_GOAL_AREA, 0
 #define POS_N_GOAL_R (SCREEN_WIDTH+SIZE_GOAL_WIDTH)/2, SIZE_BEHIND_GOAL_AREA, 0
+#define POS_PLAYER1_START SCREEN_WIDTH / 2, SCREEN_HEIGHT - 150, 0
+#define POS_PLAYER2_START SCREEN_WIDTH / 2, 150, 0
+#define POS_BALL_START SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0
+#define POS_PENALTY_N_TAKER POS_PLAYER1_START
+#define POS_PENALTY_N_RECEIVER 150, 150, 0
+#define POS_PENALTY_S_TAKER 150, SCREEN_HEIGHT - 150, 0
+#define POS_PENALTY_S_RECEIVER POS_PLAYER2_START
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for paths to art resources                                  //////////

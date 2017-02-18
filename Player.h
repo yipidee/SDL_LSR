@@ -51,7 +51,7 @@ struct _Player
     int touches;
     int score;
     Rect ownHalf;
-    bool touchingBall;
+    bool touchingBall, lastScorer, concededPenalty;
     PlayerState state;
 };
 
@@ -64,5 +64,10 @@ void Player_resetTouches(Player p);
 void Player_incrementScore(Player p);
 bool Player_touchingBall(Player p);
 GameObject* Player_getGameObject(Player p);
+void Player_setLastScorer(Player p, bool b);
+bool Player_isLastScorer(Player p);
+void Player_setPenaltyFlag(Player p);
+void Player_clearPenaltyFlag(Player p);
+bool Player_concededPenalty(Player p);
 
 #endif // _PLAYER_H_

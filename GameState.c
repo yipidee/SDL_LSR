@@ -13,6 +13,7 @@ GameState* GS_initializeGameState()
     gs->goals[0] = NULL;
     gs->goals[1] = NULL;
     gs->pitch = Rect_create(SIZE_PITCH);
+    gs->currPlayState = NORMAL_PLAY;
     return gs;
 }
 
@@ -35,8 +36,7 @@ void GS_loadGameObjects(GameState* gs)
 {
     //logical game object, players
     GameObject* player = GO_createGameObject();
-    Vec3D playerStartPosition = {SCREEN_WIDTH / 2, SCREEN_HEIGHT - 150, 0};
-    GO_setPos(player, playerStartPosition);
+    GO_setPos(player, Vec3D_makeVector(POS_PLAYER1_START));
     Circle playerBounds = {0,0,SIZE_PLAYER_H / 2};
     GO_setBCirc(player, playerBounds);
     GO_setMass(player, CONS_MASS_PLAYER);
@@ -47,8 +47,7 @@ void GS_loadGameObjects(GameState* gs)
     gs->players[0] = mccoy;
 
     GameObject* player_c = GO_createGameObject();
-    playerStartPosition.j = 150;
-    GO_setPos(player_c, playerStartPosition);
+    GO_setPos(player_c, Vec3D_makeVector(POS_PLAYER2_START));
     GO_setBCirc(player_c, playerBounds);
     GO_setMass(player_c, CONS_MASS_PLAYER);
 
@@ -59,8 +58,7 @@ void GS_loadGameObjects(GameState* gs)
 
     //logical game object, ball
     GameObject* ball = GO_createGameObject();
-    Vec3D ballStartPosition = {SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,0};
-    GO_setPos(ball, ballStartPosition);
+    GO_setPos(ball, Vec3D_makeVector(POS_BALL_START));
     Circle ballBounds = {0,0,SIZE_BALL_H / 2};
     GO_setBCirc(ball, ballBounds);
     GO_setMass(ball, CONS_MASS_BALL);

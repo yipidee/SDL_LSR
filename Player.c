@@ -18,6 +18,8 @@ Player Player_create(GameObject* go)
     p->touches = 0;
     p->state = STATIONARY;
     p->touchingBall = false;
+    p->lastScorer = false;
+    p->concededPenalty = false;
     return p;
 }
 
@@ -49,6 +51,31 @@ void Player_decrementTouches(Player p)
 void Player_resetTouches(Player p)
 {
     p->touches = CONS_MAX_TOUCHES;
+}
+
+void Player_setLastScorer(Player p, bool b)
+{
+    p->lastScorer = b;
+}
+
+bool Player_isLastScorer(Player p)
+{
+    return p->lastScorer;
+}
+
+void Player_setPenaltyFlag(Player p)
+{
+    p->concededPenalty = true;
+}
+
+void Player_clearPenaltyFlag(Player p)
+{
+    p->concededPenalty = false;
+}
+
+bool Player_concededPenalty(Player p)
+{
+    return p->concededPenalty;
 }
 
 void Player_incrementScore(Player p)

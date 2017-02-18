@@ -19,8 +19,20 @@
 
 #define PhysicalController SDL_Joystick
 
+//states of play
+typedef enum PlayState
+{
+    NORMAL_PLAY,        //Normal game play, starts from reset positions
+    GOAL_SCORED,        //Input ignored, short period of celebration
+    PENALTY,            //Rule infraction resulting in penalty kick
+    GAME_OVER           //Game over
+}PlayState;
+
 typedef struct GameState
 {
+    //current play state
+    PlayState currPlayState;
+
     //Game objects
     Player players[2];
     GameObject* ball;

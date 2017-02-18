@@ -44,3 +44,6 @@ bin/*
 *.tab.*
 *.yy.*
 test_parser
+makefile
+.vscode/
+
