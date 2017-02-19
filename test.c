@@ -16,9 +16,13 @@ void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input in, bool* c
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2);
 void drawControlsOnScreen(Input input);
 void updatePhysics(GameState* gs, Input input1, Input input2);
-void checkRules(GameState* gs);
+void checkRules(GameState* gs, bool* resetPositions);
 void resetGamePositions(GameState* gs);
 void takePenaltyPositions(GameState* gs);
+void normalPlayTick(bool* resetPositions, DecisionTree dt);
+void penaltyTick(bool* resetPositions, DecisionTree dt);
+void goalScoredTick(bool* resetPositions, DecisionTree dt);
+void gameOverTick();
 void hideControls();
 
 //globally available pointer to game state
@@ -39,9 +43,6 @@ int main(int argc, char* argv[])
 
     //Event handler
     SDL_Event e;
-
-    //each player's input
-    Input input1, input2;
 
     //AI decision tree to use
     DecisionTree dt = AI_parseDecisionTree(DT_DEFAULT);
@@ -125,77 +126,21 @@ int main(int argc, char* argv[])
             }
         }
 
-        //for info only, prints out current state of play for tick
+        //select appropriate behaviour based on play state
         switch(gs->currPlayState)
         {
             case NORMAL_PLAY:
-                printf("normal play\n");
+                normalPlayTick(&resetPositions, dt);
                 break;
             case GOAL_SCORED:
-                printf("goal\n");
+                goalScoredTick(&resetPositions, celebrationTree);
                 break;
             case PENALTY:
-                printf("penalty\n");
+                penaltyTick(&resetPositions, dt);
                 break;
             case GAME_OVER:
-                printf("game over...\n");
+                gameOverTick();
                 break;
-        }
-
-        //Step 0: check for reset or change in positions
-        if(resetPositions){
-            resetGamePositions(gs);
-            resetPositions = false;
-        }
-        if(gs->currPlayState==PENALTY)takePenaltyPositions(gs);
-
-        //Step 1: get input from user (if in playstate requiring input)
-        if(gs->currPlayState==NORMAL_PLAY || gs->currPlayState==PENALTY)
-        {
-            input1 = UI_getUserInput();
-            input2 = AI_getUserInput(gs, 1, dt);
-            if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
-        }else if(gs->currPlayState == GOAL_SCORED)
-        {
-            static int goalStateTickCounter = 0;
-            input1 = AI_getUserInput(gs, 0, celebrationTree);
-            input2 = AI_getUserInput(gs, 1, celebrationTree);
-            if(PhysCont_PhysicalControllerPresent())hideControls();
-
-            ++goalStateTickCounter;
-            if(goalStateTickCounter > 200)
-            {
-                gs->currPlayState = NORMAL_PLAY;
-                resetPositions = true;
-                goalStateTickCounter = 0;
-            }
-        }
-
-        //Step 2: Update physics
-        //update positions
-        updatePhysics(gs, input1, input2);
-        if(gs->currPlayState == NORMAL_PLAY)checkRules(gs);
-
-        if(gs->currPlayState != PENALTY)
-        {
-            if(Goal_scored(gs->goals[0], gs->ball))
-            {
-                Player_incrementScore(gs->players[1]);
-                Player_setLastScorer(gs->players[1], true);
-                Player_setLastScorer(gs->players[0], false);
-                gs->currPlayState = GOAL_SCORED;
-            }
-            else if(Goal_scored(gs->goals[1], gs->ball))
-            {
-                Player_incrementScore(gs->players[0]);
-                Player_setLastScorer(gs->players[0], true);
-                Player_setLastScorer(gs->players[1], false);
-                gs->currPlayState = GOAL_SCORED;
-            }
-        }else
-        {
-            //do penalty related stuff here
-
         }
 
         //Step 3: draw result
@@ -234,23 +179,99 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+void normalPlayTick(bool* resetPositions, DecisionTree dt)
+{
+    //Step 0: check for reset or change in positions
+    if(*resetPositions){
+        resetGamePositions(gs);
+        *resetPositions = false;
+    }
+
+    //Step 1: get input from user (if in playstate requiring input)
+    Input input1 = UI_getUserInput();
+    Input input2 = AI_getUserInput(gs, 1, dt);
+    if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
+
+    //Step 2: Update physics
+    //update positions
+    updatePhysics(gs, input1, input2);
+    checkRules(gs, resetPositions);
+    if(Goal_scored(gs->goals[0], gs->ball) && gs->currPlayState!=PENALTY)
+    {
+        Player_incrementScore(gs->players[1]);
+        Player_setLastScorer(gs->players[1], true);
+        Player_setLastScorer(gs->players[0], false);
+        gs->currPlayState = GOAL_SCORED;
+    }
+    else if(Goal_scored(gs->goals[1], gs->ball) && gs->currPlayState!=PENALTY)
+    {
+        Player_incrementScore(gs->players[0]);
+        Player_setLastScorer(gs->players[0], true);
+        Player_setLastScorer(gs->players[1], false);
+        gs->currPlayState = GOAL_SCORED;
+    }
+}
+
+void penaltyTick(bool* resetPositions, DecisionTree dt)
+{
+    //Step 0: check for reset or change in positions
+    if(*resetPositions){
+        takePenaltyPositions(gs);
+        *resetPositions = false;
+    }
+
+    //Step 1: get input from user (if in playstate requiring input)
+    Input input1 = UI_getUserInput();
+    Input input2 = AI_getUserInput(gs, 1, dt);
+    if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
+
+    //Step 2: Update physics
+    //update positions
+    updatePhysics(gs, input1, input2);
+
+    //do penalty related stuff here
+}
+
+void goalScoredTick(bool* resetPositions, DecisionTree dt)
+{
+    static int goalStateTickCounter = 0;
+    Input input1 = AI_getUserInput(gs, 0, dt);
+    Input input2 = AI_getUserInput(gs, 1, dt);
+    if(PhysCont_PhysicalControllerPresent())hideControls();
+
+    ++goalStateTickCounter;
+    if(goalStateTickCounter > 200)
+    {
+        gs->currPlayState = NORMAL_PLAY;
+        *resetPositions = true;
+        goalStateTickCounter = 0;
+    }
+}
+
+void gameOverTick()
+{
+    ;
+}
+
 void hideControls()
 {
     ;
 }
 
-void checkRules(GameState* gs)
+void checkRules(GameState* gs, bool* resetPositions)
 {
     //Check 1: too many touches
     if(Player_getTouches(gs->players[0]) < 0)
     {
         Player_setPenaltyFlag(gs->players[0]);
         gs->currPlayState = PENALTY;
+        *resetPositions = true;
         return;
     }else if(Player_getTouches(gs->players[1]) < 0)
     {
         Player_setPenaltyFlag(gs->players[1]);
         gs->currPlayState = PENALTY;
+        *resetPositions = true;
         return;
     }
 

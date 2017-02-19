@@ -40,9 +40,12 @@ struct BFuncEntry BFuncList[] = {
             {"randomTrueFalse", &returnRandBool},
             {"inOwnHalf", &inOwnHalf},
             {"ballInOwnHalf", &ballInOwnHalf},
+            {"ballIsStationary", &ballIsStationary},
             {"hasTouches", &hasTouches},
+            {"oppHasAllTouches", &oppHasAllTouches},
             {"touchingBall", &touchingBall},
             {"canScore", &canScore},
+            {"isPenalty", &isPenalty},
             {"END", NULL}
             };
 
@@ -114,11 +117,23 @@ bool hasTouches(GameState* gs, int i)
     return (Player_getTouches(gs->players[i]) > 0);
 }
 
+bool oppHasAllTouches(GameState* gs, int i)
+{
+    int id = i == 0 ? 1 : 0;
+    return (gs->players[id]->touches == CONS_MAX_TOUCHES);
+}
+
 //returns true if ball in player's half
 bool ballInOwnHalf(GameState* gs, int i)
 {
     return (Rect_containsPoint(gs->players[i]->ownHalf, gs->ball->pos.i, gs->ball->pos.j));
 }
+
+bool ballIsStationary(GameState* gs, int i)
+{
+    return Vec3D_isZero(GO_getVel(gs->ball));
+}
+
 
 //returns true if player has site of goal
 bool canScore(GameState* gs, int i)
@@ -173,6 +188,11 @@ bool touchingBall(GameState* gs, int i)
     GameObject tempGO = *Player_getGameObject(gs->players[i]);
     GO_setPos(&tempGO, Vec3D_add(GO_getPos(&tempGO), GO_getVel(&tempGO)));
     return GO_isInContact(&tempGO, gs->ball);
+}
+
+bool isPenalty(GameState* gs, int i)
+{
+    return (gs->currPlayState == PENALTY);
 }
 
 

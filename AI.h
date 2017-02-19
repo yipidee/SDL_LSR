@@ -59,9 +59,12 @@ Input AI_getUserInput(GameState* gs, int id, DecisionTree dt);
 bool returnRandBool(GameState* gs, int i);  //return True or False randomly
 bool inOwnHalf(GameState* gs, int i);
 bool hasTouches(GameState* gs, int i);
+bool oppHasAllTouches(GameState* gs, int i);
 bool ballInOwnHalf(GameState* gs, int i); //returns true if ball in player's half
+bool ballIsStationary(GameState* gs, int i); //returns whether ball stopped
 bool canScore(GameState* gs, int i);  //open view of goal
 bool touchingBall(GameState* gs, int i);  //touching the ball
+bool isPenalty(GameState* gs, int i);  //returns whether game in penalty state
 
 /*************************************************************
 ****************   Leaf Node Functions
