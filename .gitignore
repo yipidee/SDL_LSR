@@ -38,6 +38,9 @@
 *.depend
 bin/*
 
+#valgrind
+vgcore.*
+
 # Custom
 *.ignore
 *.swp

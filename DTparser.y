@@ -59,12 +59,11 @@ propertyline:
     ;
 
 body:
-    numnodes {printf("Creating decision tree of %i nodes\n", tree_size);
-	      dt = malloc(NodeSize * $1);} nodedefinitions
+    numnodes {printf("Creating decision tree of %i nodes\n", tree_size);} nodedefinitions
     ;
 
 numnodes:
-    NUMNODES '=' INT {tree_size=$3;}
+    NUMNODES '=' INT {tree_size=$3; dt = malloc(NodeSize * $3);}
     ;
 
 nodedefinitions:
@@ -115,7 +114,9 @@ DecisionTree AI_parseDecisionTree(char* DTfile) {
 		yyparse();
 	} while (!feof(yyin));
 
-	return dt;
+    DecisionTree myDT = dt;
+	dt = NULL;
+    return myDT;
 }
 
 void yyerror(const char *s) {

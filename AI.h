@@ -41,8 +41,8 @@ extern size_t NodeSize;
 
 //prototypes for decision tree building
 DecisionTree AI_parseDecisionTree(char* DTfile);
-void AI_makeBranchNode(DecisionTree dt, int id, char* func, int yes, int no);
-void AI_makeLeafNode(DecisionTree dt, int id, char* func);
+void AI_makeBranchNode(const DecisionTree dt, int id, char* func, int yes, int no);
+void AI_makeLeafNode(const DecisionTree dt, int id, char* func);
 
 //init AI unit
 void AI_init();
@@ -65,6 +65,7 @@ bool ballIsStationary(GameState* gs, int i); //returns whether ball stopped
 bool canScore(GameState* gs, int i);  //open view of goal
 bool touchingBall(GameState* gs, int i);  //touching the ball
 bool isPenalty(GameState* gs, int i);  //returns whether game in penalty state
+bool concededPenalty(GameState* gs, int i);  //returns whether player conceded penalty
 
 /*************************************************************
 ****************   Leaf Node Functions

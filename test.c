@@ -49,10 +49,11 @@ int main(int argc, char* argv[])
     DecisionTree celebrationTree = dt;//AI_parseDecisionTree(DT_DEFAULT);
 
     //labels
-    char p1score[20];
+/*    char p1score[20];
     char p2score[20];
     char p1touches[20];
     char p2touches[20];
+
 
     TextLabel p1Name = TL_createTextLabel("McDoodle", 0, 0);
     TL_setFont(p1Name, NULL);
@@ -99,7 +100,7 @@ int main(int argc, char* argv[])
     TL_setY(p1Name, SCREEN_HEIGHT - 105 - 3 * c);
     TL_setY(p1Score, TL_getY(p1Name) + TL_getHeight(p1Name));
     TL_setY(p1Touches, TL_getY(p1Score) + TL_getHeight(p1Name));
- 
+*/ 
     bool resetPositions = true;
 
     /*************************************************************
@@ -145,7 +146,7 @@ int main(int argc, char* argv[])
 
         //Step 3: draw result
         Draw_renderScene();
-        snprintf(p1score, 20, "goals %i", gs->players[0]->score);
+/*        snprintf(p1score, 20, "goals %i", gs->players[0]->score);
         snprintf(p2score, 20, "goals %i", gs->players[1]->score);
         snprintf(p1touches, 20, "touches %i", gs->players[0]->touches);
         snprintf(p2touches, 20, "touches %i", gs->players[1]->touches);
@@ -159,10 +160,10 @@ int main(int argc, char* argv[])
         TL_renderTextLabel(p2Score);
         TL_renderTextLabel(p1Touches);
         TL_renderTextLabel(p2Touches);
-    }
+*/    }
     AI_freeDecisionTree(dt);
     dt = NULL;
-    TL_destroyTextLabel(p1Name);
+/*    TL_destroyTextLabel(p1Name);
     TL_destroyTextLabel(p2Name);
     TL_destroyTextLabel(p1Score);
     TL_destroyTextLabel(p2Score);
@@ -174,7 +175,7 @@ int main(int argc, char* argv[])
     p2Score = NULL;
     p1Touches = NULL;
     p2Touches = NULL;
-    releaseResources();
+*/    releaseResources();
 
     return 0;
 }

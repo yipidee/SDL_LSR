@@ -46,6 +46,7 @@ struct BFuncEntry BFuncList[] = {
             {"touchingBall", &touchingBall},
             {"canScore", &canScore},
             {"isPenalty", &isPenalty},
+            {"concededPenalty", &concededPenalty},
             {"END", NULL}
             };
 
@@ -195,6 +196,10 @@ bool isPenalty(GameState* gs, int i)
     return (gs->currPlayState == PENALTY);
 }
 
+bool concededPenalty(GameState* gs, int i)
+{
+    return Player_concededPenalty(gs->players[i]);
+}
 
 /*************************************************************
 ****************   Leaf Node Functions
@@ -239,7 +244,7 @@ Input shoot(GameState* gs, int id)
 ***********   functions for building decision trees
 ***************************************************************/
 
-void AI_makeBranchNode(DecisionTree dt, int id, char* func, int yes, int no)
+void AI_makeBranchNode(const DecisionTree dt, int id, char* func, int yes, int no)
 {
     if(!func || !dt) {printf("Null pointer for func name or tree when making Decision tree");exit(-1);}
     Node n = dt + id*NodeSize;
