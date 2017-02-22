@@ -263,7 +263,7 @@ void Draw_quit()
 {
     if(isInitialised)
     {
-        //List_destroy(&loadedTextures);
+        List_destroy(&loadedTextures);
         List_destroy(&sprites);
 
         //Destroy window

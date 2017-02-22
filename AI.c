@@ -244,35 +244,22 @@ Input shoot(GameState* gs, int id)
 ***********   functions for building decision trees
 ***************************************************************/
 
-void AI_makeBranchNode(const DecisionTree dt, int id, char* func, int yes, int no)
+void AI_makeBranchNode(DecisionTree dt, int id, char* func, int yes, int no)
 {
     if(!func || !dt) {printf("Null pointer for func name or tree when making Decision tree");exit(-1);}
-    Node n = dt + id*NodeSize;
-    BranchNodeFunc f = lookupBFunc(func);
-    Node yesn = dt + yes*NodeSize;
-    Node non = dt + no*NodeSize;
-    _makeBranchNode(n, f, yesn, non);
-}
-void _makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no)
-{
-    n->type = BranchNode;
-    n->node.b.func = func;
-    n->node.b.yes = yes;
-    n->node.b.no = no;
+    dt[id].id = id;
+    dt[id].type = BranchNode;
+    dt[id].node.b.func = lookupBFunc(func);
+    dt[id].node.b.yes = &dt[yes];
+    dt[id].node.b.no = &dt[no];
 }
 
 void AI_makeLeafNode(DecisionTree dt, int id, char* func)
 {
     if(!func || !dt) {printf("Null pointer for func name or tree when making Decision tree");exit(-1);}
-    Node n = dt + id*NodeSize;
-    LeafNodeFunc f = lookupLFunc(func);
-    _makeLeafNode(n, f);
-}
-
-void _makeLeafNode(Node n, LeafNodeFunc func)
-{
-    n->type = LeafNode;
-    n->node.l.func = func;
+    dt[id].id = id;
+    dt[id].type = LeafNode;
+    dt[id].node.l.func = lookupLFunc(func);
 }
 
 BranchNodeFunc lookupBFunc(char* funcName)

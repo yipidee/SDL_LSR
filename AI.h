@@ -42,7 +42,7 @@ extern size_t NodeSize;
 //prototypes for decision tree building
 DecisionTree AI_parseDecisionTree(char* DTfile);
 void AI_makeBranchNode(const DecisionTree dt, int id, char* func, int yes, int no);
-void AI_makeLeafNode(const DecisionTree dt, int id, char* func);
+void AI_makeLeafNode(DecisionTree dt, int id, char* func);
 
 //init AI unit
 void AI_init();
