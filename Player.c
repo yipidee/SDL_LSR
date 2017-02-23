@@ -20,6 +20,7 @@ Player Player_create(GameObject* go)
     p->touchingBall = false;
     p->lastScorer = false;
     p->concededPenalty = false;
+    p->score = 0;
     return p;
 }
 

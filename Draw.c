@@ -387,6 +387,8 @@ void _initTL(TextLabel tl)
     SDL_Color c = RGB_BLACK;
     tl->mFontColour = c;
     tl->mTextSize = DEFAULT_TEXT_SIZE;
+    strcpy(tl->mText, "\0");
+    tl->mCurrLength = strlen(tl->mText);
     TL_setFont(tl, NULL);
     tl->textSurf = NULL;
     tl->x = 0; tl->y = 0; tl->w = 0; tl->h = 0;
@@ -396,13 +398,16 @@ void _initTL(TextLabel tl)
 void _renderTextToSurface(TextLabel tl)
 {
     if(!TTF_INITIALIZED) {TTF_Init(); TTF_INITIALIZED = true;}
-    if(tl->textSurf != NULL)
+    if(tl->textSurf)
     {
         SDL_FreeSurface(tl->textSurf);
         tl->textSurf = NULL;
     }
-    tl->textSurf = TTF_RenderText_Blended(tl->mFont, tl->mText, tl->mFontColour);
-    tl->w = tl->textSurf->w; tl->h = tl->textSurf->h;
+    if(strcmp(tl->mText, "\0")!=0)
+    {
+        tl->textSurf = TTF_RenderText_Blended(tl->mFont, tl->mText, tl->mFontColour);
+        tl->w = tl->textSurf->w; tl->h = tl->textSurf->h;
+    }
 }
 
 //Get pointer to bounding rect
@@ -414,10 +419,13 @@ SDL_Rect TL_getBoundRect(TextLabel tl)
 
 void TL_renderTextLabel(TextLabel tl)
 {
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(gRenderer, tl->textSurf);
-    SDL_Rect bb = TL_getBoundRect(tl);
-    SDL_RenderCopy(gRenderer, textTexture, NULL, &bb);
-    SDL_DestroyTexture(textTexture);
+    if(tl->textSurf)
+    {
+        SDL_Texture* textTexture = SDL_CreateTextureFromSurface(gRenderer, tl->textSurf);
+        SDL_Rect bb = TL_getBoundRect(tl);
+        SDL_RenderCopy(gRenderer, textTexture, NULL, &bb);
+        SDL_DestroyTexture(textTexture);
+    }
 }
 
 //Creates a label with text at pos x and y
@@ -425,14 +433,14 @@ TextLabel TL_createTextLabel(char* text, int x, int y)
 {
     TextLabel tl = malloc(sizeof(struct _TextLabel));
     _initTL(tl);
-    if(text!=NULL)
+    if(text && strlen(text) < TEXT_LABEL_MAX_LENGTH)
     {
         int length = strlen(text);
         strcpy(tl->mText, text);
         tl->mCurrLength = length;
     }
     tl->x = x; tl->y = y;
-    if(text!=NULL)_renderTextToSurface(tl);
+    _renderTextToSurface(tl);
     return tl;
 }
 

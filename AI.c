@@ -60,8 +60,6 @@ struct LFuncEntry LFuncList[] = {
 
 size_t NodeSize;
 
-void _makeBranchNode(Node n, BranchNodeFunc func, Node yes, Node no);
-void _makeLeafNode(Node n, LeafNodeFunc func);
 BranchNodeFunc lookupBFunc(char* funcName);
 LeafNodeFunc lookupLFunc(char* funcName);
 
