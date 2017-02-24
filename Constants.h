@@ -37,8 +37,8 @@
 #define POS_BALL_START SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0
 #define POS_PENALTY_N_TAKER POS_PLAYER1_START
 #define POS_PENALTY_N_RECEIVER 150, 150, 0
-#define POS_PENALTY_S_TAKER 150, SCREEN_HEIGHT - 150, 0
-#define POS_PENALTY_S_RECEIVER POS_PLAYER2_START
+#define POS_PENALTY_S_TAKER POS_PLAYER2_START
+#define POS_PENALTY_S_RECEIVER 150, SCREEN_HEIGHT - 150, 0
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for paths to art resources                                  //////////

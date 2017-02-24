@@ -17,6 +17,7 @@ void collisionWithEnergisedObject(GameObject* go1, GameObject* go2);
 void drawControlsOnScreen(Input input);
 void updatePhysics(GameState* gs, Input input1, Input input2);
 void checkRules(GameState* gs, bool* resetPositions);
+void checkForGoal(GameState* gs);
 void resetGamePositions(GameState* gs);
 void takePenaltyPositions(GameState* gs);
 void normalPlayTick(bool* resetPositions, DecisionTree dt);
@@ -53,7 +54,6 @@ int main(int argc, char* argv[])
     char p2score[20];
     char p1touches[20];
     char p2touches[20];
-
 
     TextLabel p1Name = TL_createTextLabel("McDoodle", 0, 0);
     TL_setFontSize(p1Name, 20);
@@ -102,6 +102,10 @@ int main(int argc, char* argv[])
     TL_setY(p1Touches, TL_getY(p1Score) + TL_getHeight(p1Name));
  
     bool resetPositions = true;
+    int t0, t1;
+
+    //to win score
+    int winningScore = 5;
 
     /*************************************************************
     *********              GAME LOOP           *******************
@@ -132,24 +136,32 @@ int main(int argc, char* argv[])
         {
             case NORMAL_PLAY:
                 normalPlayTick(&resetPositions, dt);
+                //printf("%s\n", "normal");
                 break;
             case GOAL_SCORED:
                 goalScoredTick(&resetPositions, celebrationTree);
+                //printf("%s\n", "goal");
                 break;
             case PENALTY:
                 penaltyTick(&resetPositions, dt);
+                //printf("%s\n", "penalty");
                 break;
             case GAME_OVER:
                 gameOverTick();
+                //printf("%s\n", "gameover");
                 break;
         }
+
+        if(gs->players[0]->score >= winningScore || gs->players[1]->score >= winningScore) quit = true;
 
         //Step 3: draw result
         Draw_renderScene();
         snprintf(p1score, 20, "goals %i", gs->players[0]->score);
         snprintf(p2score, 20, "goals %i", gs->players[1]->score);
-        snprintf(p1touches, 20, "touches %i", gs->players[0]->touches);
-        snprintf(p2touches, 20, "touches %i", gs->players[1]->touches);
+        t0 = gs->players[0]->touches < 0 ? 0 : gs->players[0]->touches;
+        t1 = gs->players[1]->touches < 0 ? 0 : gs->players[1]->touches;
+        snprintf(p1touches, 20, "touches %i", t0);
+        snprintf(p2touches, 20, "touches %i", t1);
         TL_setText(p1Score, p1score);
         TL_setText(p2Score, p2score);
         TL_setText(p1Touches, p1touches);
@@ -197,14 +209,19 @@ void normalPlayTick(bool* resetPositions, DecisionTree dt)
     //update positions
     updatePhysics(gs, input1, input2);
     checkRules(gs, resetPositions);
-    if(Goal_scored(gs->goals[0], gs->ball) && gs->currPlayState!=PENALTY)
+    checkForGoal(gs);
+}
+
+void checkForGoal(GameState* gs)
+{   
+    if(Goal_scored(gs->goals[0], gs->ball))
     {
         Player_incrementScore(gs->players[1]);
         Player_setLastScorer(gs->players[1], true);
         Player_setLastScorer(gs->players[0], false);
         gs->currPlayState = GOAL_SCORED;
     }
-    else if(Goal_scored(gs->goals[1], gs->ball) && gs->currPlayState!=PENALTY)
+    else if(Goal_scored(gs->goals[1], gs->ball))
     {
         Player_incrementScore(gs->players[0]);
         Player_setLastScorer(gs->players[0], true);
@@ -231,19 +248,23 @@ void penaltyTick(bool* resetPositions, DecisionTree dt)
     updatePhysics(gs, input1, input2);
 
     //do penalty related stuff here
+    checkRules(gs, resetPositions);
+    checkForGoal(gs);
 }
 
 void goalScoredTick(bool* resetPositions, DecisionTree dt)
 {
     static int goalStateTickCounter = 0;
-    Input input1 = AI_getUserInput(gs, 0, dt);
-    Input input2 = AI_getUserInput(gs, 1, dt);
-    if(PhysCont_PhysicalControllerPresent())hideControls();
+    //Input input1 = AI_getUserInput(gs, 0, dt);
+    //Input input2 = AI_getUserInput(gs, 1, dt);
+    //if(PhysCont_PhysicalControllerPresent())hideControls();
 
     ++goalStateTickCounter;
     if(goalStateTickCounter > 200)
     {
         gs->currPlayState = NORMAL_PLAY;
+        Player_resetTouches(gs->players[0]);
+        Player_resetTouches(gs->players[1]);
         *resetPositions = true;
         goalStateTickCounter = 0;
     }
@@ -259,52 +280,86 @@ void hideControls()
     ;
 }
 
+void setPenConditions(GameState* gs, int id)
+{
+    int fouled = id == 0 ? 1 : 0;
+    Player_setPenaltyFlag(gs->players[id]);
+    Player_clearPenaltyFlag(gs->players[fouled]);
+    Player_resetTouches(gs->players[0]);
+    Player_resetTouches(gs->players[1]);
+    gs->currPlayState = PENALTY;    
+}
+
 void checkRules(GameState* gs, bool* resetPositions)
 {
     //Check 1: too many touches
     if(Player_getTouches(gs->players[0]) < 0)
     {
-        Player_setPenaltyFlag(gs->players[0]);
-        gs->currPlayState = PENALTY;
+        setPenConditions(gs, 0);
         *resetPositions = true;
         return;
     }else if(Player_getTouches(gs->players[1]) < 0)
     {
-        Player_setPenaltyFlag(gs->players[1]);
-        gs->currPlayState = PENALTY;
+        setPenConditions(gs, 1);
         *resetPositions = true;
         return;
     }
 
     //Check 2: outside own half when opposition has touches
-    if(Rect_containsCircle(gs->players[1]->ownHalf, gs->ball->BCirc)&&!Player_hasTouches(gs->players[1]))
-        Player_setCanLeaveHalf(gs->players[0], true);
-    if(Rect_containsCircle(gs->players[0]->ownHalf, gs->ball->BCirc)&&!Player_hasTouches(gs->players[0]))
-        Player_setCanLeaveHalf(gs->players[1], true);
-
     if(!Player_isInOwnHalf(gs->players[0]) && !Player_canLeaveOwnHalf(gs->players[0]))
     {
-        Player_setPenaltyFlag(gs->players[0]);
-        gs->currPlayState = PENALTY;
+        setPenConditions(gs, 0);
+        *resetPositions = true;
         return;
     }else if(!Player_isInOwnHalf(gs->players[1]) && !Player_canLeaveOwnHalf(gs->players[1]))
     {
-        Player_setPenaltyFlag(gs->players[1]);
-        gs->currPlayState = PENALTY;
+        setPenConditions(gs, 1);
+        *resetPositions = true;
         return;
     }
 
-    if(Player_isInOwnHalf(gs->players[0]) && Player_hasTouches(gs->players[1]))
-        Player_setCanLeaveHalf(gs->players[0], false);
-    if(Player_isInOwnHalf(gs->players[1]) && Player_hasTouches(gs->players[0]))
-        Player_setCanLeaveHalf(gs->players[1], false);
+    //Check 3: interfere with penalty
+    //it's a penalty
+    bool cond1 = (gs->currPlayState == PENALTY);
+    //the ball has been struck by penalty taker
+    bool cond2 = false;
+    if((gs->players[0]->concededPenalty && !Player_hasAllTouches(gs->players[1])) ||
+        (gs->players[1]->concededPenalty && !Player_hasAllTouches(gs->players[0]))) cond2=true;
+    //ball has not yet stopped
+    bool cond3 = !Vec3D_isZero(GO_getVel(gs->ball));
+    if(cond1 && cond2 && cond3)
+    {
+        //player who conceded penalty has interfered
+        if(Player_concededPenalty(gs->players[0]) && !Player_hasAllTouches(gs->players[0]))
+        {
+            setPenConditions(gs, 0);
+            *resetPositions = true;
+            return;
+        }
+        if(Player_concededPenalty(gs->players[1]) && !Player_hasAllTouches(gs->players[1]))
+        {
+            setPenConditions(gs, 1);
+            *resetPositions = true;
+            return;
+        }
+    }
+    if(cond2 && !cond3)
+    {
+        gs->currPlayState = NORMAL_PLAY;
+        Player_clearPenaltyFlag(gs->players[0]);
+        Player_clearPenaltyFlag(gs->players[1]);
+    }
 }
 
 void resetGamePositions(GameState* gs)
 {
     Player_setPos(gs->players[0], Vec3D_makeVector(POS_PLAYER1_START));
     Player_setPos(gs->players[1], Vec3D_makeVector(POS_PLAYER2_START));
+    Player_resetTouches(gs->players[0]);
+    Player_resetTouches(gs->players[1]);
     GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
+    GO_setVel(gs->ball, VECTOR_ZERO);
+    GO_setAcc(gs->ball, VECTOR_ZERO);
 }
 
 void takePenaltyPositions(GameState* gs)
@@ -313,39 +368,26 @@ void takePenaltyPositions(GameState* gs)
     {
         Player_setPos(gs->players[0], Vec3D_makeVector(POS_PENALTY_S_RECEIVER));
         Player_setPos(gs->players[1], Vec3D_makeVector(POS_PENALTY_S_TAKER));
-        GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
     }else
     {
         Player_setPos(gs->players[0], Vec3D_makeVector(POS_PENALTY_N_TAKER));
         Player_setPos(gs->players[1], Vec3D_makeVector(POS_PENALTY_N_RECEIVER));
-        GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
     }
-    Player_clearPenaltyFlag(gs->players[0]);
-    Player_clearPenaltyFlag(gs->players[1]);
+    GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
+    GO_setVel(gs->ball, VECTOR_ZERO);
+    GO_setAcc(gs->ball, VECTOR_ZERO);
 }
 
 void updatePhysics(GameState* gs, Input input1, Input input2)
 {
     //Move Player 1
     Player_setVel(gs->players[0], getVelFromInput(input1));
-    if(Vec3D_isZero(Player_getVel(gs->players[0])))
-    {
-        Player_setIsStationary(gs->players[0], true);
-    }else
-    {
-        Player_setIsStationary(gs->players[0], false);
-    }
+    Player_setIsStationary(gs->players[0], Vec3D_isZero(Player_getVel(gs->players[0])));
     Player_move(gs->players[0]);
 
     //Move Player 2
     Player_setVel(gs->players[1], getVelFromInput(input2));
-    if(Vec3D_isZero(Player_getVel(gs->players[1])))
-    {
-        Player_setIsStationary(gs->players[1], true);
-    }else
-    {
-        Player_setIsStationary(gs->players[1], false);
-    }
+    Player_setIsStationary(gs->players[1], Vec3D_isZero(Player_getVel(gs->players[1])));
     Player_move(gs->players[1]);
 
     //update ball physics
@@ -419,6 +461,18 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     }
 
     collisionWithEnergisedObject(Player_getGameObject(gs->players[0]), Player_getGameObject(gs->players[1]));
+
+    // determine if in new positions players can legally enter other half
+    if(Rect_containsCircle(gs->players[1]->ownHalf, gs->ball->BCirc)&&!Player_hasTouches(gs->players[1]))
+        Player_setCanLeaveHalf(gs->players[0], true);
+    if(Rect_containsCircle(gs->players[0]->ownHalf, gs->ball->BCirc)&&!Player_hasTouches(gs->players[0]))
+        Player_setCanLeaveHalf(gs->players[1], true);
+
+    // determine if in new positions players can no longer legally enter other half
+    if(Player_isInOwnHalf(gs->players[0]) && Player_hasTouches(gs->players[1]))
+        Player_setCanLeaveHalf(gs->players[0], false);
+    if(Player_isInOwnHalf(gs->players[1]) && Player_hasTouches(gs->players[0]))
+        Player_setCanLeaveHalf(gs->players[1], false);
 }
 
 //TODO move this to Physics

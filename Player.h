@@ -4,6 +4,7 @@
 #include "Utility/Geometry.h"
 #include "GameObject.h"
 #include "Physics.h"
+#include "Constants.h"
 
 //mappings to gameobject function for convenience
 //hard working functions
@@ -36,6 +37,7 @@
 //function defs for readablity of higher level code
 #define Player_isInOwnHalf(p) Rect_containsPoint((p)->ownHalf, (p)->go->pos.i, (p)->go->pos.j)
 #define Player_hasTouches(p) (Player_getTouches((p)) > 0)
+#define Player_hasAllTouches(p) (Player_getTouches((p)) == CONS_MAX_TOUCHES)
 
 typedef struct _Player* Player;
 

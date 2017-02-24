@@ -9,7 +9,6 @@
 #include "GameObject.h"
 #include "Utility/Geometry.h"
 #include "Player.h"
-#include "Constants.h"
 
 Player Player_create(GameObject* go)
 {
