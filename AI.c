@@ -55,10 +55,13 @@ struct LFuncEntry LFuncList[] = {
             {"stop", &stop},
             {"returnToOwnHalf", &returnToOwnHalf},
             {"shoot", &shoot},
+            {"playIntoCorner", &playIntoCorner},
             {"END", NULL}
             };
 
 size_t NodeSize;
+const Vec3D OUTSIDE_PLAYABLE_RANGE = {-1,-1,-1};
+Vec3D gShotTarget;  // storage location of scorable target for "canScore" function
 
 BranchNodeFunc lookupBFunc(char* funcName);
 LeafNodeFunc lookupLFunc(char* funcName);
@@ -66,6 +69,7 @@ LeafNodeFunc lookupLFunc(char* funcName);
 void AI_init()
 {
     NodeSize = sizeof(struct decisionTreeNode);
+    gShotTarget = OUTSIDE_PLAYABLE_RANGE;
     srand((int)time(NULL));
 }
 
@@ -137,48 +141,59 @@ bool ballIsStationary(GameState* gs, int i)
 //returns true if player has site of goal
 bool canScore(GameState* gs, int i)
 {
-
     int targetGoal = i == 0 ? 1 : 0;
     Vec3D target = GO_getPos(Goal_getLPost(gs->goals[targetGoal]));
-    Line l = {GO_getPos(Player_getGameObject(gs->players[i])),target};
+    //line of site between ball and target
+    Line l = {GO_getPos(gs->ball),target};
+    //bounding circle of oppositions player
     Circle oppBCirc = Player_getGameObject(gs->players[targetGoal])->BCirc;
-    if(Circle_inCollisionWithLine(oppBCirc, l))
+    //check if line of site passes through bounding circle
+    if(Circle_inCollisionWithLine(oppBCirc, l, gs->ball->BCirc.r * 2))
     {
         // no view of left post
+        //change line of site to right post
         l.p2 = GO_getPos(Goal_getRPost(gs->goals[targetGoal]));
-        if(Circle_inCollisionWithLine(oppBCirc, l))
+        if(Circle_inCollisionWithLine(oppBCirc, l, gs->ball->BCirc.r * 2))
         {
             // no view of either left or right post
+            // goal is covered, can't score
             return false;
         }else
         {
             // view of right post
-            Vec3D p = GO_getPos(Player_getGameObject(gs->players[targetGoal]));
+            Vec3D p = Player_getPos(gs->players[targetGoal]);
             Vec3D pClosestL = Line_getClosestPointFromPointOnLine(l, p);
-            Vec3D edge = Vec3D_add(p, Vec3D_scalarMult(Vec3D_normalise(Vec3D_subtract(pClosestL, p)), SIZE_PLAYER_W / 2));
+            Vec3D edge = Vec3D_add(p, Vec3D_scalarMult(Vec3D_normalise(Vec3D_subtract(pClosestL, p)), oppBCirc.r));
             Vec3D farEdge;
             farEdge.k = 0;
             farEdge.j = edge.j;
             farEdge.i = 1 / Line_getGradient(l) * (farEdge.j - l.p1.j) + l.p1.i;
-            if(Vec3D_getMagnitude(Vec3D_subtract(farEdge, edge)) >= SIZE_BALL_W) return true;
+            if(Vec3D_getMagnitude(Vec3D_subtract(farEdge, edge)) >= (gs->ball->BCirc.r * 2)) return true;
         }
     }else
     {
         // view of left post
         Line farPostSite = l;
         farPostSite.p2 = GO_getPos(Goal_getRPost(gs->goals[targetGoal]));
-        if(Circle_inCollisionWithLine(oppBCirc, farPostSite))
+        if(Circle_inCollisionWithLine(oppBCirc, farPostSite, gs->ball->BCirc.r * 2))
         {
-            Vec3D p = GO_getPos(Player_getGameObject(gs->players[targetGoal]));
+            Vec3D p = Player_getPos(gs->players[targetGoal]);
             Vec3D pClosestL = Line_getClosestPointFromPointOnLine(farPostSite, p);
             Vec3D edge = Vec3D_add(p, Vec3D_scalarMult(Vec3D_normalise(Vec3D_subtract(pClosestL, p)), SIZE_PLAYER_W / 2));
             Vec3D farEdge;
             farEdge.k = 0;
             farEdge.j = edge.j;
             farEdge.i = 1 / Line_getGradient(l) * (farEdge.j - l.p1.j) + l.p1.i;
-            if(Vec3D_getMagnitude(Vec3D_subtract(farEdge, edge)) >= SIZE_BALL_W) return true;
-        }else return true;
+            if(Vec3D_getMagnitude(Vec3D_subtract(farEdge, edge)) >= (gs->ball->BCirc.r * 2)) return true;
+        }else
+        {
+            gShotTarget = Vec3D_scalarMult(Vec3D_add(GO_getPos(Goal_getLPost(gs->goals[targetGoal])),
+                                                        GO_getPos(Goal_getRPost(gs->goals[targetGoal]))
+                                                    ),0.5);
+            return true;
+        }
     }
+    gShotTarget = OUTSIDE_PLAYABLE_RANGE;
     return false;
 }
 
@@ -234,7 +249,17 @@ Input returnToOwnHalf(GameState* gs, int id)
 Input shoot(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
-    i.shot = VECTOR_S;
+    Vec3D target = Vec3D_equal(gShotTarget, OUTSIDE_PLAYABLE_RANGE) ? GO_getPos(Goal_getLPost(gs->goals[0])) : gShotTarget;
+    Vec3D dir = Vec3D_subtract(target, GO_getPos(gs->ball));
+    i.shot = Vec3D_normalise(dir);
+    return i;
+}
+
+Input playIntoCorner(GameState* gs, int id)
+{
+    Input i = INPUT_NULL;
+    Vec3D dir = Vec3D_subtract(Vec3D_makeVector(SCREEN_WIDTH, SCREEN_HEIGHT, 0), GO_getPos(gs->ball));
+    i.control = Vec3D_normalise(dir);
     return i;
 }
 

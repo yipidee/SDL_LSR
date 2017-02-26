@@ -57,9 +57,9 @@ Input AI_getUserInput(GameState* gs, int id, DecisionTree dt);
 ****************   Branch Node Functions
 *************************************************************/
 bool returnRandBool(GameState* gs, int i);  //return True or False randomly
-bool inOwnHalf(GameState* gs, int i);
-bool hasTouches(GameState* gs, int i);
-bool oppHasAllTouches(GameState* gs, int i);
+bool inOwnHalf(GameState* gs, int i);  //return whether player is in own half
+bool hasTouches(GameState* gs, int i);  //return whether player has touches remaining
+bool oppHasAllTouches(GameState* gs, int i);  //returns true if opposition has all touches remaining
 bool ballInOwnHalf(GameState* gs, int i); //returns true if ball in player's half
 bool ballIsStationary(GameState* gs, int i); //returns whether ball stopped
 bool canScore(GameState* gs, int i);  //open view of goal
@@ -73,6 +73,7 @@ bool concededPenalty(GameState* gs, int i);  //returns whether player conceded p
 Input runToBall(GameState* gs, int i);  //returns Input moving AI in direction of ball
 Input stop(GameState* gs, int id);  //returns NULL input (stops player)
 Input returnToOwnHalf(GameState* gs, int id);  //returns Input returning player to own half
-Input shoot(GameState* gs, int id);
+Input shoot(GameState* gs, int id); //returns input to shoot at goal
+Input playIntoCorner(GameState* gs, int id); //returns input to play ball toward bottom right corner
 
 #endif // _AI_H
