@@ -350,6 +350,12 @@ void Draw_renderScene()
     SDL_RenderClear(gRenderer);
 }
 
+void Draw_line(Vec3D p1, Vec3D p2)
+{
+    SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+    SDL_RenderDrawLine(gRenderer, p1.i, p1.j, p2.i, p2.j);
+}
+
 /********************************************************************
 *********************************************************************
 ****                    Text Label methods                        ***

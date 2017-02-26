@@ -65,4 +65,5 @@ int TL_getHeight(TextLabel tl);
 
 //render all visible sprites to screen in order of creation
 void Draw_renderScene();
+void Draw_line(Vec3D p1, Vec3D p2);
 #endif // _DRAW_H_
