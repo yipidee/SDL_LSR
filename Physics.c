@@ -20,10 +20,10 @@ bool Phys_inCollisionWithBoundary(GameObject* go, Rect r)
     Line T, R, B, L;
     makeWalls(&T, &R, &B, &L, r);
 
-    return (Circle_inCollisionWithLine(go->BCirc, T)
-            ||Circle_inCollisionWithLine(go->BCirc, R)
-            ||Circle_inCollisionWithLine(go->BCirc, B)
-            ||Circle_inCollisionWithLine(go->BCirc, L)
+    return (Circle_inCollisionWithLine(go->BCirc, T, 0)
+            ||Circle_inCollisionWithLine(go->BCirc, R, 0)
+            ||Circle_inCollisionWithLine(go->BCirc, B, 0)
+            ||Circle_inCollisionWithLine(go->BCirc, L, 0)
             );
 }
 
@@ -33,7 +33,7 @@ void Phys_boundaryCollision(GameObject* go, Rect r)
     makeWalls(&T, &R, &B, &L, r);
 
     //determine struck wall and adjust accordingly
-    if(Circle_inCollisionWithLine(go->BCirc, T)||Circle_inCollisionWithLine(go->BCirc, B))
+    if(Circle_inCollisionWithLine(go->BCirc, T, 0)||Circle_inCollisionWithLine(go->BCirc, B, 0))
     {
         go->vel.j *= -CONS_BALL_WALL_COR;
         go->acc.j *= -1;
@@ -51,7 +51,7 @@ void Phys_boundaryCollision(GameObject* go, Rect r)
             GO_move(go, delta);
         }
     }
-    if(Circle_inCollisionWithLine(go->BCirc, R)||Circle_inCollisionWithLine(go->BCirc, L))
+    if(Circle_inCollisionWithLine(go->BCirc, R, 0)||Circle_inCollisionWithLine(go->BCirc, L, 0))
     {
         go->vel.i *= -CONS_BALL_WALL_COR;
         go->acc.i *= -1;
@@ -77,7 +77,7 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
     makeWalls(&T, &R, &B, &L, r);
 
     //determine struck wall and adjust accordingly
-    if(Circle_inCollisionWithLine(go->BCirc, T)||Circle_inCollisionWithLine(go->BCirc, B))
+    if(Circle_inCollisionWithLine(go->BCirc, T, 0)||Circle_inCollisionWithLine(go->BCirc, B, 0))
     {
         if(go->pos.j < go->BCirc.r)
         {
@@ -93,7 +93,7 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
         }
         go->vel.j = 0;
         go->acc.j = 0;
-    }if(Circle_inCollisionWithLine(go->BCirc, R)||Circle_inCollisionWithLine(go->BCirc, L))
+    }if(Circle_inCollisionWithLine(go->BCirc, R, 0)||Circle_inCollisionWithLine(go->BCirc, L, 0))
     {
         if(go->pos.i < go->BCirc.r)
         {
