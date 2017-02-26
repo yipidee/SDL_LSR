@@ -326,10 +326,11 @@ bool Circle_inCollisionRect(Circle c, Rect r)
     return false;
 }
 
-bool Circle_inCollisionWithLine(Circle c, Line l)
+bool Circle_inCollisionWithLine(Circle c, Line l, double offset)
 {
     Vec3D p = {c.x,c.y,0};
-    return (c.r >= Line_getDistanceOfPointFromLine(l, p));
+    bool res = ((c.r + offset) >= Line_getDistanceOfPointFromLine(l, p));
+    return res;
 }
 
 ///////////////////////////////////////////////////
@@ -377,11 +378,12 @@ Vec3D Line_getClosestPointFromPointOnLine(Line l, Vec3D p)
         return closestP;
     }else
     {
-        double grad = Line_getGradient(l);
+        double m1 = Line_getGradient(l);
+        double m2 = -1 / m1;
         double closestYonLine = 0;
         double closestXonLine = 0;
-        closestXonLine = (p.j-l.p1.j)/2/grad + l.p1.i - p.i;
-        closestYonLine = p.j-grad*(closestXonLine-p.i);
+        closestXonLine = (m1*l.p1.i - m2*p.i + p.j - l.p1.j)/(m1 - m2);
+        closestYonLine = m2*(closestXonLine - p.i) + p.j;
         closestP.i = closestXonLine;
         closestP.j = closestYonLine;
         closestP.k = p.k;
@@ -401,6 +403,7 @@ double Line_getDistanceOfPointFromLine(Line l, Vec3D p)
     {
         Vec3D closestP = Line_getClosestPointFromPointOnLine(l, p);
         Vec3D closestVec = Vec3D_subtract(closestP, p);
-        return Vec3D_getMagnitude(closestVec);
+        double M = Vec3D_getMagnitude(closestVec);
+        return M;
     }
 }

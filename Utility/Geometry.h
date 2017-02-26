@@ -178,7 +178,7 @@ typedef struct Line
     Vec3D p2;
 }Line;
 
-bool Circle_inCollisionWithLine(Circle c, Line l);
+bool Circle_inCollisionWithLine(Circle c, Line l, double offset);
 
 double Line_getLength(Line l);
 
