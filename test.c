@@ -262,7 +262,7 @@ void goalScoredTick(bool* resetPositions, DecisionTree dt)
     //if(PhysCont_PhysicalControllerPresent())hideControls();
 
     ++goalStateTickCounter;
-    if(goalStateTickCounter > 200)
+    if(goalStateTickCounter > 150)
     {
         gs->currPlayState = NORMAL_PLAY;
         Player_resetTouches(gs->players[0]);
@@ -302,20 +302,21 @@ void checkRules(GameState* gs, bool* resetPositions)
         return;
     }else if(Player_getTouches(gs->players[1]) < 0)
     {
+        printf("too many touches\n");
         setPenConditions(gs, 1);
         *resetPositions = true;
         return;
     }
 
-    //Check 2: outside own half when opposition has touches
+    //Check 2: touch outside own half when opposition has touches
     if(gs->currPlayState!=PENALTY)
     {
-        if(!Player_isInOwnHalf(gs->players[0]) && !Player_canLeaveOwnHalf(gs->players[0]))
+        if(!Player_isInOwnHalf(gs->players[0]) && !Player_canLeaveOwnHalf(gs->players[0]) && Player_touchingBall(gs->players[0]))
         {
             setPenConditions(gs, 0);
             *resetPositions = true;
             return;
-        }else if(!Player_isInOwnHalf(gs->players[1]) && !Player_canLeaveOwnHalf(gs->players[1]))
+        }else if(!Player_isInOwnHalf(gs->players[1]) && !Player_canLeaveOwnHalf(gs->players[1]) && Player_touchingBall(gs->players[1]))
         {
             setPenConditions(gs, 1);
             *resetPositions = true;
@@ -390,8 +391,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     bool lastTickContact = Player_touchingBall(gs->players[0]);
     collisionWithFreeObject(Player_getGameObject(gs->players[0]), gs->ball, input1, &gs->players[0]->touchingBall);
     if(((lastTickContact == false)&&(Player_touchingBall(gs->players[0]) == true)) || 
-            ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[0]))&&
-            Circle_containsPoint(Player_getGameObject(gs->players[0])->BCirc, GO_getPos(gs->ball).i,GO_getPos(gs->ball).j)))
+            ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[0]))&&Vec3D_isZero(GO_getVel(gs->ball))))
     {
         Player_decrementTouches(gs->players[0]);
         Player_resetTouches(gs->players[1]);
@@ -401,8 +401,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     lastTickContact = Player_touchingBall(gs->players[1]);
     collisionWithFreeObject(Player_getGameObject(gs->players[1]), gs->ball, input2, &gs->players[1]->touchingBall);
     if(((lastTickContact == false)&&(Player_touchingBall(gs->players[1]) == true)) || 
-            ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[1]))&&
-            Circle_containsPoint(Player_getGameObject(gs->players[1])->BCirc, GO_getPos(gs->ball).i,GO_getPos(gs->ball).j)))
+            ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[1]))&&Vec3D_isZero(GO_getVel(gs->ball))))
     {
         Player_decrementTouches(gs->players[1]);
         Player_resetTouches(gs->players[0]);

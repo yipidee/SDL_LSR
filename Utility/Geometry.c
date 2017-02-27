@@ -47,7 +47,7 @@ double Vec3D_dotProduct(Vec3D v1, Vec3D v2)
 
 Vec3D Vec3D_crossProduct(Vec3D v1, Vec3D v2)
 {
-    int coeff1, coeff2, coeff3;
+    double coeff1, coeff2, coeff3;
     coeff1 = v1.j*v2.k-v2.j*v1.k;
     coeff2 = v1.i*v2.k-v2.i*v1.k;
     coeff3 = v1.i*v2.j-v2.i*v1.j;
@@ -403,7 +403,6 @@ double Line_getDistanceOfPointFromLine(Line l, Vec3D p)
     {
         Vec3D closestP = Line_getClosestPointFromPointOnLine(l, p);
         Vec3D closestVec = Vec3D_subtract(closestP, p);
-        double M = Vec3D_getMagnitude(closestVec);
-        return M;
+        return Vec3D_getMagnitude(closestVec);
     }
 }
