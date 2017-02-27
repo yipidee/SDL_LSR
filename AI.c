@@ -43,6 +43,7 @@ struct BFuncEntry BFuncList[] = {
             {"ballIsStationary", &ballIsStationary},
             {"hasTouches", &hasTouches},
             {"oppHasAllTouches", &oppHasAllTouches},
+            {"oppHasTouches", &oppHasTouches},
             {"touchingBall", &touchingBall},
             {"canScore", &canScore},
             {"isPenalty", &isPenalty},
@@ -124,6 +125,12 @@ bool oppHasAllTouches(GameState* gs, int i)
 {
     int id = i == 0 ? 1 : 0;
     return (gs->players[id]->touches == CONS_MAX_TOUCHES);
+}
+
+bool oppHasTouches(GameState* gs, int i)
+{
+    int id = i == 0 ? 1 : 0;
+    return (gs->players[id]->touches > 0);
 }
 
 //returns true if ball in player's half
