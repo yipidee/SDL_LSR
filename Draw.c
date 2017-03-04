@@ -392,9 +392,9 @@ void _initTL(TextLabel tl)
     tl->mCurrLength = 0;
     SDL_Color c = RGB_BLACK;
     tl->mFontColour = c;
-    tl->mTextSize = DEFAULT_TEXT_SIZE;
     strcpy(tl->mText, "\0");
     tl->mCurrLength = strlen(tl->mText);
+    tl->mTextSize = DEFAULT_TEXT_SIZE;
     TL_setFont(tl, NULL);
     tl->textSurf = NULL;
     tl->x = 0; tl->y = 0; tl->w = 0; tl->h = 0;
@@ -463,9 +463,16 @@ void TL_setText(TextLabel tl, char* text)
 {
     if(tl->_initialised)
     {
-        tl->mCurrLength = strlen(text);
-        if(tl->mCurrLength<=TEXT_LABEL_MAX_LENGTH) strcpy(tl->mText, text);
-        _renderTextToSurface(tl);
+        if(!text)
+        {
+            strcpy(tl->mText, "\0");
+            tl->mCurrLength = strlen(tl->mText);
+        }else
+        {
+            tl->mCurrLength = strlen(text);
+            if(tl->mCurrLength<=TEXT_LABEL_MAX_LENGTH) strcpy(tl->mText, text);
+        }
+       _renderTextToSurface(tl);
     }
 }
 
