@@ -27,7 +27,8 @@ void gameOverTick();
 void hideControls();
 
 //globally available pointer to game state
-GameState* gs;
+GameState* gs = NULL;
+TextLabel gInfo = NULL;
 
 int main(int argc, char* argv[])
 {
@@ -78,6 +79,10 @@ int main(int argc, char* argv[])
     TextLabel p2Touches = TL_createTextLabel(NULL, 0, 0);
     TL_setFontSize(p2Touches, 20);
     TL_setFont(p2Touches, NULL);
+
+    gInfo = TL_createTextLabel(NULL, 0, 0);
+    TL_setFontSize(gInfo, 80);
+    TL_setFont(gInfo, NULL);
 
     //Set label positions
     int a = TL_getWidth(p1Name);
@@ -170,6 +175,10 @@ int main(int argc, char* argv[])
         TL_renderTextLabel(p2Score);
         TL_renderTextLabel(p1Touches);
         TL_renderTextLabel(p2Touches);
+        // content of gInfo label is not constant so draw position should be calculated before render
+        TL_setX(gInfo, (SCREEN_WIDTH - TL_getWidth(gInfo)) / 2);
+        TL_setY(gInfo, (SCREEN_HEIGHT - TL_getHeight(gInfo)) / 2);
+        TL_renderTextLabel(gInfo);
 
         //first to 5 wins and triggers quit game
         if(gs->players[0]->score >= winningScore || gs->players[1]->score >= winningScore) quit = true;
@@ -183,12 +192,14 @@ int main(int argc, char* argv[])
     TL_destroyTextLabel(p2Score);
     TL_destroyTextLabel(p1Touches);
     TL_destroyTextLabel(p2Touches);
+    TL_destroyTextLabel(gInfo);
     p1Name = NULL;
     p2Name = NULL;
     p1Score = NULL;
     p2Score = NULL;
     p1Touches = NULL;
     p2Touches = NULL;
+    gInfo = NULL;
     releaseResources();
 
     return 0;
@@ -234,21 +245,36 @@ void checkForGoal(GameState* gs)
 
 void penaltyTick(bool* resetPositions, DecisionTree dt)
 {
+    static bool countDownOn = false;
+    static int penaltyTickCounter = 0;
+
     //Step 0: check for reset or change in positions
     if(*resetPositions){
         takePenaltyPositions(gs);
         *resetPositions = false;
+        countDownOn = true;
+    }
+
+    if(countDownOn) ++penaltyTickCounter;
+    if(penaltyTickCounter == 1) TL_setText(gInfo, "Penalty!");
+    if(penaltyTickCounter == 20)
+    {
+        TL_setText(gInfo, NULL);
+        countDownOn = false;
+        penaltyTickCounter = 0;
     }
 
     //Step 1: get input from user (if in playstate requiring input)
-    Input input1 = UI_getUserInput();
-    Input input2 = AI_getUserInput(gs, 1, dt);
-    if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
+    if(!countDownOn)
+    {
+        Input input1 = UI_getUserInput();
+        Input input2 = AI_getUserInput(gs, 1, dt);
+        if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
 
-    //Step 2: Update physics
-    //update positions
-    updatePhysics(gs, input1, input2);
-
+        //Step 2: Update physics
+        //update positions
+        updatePhysics(gs, input1, input2);
+    }
     //do penalty related stuff here
     checkRules(gs, resetPositions);
     checkForGoal(gs);
@@ -262,6 +288,7 @@ void goalScoredTick(bool* resetPositions, DecisionTree dt)
     //if(PhysCont_PhysicalControllerPresent())hideControls();
 
     ++goalStateTickCounter;
+    if(goalStateTickCounter == 1)TL_setText(gInfo, "GOAL!");
     if(goalStateTickCounter > 150)
     {
         gs->currPlayState = NORMAL_PLAY;
@@ -269,6 +296,7 @@ void goalScoredTick(bool* resetPositions, DecisionTree dt)
         Player_resetTouches(gs->players[1]);
         *resetPositions = true;
         goalStateTickCounter = 0;
+        TL_setText(gInfo, NULL);
     }
 }
 
@@ -302,7 +330,6 @@ void checkRules(GameState* gs, bool* resetPositions)
         return;
     }else if(Player_getTouches(gs->players[1]) < 0)
     {
-        printf("too many touches\n");
         setPenConditions(gs, 1);
         *resetPositions = true;
         return;

@@ -38,7 +38,7 @@
 // in a decision tree for memory management purposes
 numnodes = 15
 
-// The actual node definitions and there interlinking
+// The actual node definitions and their interlinking
 &0:func = isPenalty yes = 1 no = 8
 //////////////////////////////////////////////////////
 //////           Penalty Behaviour          //////////
@@ -48,7 +48,7 @@ numnodes = 15
 #3:func = stop
 &4:func = ballIsStationary yes = 5 no = 3
 #5:func = runToBall
-&6:func = touchingBall yes = 7 no = 5
+&6:func = touchingBall yes = 10 no = 5
 #7:func = shoot
 //////////////////////////////////////////////////////
 ////////       Non Penalty Behaviour        //////////
