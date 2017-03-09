@@ -257,7 +257,7 @@ void penaltyTick(bool* resetPositions, DecisionTree dt)
 
     if(countDownOn) ++penaltyTickCounter;
     if(penaltyTickCounter == 1) TL_setText(gInfo, "Penalty!");
-    if(penaltyTickCounter == 20)
+    if(penaltyTickCounter == 40)
     {
         TL_setText(gInfo, NULL);
         countDownOn = false;

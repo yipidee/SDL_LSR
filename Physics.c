@@ -144,7 +144,7 @@ void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, floa
     dirOfCollision = Vec3D_normalise(dirOfCollision);
     Vec3D perpToCollision = Vec3D_getUnitNormal(dirOfCollision);
 
-    if(go1->isStationary && !Vec3D_equal(GO_getVel(go2), VECTOR_ZERO))
+    if(go1->isStationary && !Vec3D_isZero(GO_getVel(go2)))
     {
         double alpha;
         alpha = Vec3D_getCosAlpha(go2->vel, dirOfCollision);
@@ -155,31 +155,31 @@ void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, floa
         uDOC = Vec3D_scalarMult(uDOC, -1.0);
         GO_setVel(go2, Vec3D_add(uDOC, uPTC));
         GO_setAcc(go2, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go2)),CONS_BALL_COURT_DEACC));
-    }else if(go2->isStationary && !Vec3D_equal(GO_getVel(go1), VECTOR_ZERO))
+    }else if(go2->isStationary && !Vec3D_isZero(GO_getVel(go1)))
     {
         double alpha;
         alpha = Vec3D_getCosAlpha(go1->vel, dirOfCollision);
         Vec3D uDOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go1->vel) * alpha);
-        alpha = Vec3D_getCosAlpha(go2->vel, perpToCollision);
+        alpha = Vec3D_getCosAlpha(go1->vel, perpToCollision);
         Vec3D uPTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go1->vel) * alpha);
 
         uDOC = Vec3D_scalarMult(uDOC, -1.0);
         GO_setVel(go1, Vec3D_add(uDOC, uPTC));
         GO_setAcc(go1, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go1)),CONS_BALL_COURT_DEACC));
-    }else if(!(Vec3D_equal(go1->vel, VECTOR_ZERO)&&Vec3D_equal(go2->vel, VECTOR_ZERO)))
+    }else if((!Vec3D_isZero(go1->vel))&&(!Vec3D_isZero(go2->vel)))
     {
         //get component of vel in direction of collision
         double  alpha1;
-        alpha1 = Vec3D_equal(go1->vel, VECTOR_ZERO) ? 0 : Vec3D_getCosAlpha(go1->vel, dirOfCollision);
+        alpha1 = Vec3D_getCosAlpha(go1->vel, dirOfCollision);
         double  alpha2;
-        alpha2 = Vec3D_equal(go2->vel, VECTOR_ZERO) ? 0 : Vec3D_getCosAlpha(go2->vel, Vec3D_scalarMult(dirOfCollision, -1));
+        alpha2 = Vec3D_getCosAlpha(go2->vel, Vec3D_scalarMult(dirOfCollision, -1));
 
         //velocities precollision in cirection of collision
         Vec3D u1DOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go1->vel) * alpha1);
         Vec3D u2DOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(go2->vel) * alpha2);
 
-        alpha1 = Vec3D_equal(go1->vel, VECTOR_ZERO) ? 0 : Vec3D_getCosAlpha(go1->vel, perpToCollision);
-        alpha2 = Vec3D_equal(go2->vel, VECTOR_ZERO) ? 0 : Vec3D_getCosAlpha(go2->vel, Vec3D_scalarMult(perpToCollision, -1));
+        alpha1 = Vec3D_getCosAlpha(go1->vel, perpToCollision);
+        alpha2 = Vec3D_getCosAlpha(go2->vel, Vec3D_scalarMult(perpToCollision, -1));
 
         //velocities precollision perp to cirection of collision
         Vec3D u1PTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(go1->vel) * alpha1);
@@ -197,11 +197,35 @@ void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, floa
         GO_setAcc(go2, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(go2)),CONS_BALL_COURT_DEACC));
     }else
     {
-        Vec3D dirOfContact = Vec3D_subtract(go2->pos, go1->pos);
-        dirOfContact = Vec3D_scalarMult(Vec3D_normalise(dirOfContact), Vec3D_getMagnitude(dirOfContact)+1.0);
-        GO_setPos(go2, Vec3D_add(GO_getPos(go1), dirOfContact));
-        GO_setVel(go2, VECTOR_ZERO);
-        GO_setAcc(go2, VECTOR_ZERO);
+        // determine stationary and moving objects
+        GameObject* stationary = NULL;
+        GameObject* moving = NULL;
+        stationary = Vec3D_isZero(GO_getVel(go1)) ? go1 : go2;
+        moving = stationary == go1 ? go2 : go1;
+        dirOfCollision = Vec3D_subtract(GO_getPos(stationary), GO_getPos(moving));
+        dirOfCollision = Vec3D_normalise(dirOfCollision);
+        perpToCollision = Vec3D_getUnitNormal(dirOfCollision);
+
+        //get component of vel in direction of collision
+        double  alpha;
+        alpha = Vec3D_getCosAlpha(GO_getVel(moving), dirOfCollision);
+
+        //velocities precollision in cirection of collision
+        Vec3D uDOC = Vec3D_scalarMult(dirOfCollision, Vec3D_getMagnitude(GO_getVel(moving)) * alpha);
+
+        alpha = Vec3D_getCosAlpha(GO_getVel(moving), perpToCollision);
+
+        //velocities precollision perp to cirection of collision
+        Vec3D uPTC = Vec3D_scalarMult(perpToCollision, Vec3D_getMagnitude(GO_getVel(moving)) * alpha);
+
+        GO_setVel(moving, uDOC);
+
+        //collision in dir of collision
+        Phys_conservationMomentumCollision1D(moving, stationary, COR);
+
+        //resolve into global coords again
+        GO_setVel(moving, Vec3D_add(GO_getVel(moving), uPTC));
+        GO_setAcc(stationary, Vec3D_scalarMult(Vec3D_normalise(GO_getVel(stationary)),CONS_BALL_COURT_DEACC));
     }
 }
 
