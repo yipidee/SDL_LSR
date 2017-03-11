@@ -46,6 +46,7 @@
 #define PATH_TO_ORANGE_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/orange.png"
 #define PATH_TO_RED_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/red.png"
 #define PATH_TO_BLUE_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/blue.png"
+#define PATH_TO_BALL "/home/adrian/dev/SDL/TT_LSR/Assets/ball.png"
 #define PATH_TO_POST_ART PATH_TO_RED_CONTROLLER
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -97,5 +98,6 @@
 #define DT_DEFAULT "Assets/decision_trees/_default_.dt"
 
 #define PI 3.14159265358979323846
+#define MAX_LONG_VALUE 4294967295
 
 #endif // CONSTANTS_H_

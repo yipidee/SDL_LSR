@@ -18,6 +18,9 @@ static bool isInitialised = false;
 static List loadedTextures;
 static void freeListedTexture(void* data);
 
+//static counter for animation
+unsigned long animation_count = 0;
+
 struct textureListItem
 {
     char* name;
@@ -76,11 +79,11 @@ void Spritesheet_destroy(Spritesheet s)
 struct _Sprite
 {
     double* gX, * gY, * gZ;        //global x, y and z of sprite
-    int gW, gH;                 //global width and height of sprite
+    int gW, gH, angle;                 //global width and height of sprite
     bool isVisible, posRefByCentre; //flag to mark a sprite for drawing
     Spritesheet spriteSheet;   //pointer to texture
     int* state;                 //state
-    int frame;                  //current frame
+    int frame, frameRate;      //current frame
     bool isFullscreen;     //whether exists in global space or directly on screen
 };
 
@@ -89,7 +92,9 @@ Sprite Sprite_createSprite(char* pathToSpriteSheet, int sW, int sH, int numState
     Sprite s = malloc(sizeof(struct _Sprite));
     Spritesheet ss = Spritesheet_create(pathToSpriteSheet, sW, sH, numStates, framesPerState);
     s->spriteSheet = ss;
-    s->frame=0;
+    s->frame = 0;
+    s->angle = 0;
+    s->frameRate = 5;
     s->gH = 0;
     s->gW = 0;
     s->isFullscreen = false;
@@ -147,15 +152,25 @@ void Sprite_renderSprite(Sprite s)
     //source rect on spritesheet from where to read the image
     SDL_Rect srcRect;
     SDL_Rect* pSrcRect;
-    if(s->spriteSheet->h == 0 || s->spriteSheet->w == 0)
+    if(s->spriteSheet->h == 0 && s->spriteSheet->w == 0)
     {
         pSrcRect = NULL;
     }else{
-         SDL_Rect tmpRect= {
-                s->frame*s->spriteSheet->w,         //x
-                currState*s->spriteSheet->h,        //y
-                s->spriteSheet->w,                  //w
-                s->spriteSheet->h                   //h
+        int localW, localH;
+        if(s->spriteSheet->w == USE_FULL_IMAGE_WIDTH)
+        {
+            SDL_QueryTexture(s->spriteSheet->spritesheet, NULL, NULL, &localW, NULL);
+            localH = s->spriteSheet->h;
+        }else  // using full image height
+        {
+            SDL_QueryTexture(s->spriteSheet->spritesheet, NULL, NULL, NULL, &localH);
+            localW = s->spriteSheet->w;
+        }
+        SDL_Rect tmpRect= {
+               s->frame*localW,         //x
+               currState*localH,        //y
+               localW,                  //w
+               localH                   //h
         };
         srcRect = tmpRect;
         pSrcRect = &srcRect;
@@ -197,7 +212,42 @@ void Sprite_renderSprite(Sprite s)
     }
 
     //copy the image into the renderer for render to screen at next step
-    SDL_RenderCopyEx(gRenderer, s->spriteSheet->spritesheet, pSrcRect, pDstRect, 0, NULL, 0);
+    SDL_RenderCopyEx(gRenderer, s->spriteSheet->spritesheet, pSrcRect, pDstRect, s->angle, NULL, 0);
+}
+
+void Sprite_tickFrame(Sprite s)
+{
+    if(s->spriteSheet->framesPerState)
+    {
+        ++s->frame;
+        int state_l = s->state ? *s->state : 0;
+        if(s->frame >= s->spriteSheet->framesPerState[state_l]) s->frame = 0;
+    }
+}
+
+int Sprite_getCurrFrame(Sprite s)
+{
+    return s->frame;
+}
+
+int* Sprite_getRateSetAddress(Sprite s)
+{
+    return &s->frameRate;
+}
+
+void Sprite_setFrameRate(int* addr, int rate)
+{
+    *addr = rate;
+}
+
+int* Sprite_getAngleSetAddress(Sprite s)
+{
+    return &s->angle;
+}
+
+void Sprite_setAngle(int* addr, int angle)
+{
+    *addr = angle;
 }
 
 /********************************************************************
@@ -338,11 +388,17 @@ void Viewport_setPosByCentre(Vec3D p)
 
 void Draw_renderScene()
 {
+    // tick count
+    ++animation_count;
+    if(animation_count >= MAX_LONG_VALUE) animation_count = 0;
+    
+    // render all sprites
     ListNode* curr = sprites.head;
     while(curr)
     {
         Sprite s = curr->data;
         if(s->isVisible)Sprite_renderSprite(s);
+        if((s->frameRate != MAX_LONG_VALUE)&&((animation_count % s->frameRate)==0)) Sprite_tickFrame(s);
         curr = curr->next;
     }
     SDL_RenderPresent(gRenderer);

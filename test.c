@@ -30,6 +30,11 @@ void hideControls();
 GameState* gs = NULL;
 TextLabel gInfo = NULL;
 
+//Animation data for Ball, (shouldn't really be here)
+int BALL_FRAME_INFO[] = {4};
+int* ball_frameRate = NULL;
+int* ball_angle = NULL;
+
 int main(int argc, char* argv[])
 {
     Draw_init();
@@ -157,8 +162,15 @@ int main(int argc, char* argv[])
                 break;
         }
 
+        // intermediate step for ball animation, ugly, I know
+        if(Vec3D_isZero(GO_getVel(gs->ball)))Sprite_setFrameRate(ball_frameRate, MAX_LONG_VALUE);
+        else Sprite_setFrameRate(ball_frameRate, 10);
+        int alpha = (int)(Vec3D_getAngle(GO_getVel(gs->ball), VECTOR_N));
+        Sprite_setAngle(ball_angle, alpha);
+
         //Step 3: draw result
         Draw_renderScene();
+
         snprintf(p1score, 20, "goals %i", gs->players[0]->score);
         snprintf(p2score, 20, "goals %i", gs->players[1]->score);
         t0 = gs->players[0]->touches < 0 ? 0 : gs->players[0]->touches;
@@ -607,11 +619,13 @@ void loadSprites()
     Sprite_setSpriteInWorldPosRef(player_cs, &gs->players[1]->go->pos.i, &gs->players[1]->go->pos.j, NULL);
 
     //sprite rep of ball
-    Sprite ball_s = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite ball_s = Sprite_createSprite(PATH_TO_BALL, 35, USE_FULL_IMAGE_HEIGHT, 1, BALL_FRAME_INFO);
     Sprite_setSpriteInWorldDims(ball_s, SIZE_BALL_W, SIZE_BALL_H);
     Sprite_posByCentre(ball_s, true);
     Sprite_setSpriteInWorldPosRef(ball_s, &gs->ball->pos.i, &gs->ball->pos.j, NULL);
-
+    ball_frameRate = Sprite_getRateSetAddress(ball_s);
+    ball_angle = Sprite_getAngleSetAddress(ball_s);
+    
     //sprites for posts of goals
     Sprite post1_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post1_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);

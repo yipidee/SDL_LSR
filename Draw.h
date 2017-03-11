@@ -34,6 +34,12 @@ void Sprite_setSpriteInWorldDims(Sprite s, int w, int h);
 void Sprite_setSpriteInWorldPosRef(Sprite s, double* x, double* y, double* z);
 void Sprite_setSpriteStateRef(Sprite s, int* state);
 void Sprite_renderSprite(Sprite s);
+void Sprite_tickFrame(Sprite s);
+int Sprite_getCurrFrame(Sprite s);
+int* Sprite_getRateSetAddress(Sprite s);
+void Sprite_setFrameRate(int* rate, int r);
+int* Sprite_getAngleSetAddress(Sprite s);
+void Sprite_setAngle(int* addr, int angle);
 
 //text label methods
 //Creates a label with text at pos x and y
