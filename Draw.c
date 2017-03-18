@@ -94,7 +94,7 @@ Sprite Sprite_createSprite(char* pathToSpriteSheet, int sW, int sH, int numState
     s->spriteSheet = ss;
     s->frame = 0;
     s->angle = 0;
-    s->frameRate = 5;
+    s->frameRate = 7;
     s->gH = 0;
     s->gW = 0;
     s->isFullscreen = false;
@@ -401,6 +401,10 @@ void Draw_renderScene()
         if((s->frameRate != MAX_LONG_VALUE)&&((animation_count % s->frameRate)==0)) Sprite_tickFrame(s);
         curr = curr->next;
     }
+}
+
+void Draw_clearScreen()
+{
     SDL_RenderPresent(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, COLOUR_BLACK);
     SDL_RenderClear(gRenderer);

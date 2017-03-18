@@ -35,6 +35,13 @@ int BALL_FRAME_INFO[] = {4};
 int* ball_frameRate = NULL;
 int* ball_angle = NULL;
 
+int CALFNUTS_FRAME_INFO[] = {4};
+int* calfnuts_frameRate = NULL;
+int* calfnuts_angle = NULL;
+
+//background anchor, again horrible architecture
+double ZERO_ANCHOR = 0;
+
 int main(int argc, char* argv[])
 {
     Draw_init();
@@ -163,10 +170,30 @@ int main(int argc, char* argv[])
         }
 
         // intermediate step for ball animation, ugly, I know
-        if(Vec3D_isZero(GO_getVel(gs->ball)))Sprite_setFrameRate(ball_frameRate, MAX_LONG_VALUE);
-        else Sprite_setFrameRate(ball_frameRate, 10);
-        int alpha = (int)(Vec3D_getAngle(GO_getVel(gs->ball), VECTOR_N));
-        Sprite_setAngle(ball_angle, alpha);
+        if(Vec3D_isZero(GO_getVel(gs->ball)))
+        {
+            Sprite_setFrameRate(ball_frameRate, MAX_LONG_VALUE);
+        }else if(Vec3D_getMagnitude(GO_getVel(gs->ball))>CONS_MAX_SPEED)
+        {
+            Sprite_setFrameRate(ball_frameRate, 5);
+        }else
+        {
+            Sprite_setFrameRate(ball_frameRate, 10);
+        }
+
+        if(Vec3D_isZero(GO_getVel(Player_getGameObject(gs->players[1]))))
+        {
+            Sprite_setFrameRate(calfnuts_frameRate, MAX_LONG_VALUE);
+        }else
+        {
+            Sprite_setFrameRate(calfnuts_frameRate, 5);
+        }
+
+        double alpha = !Vec3D_isZero(GO_getVel(gs->ball)) ? (Vec3D_getAngle(GO_getVel(gs->ball), VECTOR_N)) : 0 ;
+        Sprite_setAngle(ball_angle, (int)(alpha * (double)180 / PI));
+
+        alpha = !Vec3D_isZero(Player_getVel(gs->players[1])) ? (Vec3D_getAngle(Player_getVel(gs->players[1]), VECTOR_N)) : (Vec3D_getAngle(Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[1])), VECTOR_N));
+        Sprite_setAngle(calfnuts_angle, (int)(alpha * (double)180 / PI));
 
         //Step 3: draw result
         Draw_renderScene();
@@ -191,6 +218,9 @@ int main(int argc, char* argv[])
         TL_setX(gInfo, (SCREEN_WIDTH - TL_getWidth(gInfo)) / 2);
         TL_setY(gInfo, (SCREEN_HEIGHT - TL_getHeight(gInfo)) / 2);
         TL_renderTextLabel(gInfo);
+
+        // render content of renderer to screen and reset
+        Draw_clearScreen();
 
         //first to 5 wins and triggers quit game
         if(gs->players[0]->score >= winningScore || gs->players[1]->score >= winningScore) quit = true;
@@ -607,16 +637,24 @@ void releaseResources()
 
 void loadSprites()
 {
+    // Background image for court
+    Sprite bg =  Sprite_createSprite(PATH_TO_COURT, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 90, NULL);
+    Sprite_setSpriteInWorldDims(bg, SCREEN_WIDTH, SCREEN_HEIGHT);
+    Sprite_posByCentre(bg, false);
+    Sprite_setSpriteInWorldPosRef(bg, &ZERO_ANCHOR, &ZERO_ANCHOR, NULL);
+
     //sprite rep of players
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
     Sprite_setSpriteInWorldPosRef(player_s, &gs->players[0]->go->pos.i, &gs->players[0]->go->pos.j, NULL);
 
-    Sprite player_cs = Sprite_createSprite(PATH_TO_BLUE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite player_cs = Sprite_createSprite(PATH_TO_CALFNUTS, 69, USE_FULL_IMAGE_HEIGHT, 1, CALFNUTS_FRAME_INFO);
     Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_cs, true);
     Sprite_setSpriteInWorldPosRef(player_cs, &gs->players[1]->go->pos.i, &gs->players[1]->go->pos.j, NULL);
+    calfnuts_frameRate = Sprite_getRateSetAddress(player_cs);
+    calfnuts_angle = Sprite_getAngleSetAddress(player_cs);
 
     //sprite rep of ball
     Sprite ball_s = Sprite_createSprite(PATH_TO_BALL, 35, USE_FULL_IMAGE_HEIGHT, 1, BALL_FRAME_INFO);

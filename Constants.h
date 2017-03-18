@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 #define SCREEN_WIDTH 480
-#define SCREEN_HEIGHT 640
+#define SCREEN_HEIGHT 675
 #define SIZE_CONTROLLER_1 100
 #define SIZE_CONTROLLER_2 80
 #define SIZE_CONTROLLER_3 80
@@ -47,6 +47,8 @@
 #define PATH_TO_RED_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/red.png"
 #define PATH_TO_BLUE_CONTROLLER "/home/adrian/dev/SDL/TT_LSR/Assets/blue.png"
 #define PATH_TO_BALL "/home/adrian/dev/SDL/TT_LSR/Assets/ball.png"
+#define PATH_TO_COURT "/home/adrian/dev/SDL/TT_LSR/Assets/court.png"
+#define PATH_TO_CALFNUTS "/home/adrian/dev/SDL/TT_LSR/Assets/calfnuts_sprite.png"
 #define PATH_TO_POST_ART PATH_TO_RED_CONTROLLER
 
 //////////////////////////////////////////////////////////////////////////////////////////
