@@ -83,6 +83,8 @@ Vec3D Vec3D_rotateVectorByAlphaRad(Vec3D v, double alpha);
 //rotate a vector anticlockwise through alpha radians, pass cos alpha as arg
 Vec3D Vec3D_rotateVectorByCosAlpha(Vec3D v, double cosAlpha);
 
+//return the value of v in an orthogonal system with x axis as refXaxis
+Vec3D Vec3D_transposeIntoRefCoordSystem(Vec3D v, Vec3D refXaxis);
 
 ///////////////////////////////////////////////////
 ////           Rect

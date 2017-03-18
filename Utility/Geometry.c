@@ -74,7 +74,12 @@ double Vec3D_getSinAlpha(Vec3D v1, Vec3D v2)
 //get angle between vectors
 double Vec3D_getAngle(Vec3D v1, Vec3D v2)
 {
-    return acos(Vec3D_getCosAlpha(v1, v2));
+    // acos returns value between 0~PI, no indication of direction
+    double angle = acos(Vec3D_getCosAlpha(v1, v2));
+    short dirFix = 1;
+    Vec3D v2Inv1 = Vec3D_transposeIntoRefCoordSystem(v2, v1);
+    if(v2Inv1.j < 0) dirFix=-1;
+    return angle*dirFix;
 }
 
 //get magnitude
@@ -145,6 +150,15 @@ Vec3D Vec3D_rotateVectorByCosAlpha(Vec3D v, double cosAlpha)
     return res;
 }
 
+Vec3D Vec3D_transposeIntoRefCoordSystem(Vec3D v, Vec3D refXaxis)
+{
+    Vec3D unitXdash = Vec3D_normalise(refXaxis);
+    Vec3D unitYdash = Vec3D_getUnitNormal(unitXdash);
+    double coeffYdash = (v.j * unitXdash.i - v.i * unitXdash.j) / (unitYdash.j*unitXdash.i - unitYdash.i*unitXdash.j);
+    double coeffXdash = (v.i - coeffYdash*unitYdash.i) / unitXdash.i;
+    Vec3D res = {coeffXdash, coeffYdash, 0};
+    return res;    
+}
 
 ///////////////////////////////////////////////////
 ////           Rect
