@@ -28,6 +28,11 @@ void Player_destroy(Player p)
     if(p)free(p);
 }
 
+void Player_setState(Player p, PlayerState state)
+{
+    if(p)p->state = state;
+}
+
 void Player_setOwnHalf(Player p, Rect r)
 {
     p->ownHalf = r;
@@ -96,4 +101,19 @@ void Player_setCanLeaveHalf(Player p, bool b)
 bool Player_canLeaveOwnHalf(Player p)
 {
     return p->canLeaveOwnHalf;
+}
+
+void Player_updateState(Player p, GameObject* ball)
+{
+    double alpha;
+    if(Vec3D_isZero(GO_getVel(Player_getGameObject(p))))
+    {
+        Player_setState(p, STATIONARY);
+        alpha = Vec3D_getAngle(Vec3D_subtract(GO_getPos(ball), Player_getPos(p)), VECTOR_N);
+    }else
+    {
+        alpha = Vec3D_getAngle(Player_getVel(p), VECTOR_N);
+        Player_setState(p, RUNNING);
+    }
+    GO_setRPos(Player_getGameObject(p), alpha);
 }

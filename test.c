@@ -36,7 +36,6 @@ int* ball_frameRate = NULL;
 
 int CALFNUTS_FRAME_INFO[] = {1, 4};
 int* calfnuts_frameRate = NULL;
-int calfnuts_state = 0;  // 0:stopped, 1:moving
 
 //background anchor, again horrible architecture
 double ZERO_ANCHOR = 0;
@@ -532,13 +531,10 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
         Sprite_setFrameRate(ball_frameRate, 10);
     }
 
-    calfnuts_state = Vec3D_isZero(GO_getVel(Player_getGameObject(gs->players[1]))) ? 0 : 1;
-
     double alpha = !Vec3D_isZero(GO_getVel(gs->ball)) ? (Vec3D_getAngle(GO_getVel(gs->ball), VECTOR_N)) : 0 ;
     GO_setRPos(gs->ball, alpha);
 
-    alpha = !Vec3D_isZero(Player_getVel(gs->players[1])) ? (Vec3D_getAngle(Player_getVel(gs->players[1]), VECTOR_N)) : (Vec3D_getAngle(Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[1])), VECTOR_N));
-    GO_setRPos(Player_getGameObject(gs->players[1]), alpha);
+    Player_updateState(gs->players[1], gs->ball);
 }
 
 //TODO move this to Physics
@@ -648,7 +644,7 @@ void loadSprites()
     Sprite_setSpriteInWorldPosRef(player_cs, &gs->players[1]->go->pos.i, &gs->players[1]->go->pos.j, NULL);
     calfnuts_frameRate = Sprite_getRateSetAddress(player_cs);
     Sprite_setSpriteRotationRef(player_cs, &gs->players[1]->go->rPos);
-    Sprite_setSpriteStateRef(player_cs, &calfnuts_state);
+    Sprite_setSpriteStateRef(player_cs, (int*)&gs->players[1]->state);
     Sprite_setFR(player_cs, 5);
 
     //sprite rep of ball

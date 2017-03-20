@@ -18,8 +18,8 @@
 #define SIZE_CONTROLLER_KNOB3 50
 #define SIZE_PLAYER_H 45
 #define SIZE_PLAYER_W 45
-#define SIZE_BALL_H 20
-#define SIZE_BALL_W 20
+#define SIZE_BALL_H 22
+#define SIZE_BALL_W 22
 #define SIZE_PITCH 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT
 #define SIZE_BEHIND_GOAL_AREA 50
 #define SIZE_POST_DIAMETER 8
@@ -79,8 +79,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////        Defines for physics constants                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
-#define CONS_MAX_APPLIABLE_IMPULSE 65
-#define CONS_MAX_CONTROL_IMPULSE 35
+#define CONS_MAX_APPLIABLE_IMPULSE 60
+#define CONS_MAX_CONTROL_IMPULSE 40
 #define CONS_MAX_SPEED 7
 #define CONS_BALL_WALL_COR 0.65
 #define CONS_BALL_PLAYER_COR 0.1

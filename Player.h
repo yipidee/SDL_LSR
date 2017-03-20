@@ -44,8 +44,8 @@ typedef struct _Player* Player;
 typedef enum PlayerState
 {
     STATIONARY = 0,
-    RUNNING = 1,
-    KICKING = 2,
+    RUNNING = 1
+    //KICKING = 2,
 }PlayerState;
 
 struct _Player
@@ -60,6 +60,7 @@ struct _Player
 
 Player Player_create(GameObject* go);
 void Player_destroy(Player p);
+void Player_setState(Player p, PlayerState state);
 void Player_setOwnHalf(Player p, Rect r);
 int Player_getTouches(Player p);
 void Player_decrementTouches(Player p);
@@ -74,5 +75,6 @@ void Player_clearPenaltyFlag(Player p);
 bool Player_concededPenalty(Player p);
 void Player_setCanLeaveHalf(Player p, bool b);
 bool Player_canLeaveOwnHalf(Player p);
+void Player_updateState(Player p, GameObject* ball);
 
 #endif // _PLAYER_H_
