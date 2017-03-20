@@ -33,11 +33,10 @@ TextLabel gInfo = NULL;
 //Animation data for Ball, (shouldn't really be here)
 int BALL_FRAME_INFO[] = {4};
 int* ball_frameRate = NULL;
-int* ball_angle = NULL;
 
-int CALFNUTS_FRAME_INFO[] = {4};
+int CALFNUTS_FRAME_INFO[] = {1, 4};
 int* calfnuts_frameRate = NULL;
-int* calfnuts_angle = NULL;
+int calfnuts_state = 0;  // 0:stopped, 1:moving
 
 //background anchor, again horrible architecture
 double ZERO_ANCHOR = 0;
@@ -169,33 +168,7 @@ int main(int argc, char* argv[])
                 break;
         }
 
-        // intermediate step for ball animation, ugly, I know
-        if(Vec3D_isZero(GO_getVel(gs->ball)))
-        {
-            Sprite_setFrameRate(ball_frameRate, MAX_LONG_VALUE);
-        }else if(Vec3D_getMagnitude(GO_getVel(gs->ball))>CONS_MAX_SPEED)
-        {
-            Sprite_setFrameRate(ball_frameRate, 5);
-        }else
-        {
-            Sprite_setFrameRate(ball_frameRate, 10);
-        }
-
-        if(Vec3D_isZero(GO_getVel(Player_getGameObject(gs->players[1]))))
-        {
-            Sprite_setFrameRate(calfnuts_frameRate, MAX_LONG_VALUE);
-        }else
-        {
-            Sprite_setFrameRate(calfnuts_frameRate, 5);
-        }
-
-        double alpha = !Vec3D_isZero(GO_getVel(gs->ball)) ? (Vec3D_getAngle(GO_getVel(gs->ball), VECTOR_N)) : 0 ;
-        Sprite_setAngle(ball_angle, (int)(alpha * (double)180 / PI));
-
-        alpha = !Vec3D_isZero(Player_getVel(gs->players[1])) ? (Vec3D_getAngle(Player_getVel(gs->players[1]), VECTOR_N)) : (Vec3D_getAngle(Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[1])), VECTOR_N));
-        Sprite_setAngle(calfnuts_angle, (int)(alpha * (double)180 / PI));
-
-        //Step 3: draw result
+                //Step 3: draw result
         Draw_renderScene();
 
         snprintf(p1score, 20, "goals %i", gs->players[0]->score);
@@ -220,7 +193,7 @@ int main(int argc, char* argv[])
         TL_renderTextLabel(gInfo);
 
         // render content of renderer to screen and reset
-        Draw_clearScreen();
+        Draw_drawSceneBuffer();
 
         //first to 5 wins and triggers quit game
         if(gs->players[0]->score >= winningScore || gs->players[1]->score >= winningScore) quit = true;
@@ -546,6 +519,26 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
         Player_setCanLeaveHalf(gs->players[0], false);
     if(Player_isInOwnHalf(gs->players[1]) && Player_hasTouches(gs->players[0]))
         Player_setCanLeaveHalf(gs->players[1], false);
+
+    // update player and ball states
+    if(Vec3D_isZero(GO_getVel(gs->ball)))
+    {
+        Sprite_setFrameRate(ball_frameRate, MAX_LONG_VALUE);
+    }else if(Vec3D_getMagnitude(GO_getVel(gs->ball))>CONS_MAX_SPEED)
+    {
+        Sprite_setFrameRate(ball_frameRate, 5);
+    }else
+    {
+        Sprite_setFrameRate(ball_frameRate, 10);
+    }
+
+    calfnuts_state = Vec3D_isZero(GO_getVel(Player_getGameObject(gs->players[1]))) ? 0 : 1;
+
+    double alpha = !Vec3D_isZero(GO_getVel(gs->ball)) ? (Vec3D_getAngle(GO_getVel(gs->ball), VECTOR_N)) : 0 ;
+    GO_setRPos(gs->ball, alpha);
+
+    alpha = !Vec3D_isZero(Player_getVel(gs->players[1])) ? (Vec3D_getAngle(Player_getVel(gs->players[1]), VECTOR_N)) : (Vec3D_getAngle(Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[1])), VECTOR_N));
+    GO_setRPos(Player_getGameObject(gs->players[1]), alpha);
 }
 
 //TODO move this to Physics
@@ -649,12 +642,14 @@ void loadSprites()
     Sprite_posByCentre(player_s, true);
     Sprite_setSpriteInWorldPosRef(player_s, &gs->players[0]->go->pos.i, &gs->players[0]->go->pos.j, NULL);
 
-    Sprite player_cs = Sprite_createSprite(PATH_TO_CALFNUTS, 69, USE_FULL_IMAGE_HEIGHT, 1, CALFNUTS_FRAME_INFO);
+    Sprite player_cs = Sprite_createSprite(PATH_TO_CALFNUTS, 69, 108, 2, CALFNUTS_FRAME_INFO);
     Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_cs, true);
     Sprite_setSpriteInWorldPosRef(player_cs, &gs->players[1]->go->pos.i, &gs->players[1]->go->pos.j, NULL);
     calfnuts_frameRate = Sprite_getRateSetAddress(player_cs);
-    calfnuts_angle = Sprite_getAngleSetAddress(player_cs);
+    Sprite_setSpriteRotationRef(player_cs, &gs->players[1]->go->rPos);
+    Sprite_setSpriteStateRef(player_cs, &calfnuts_state);
+    Sprite_setFR(player_cs, 5);
 
     //sprite rep of ball
     Sprite ball_s = Sprite_createSprite(PATH_TO_BALL, 35, USE_FULL_IMAGE_HEIGHT, 1, BALL_FRAME_INFO);
@@ -662,7 +657,7 @@ void loadSprites()
     Sprite_posByCentre(ball_s, true);
     Sprite_setSpriteInWorldPosRef(ball_s, &gs->ball->pos.i, &gs->ball->pos.j, NULL);
     ball_frameRate = Sprite_getRateSetAddress(ball_s);
-    ball_angle = Sprite_getAngleSetAddress(ball_s);
+    Sprite_setSpriteRotationRef(ball_s, &gs->ball->rPos);
     
     //sprites for posts of goals
     Sprite post1_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);

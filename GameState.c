@@ -37,7 +37,7 @@ void GS_loadGameObjects(GameState* gs)
     //logical game object, players
     GameObject* player = GO_createGameObject();
     GO_setPos(player, Vec3D_makeVector(POS_PLAYER1_START));
-    Circle playerBounds = {0,0,SIZE_PLAYER_H / 2};
+    Circle playerBounds = {0,0,SIZE_PLAYER_H / 2 - 1};
     GO_setBCirc(player, playerBounds);
     GO_setMass(player, CONS_MASS_PLAYER);
 

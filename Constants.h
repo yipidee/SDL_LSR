@@ -16,14 +16,14 @@
 #define SIZE_CONTROLLER_KNOB1 60
 #define SIZE_CONTROLLER_KNOB2 50
 #define SIZE_CONTROLLER_KNOB3 50
-#define SIZE_PLAYER_H 50
-#define SIZE_PLAYER_W 50
-#define SIZE_BALL_H 28
-#define SIZE_BALL_W 28
+#define SIZE_PLAYER_H 45
+#define SIZE_PLAYER_W 45
+#define SIZE_BALL_H 20
+#define SIZE_BALL_W 20
 #define SIZE_PITCH 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT
-#define SIZE_BEHIND_GOAL_AREA 60
+#define SIZE_BEHIND_GOAL_AREA 50
 #define SIZE_POST_DIAMETER 8
-#define SIZE_GOAL_WIDTH 100
+#define SIZE_GOAL_WIDTH 75
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for positions of objects                                    //////////

@@ -78,8 +78,8 @@ void Spritesheet_destroy(Spritesheet s)
 //the sprite structure used for rendering game objects
 struct _Sprite
 {
-    double* gX, * gY, * gZ;        //global x, y and z of sprite
-    int gW, gH, angle;                 //global width and height of sprite
+    double* gX, * gY, * gZ, *angle;        //global x, y and z of sprite
+    int gW, gH;                 //global width and height of sprite
     bool isVisible, posRefByCentre; //flag to mark a sprite for drawing
     Spritesheet spriteSheet;   //pointer to texture
     int* state;                 //state
@@ -93,7 +93,6 @@ Sprite Sprite_createSprite(char* pathToSpriteSheet, int sW, int sH, int numState
     Spritesheet ss = Spritesheet_create(pathToSpriteSheet, sW, sH, numStates, framesPerState);
     s->spriteSheet = ss;
     s->frame = 0;
-    s->angle = 0;
     s->frameRate = 7;
     s->gH = 0;
     s->gW = 0;
@@ -103,6 +102,7 @@ Sprite Sprite_createSprite(char* pathToSpriteSheet, int sW, int sH, int numState
     s->gX=NULL;
     s->gY=NULL;
     s->gZ=NULL;
+    s->angle = NULL;
     s->state=NULL;
 
     List_append(&sprites, s);
@@ -140,6 +140,11 @@ void Sprite_setSpriteInWorldPosRef(Sprite s, double* x, double* y, double* z)
     if(z)s->gZ = z;
 }
 
+void Sprite_setSpriteRotationRef(Sprite s, double* angle)
+{
+    if(angle)s->angle = angle;
+}
+
 void Sprite_setSpriteStateRef(Sprite s, int* state)
 {
     s->state = state;
@@ -161,10 +166,14 @@ void Sprite_renderSprite(Sprite s)
         {
             SDL_QueryTexture(s->spriteSheet->spritesheet, NULL, NULL, &localW, NULL);
             localH = s->spriteSheet->h;
-        }else  // using full image height
+        }else if(s->spriteSheet->h == USE_FULL_IMAGE_HEIGHT) // using full image height
         {
             SDL_QueryTexture(s->spriteSheet->spritesheet, NULL, NULL, NULL, &localH);
             localW = s->spriteSheet->w;
+        }else
+        {
+            localW = s->spriteSheet->w;
+            localH = s->spriteSheet->h;
         }
         SDL_Rect tmpRect= {
                s->frame*localW,         //x
@@ -212,7 +221,8 @@ void Sprite_renderSprite(Sprite s)
     }
 
     //copy the image into the renderer for render to screen at next step
-    SDL_RenderCopyEx(gRenderer, s->spriteSheet->spritesheet, pSrcRect, pDstRect, s->angle, NULL, 0);
+    int rotation = s->angle ? (int)(*s->angle * (double)180 / PI) : 0;
+    SDL_RenderCopyEx(gRenderer, s->spriteSheet->spritesheet, pSrcRect, pDstRect, rotation, NULL, 0);
 }
 
 void Sprite_tickFrame(Sprite s)
@@ -240,6 +250,7 @@ void Sprite_setFrameRate(int* addr, int rate)
     *addr = rate;
 }
 
+/*
 int* Sprite_getAngleSetAddress(Sprite s)
 {
     return &s->angle;
@@ -249,7 +260,7 @@ void Sprite_setAngle(int* addr, int angle)
 {
     *addr = angle;
 }
-
+*/
 /********************************************************************
 *********************************************************************
 ****                    Draw functions                            ***
@@ -403,7 +414,7 @@ void Draw_renderScene()
     }
 }
 
-void Draw_clearScreen()
+void Draw_drawSceneBuffer()
 {
     SDL_RenderPresent(gRenderer);
     SDL_SetRenderDrawColor(gRenderer, COLOUR_BLACK);

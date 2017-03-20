@@ -32,14 +32,14 @@ void Sprite_isFullscreen(Sprite s, bool fullscreen);
 void Sprite_posByCentre(Sprite s, bool PBC);
 void Sprite_setSpriteInWorldDims(Sprite s, int w, int h);
 void Sprite_setSpriteInWorldPosRef(Sprite s, double* x, double* y, double* z);
+void Sprite_setSpriteRotationRef(Sprite s, double* angle);
 void Sprite_setSpriteStateRef(Sprite s, int* state);
 void Sprite_renderSprite(Sprite s);
 void Sprite_tickFrame(Sprite s);
 int Sprite_getCurrFrame(Sprite s);
 int* Sprite_getRateSetAddress(Sprite s);
 void Sprite_setFrameRate(int* rate, int r);
-int* Sprite_getAngleSetAddress(Sprite s);
-void Sprite_setAngle(int* addr, int angle);
+#define Sprite_setFR(s, r) Sprite_setFrameRate(Sprite_getRateSetAddress((s)), (r))
 
 //text label methods
 //Creates a label with text at pos x and y
@@ -72,6 +72,6 @@ int TL_getHeight(TextLabel tl);
 //render all visible sprites to screen in order of creation
 void Draw_renderScene();
 void Draw_line(Vec3D p1, Vec3D p2);
-void Draw_clearScreen();
+void Draw_drawSceneBuffer();
 
 #endif // _DRAW_H_

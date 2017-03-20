@@ -154,9 +154,10 @@ Vec3D Vec3D_transposeIntoRefCoordSystem(Vec3D v, Vec3D refXaxis)
 {
     Vec3D unitXdash = Vec3D_normalise(refXaxis);
     Vec3D unitYdash = Vec3D_getUnitNormal(unitXdash);
-    double coeffYdash = (v.j * unitXdash.i - v.i * unitXdash.j) / (unitYdash.j*unitXdash.i - unitYdash.i*unitXdash.j);
-    double coeffXdash = (v.i - coeffYdash*unitYdash.i) / unitXdash.i;
-    Vec3D res = {coeffXdash, coeffYdash, 0};
+    Vec3D res;
+    res.j = (v.j * unitXdash.i - v.i * unitXdash.j) / (unitYdash.j*unitXdash.i - unitYdash.i*unitXdash.j);
+    res.i = (v.i - res.j*unitYdash.i) / unitXdash.i;
+    res.k = 0;
     return res;    
 }
 

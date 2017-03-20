@@ -172,17 +172,17 @@ void GO_setPos(GameObject* go, Vec3D p)
     go->pos = p;
 }
 
-void GO_setRPos(GameObject* go, int p)
+void GO_setRPos(GameObject* go, double p)
 {
     go->rPos = p;
 }
 
-void GO_setRVel(GameObject* go, int v)
+void GO_setRVel(GameObject* go, double v)
 {
     go->rVel = v;
 }
 
-void GO_setRAcc(GameObject* go, int a)
+void GO_setRAcc(GameObject* go, double a)
 {
     go->rAcc = a;
 }
@@ -220,17 +220,17 @@ Vec3D GO_getPos(const GameObject* go)
     return go->pos;
 }
 
-int GO_getRPos(const GameObject* go)
+double GO_getRPos(const GameObject* go)
 {
     return go->rPos;
 }
 
-int GO_getRVel(const GameObject* go)
+double GO_getRVel(const GameObject* go)
 {
     return go->rVel;
 }
 
-int GO_getRAcc(const GameObject* go)
+double GO_getRAcc(const GameObject* go)
 {
     return go->rAcc;
 }
