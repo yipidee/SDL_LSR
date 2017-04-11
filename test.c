@@ -1,6 +1,12 @@
 #include <stdbool.h>
 #include <math.h>
+#include <inttypes.h>
+#ifdef __ANDROID__
+#include <SDL.h>
+#include <android/log.h>
+#else
 #include <SDL2/SDL.h>
+#endif
 #include "EventHandler.h"
 #include "Draw.h"
 #include "Physics.h"
@@ -57,7 +63,15 @@ int main(int argc, char* argv[])
     SDL_Event e;
 
     //AI decision tree to use
-    DecisionTree dt = AI_parseDecisionTree(DT_DEFAULT);
+    char pathToDT[512];
+#ifdef __ANDROID__
+    strcpy(pathToDT, SDL_AndroidGetInternalStoragePath());
+    strcat(pathToDT, "/");
+    strcat(pathToDT, DT_DEFAULT);
+#else
+    strcpy(pathToDT, DT_DEFAULT);
+#endif
+    DecisionTree dt = AI_parseDecisionTree(pathToDT);
     DecisionTree celebrationTree = dt;//AI_parseDecisionTree(DT_DEFAULT);
 
     //labels
@@ -67,38 +81,38 @@ int main(int argc, char* argv[])
     char p2touches[20];
 
     TextLabel p1Name = TL_createTextLabel("McDoodle", 0, 0);
-    TL_setFontSize(p1Name, 20);
+    TL_setFontSize(p1Name, (int)(20 * Draw_getScalingFactor()));
     TL_setFont(p1Name, NULL);
 
     TextLabel p2Name = TL_createTextLabel("Calfnuts", 0, 0);
-    TL_setFontSize(p2Name, 20);
+    TL_setFontSize(p2Name, (int)(20 * Draw_getScalingFactor()));
     TL_setFont(p2Name, NULL);
 
     TextLabel p1Score = TL_createTextLabel(NULL, 0, 0);
-    TL_setFontSize(p1Score, 20);
+    TL_setFontSize(p1Score, (int)(20 * Draw_getScalingFactor()));
     TL_setFont(p1Score, NULL);
 
     TextLabel p2Score = TL_createTextLabel(NULL, 0, 0);
-    TL_setFontSize(p2Score, 20);
+    TL_setFontSize(p2Score, (int)(20 * Draw_getScalingFactor()));
     TL_setFont(p2Score, NULL);
 
     TextLabel p1Touches = TL_createTextLabel(NULL, 0, 0);
-    TL_setFontSize(p1Touches, 20);
+    TL_setFontSize(p1Touches, (int)(20 * Draw_getScalingFactor()));
     TL_setFont(p1Touches, NULL);
     
     TextLabel p2Touches = TL_createTextLabel(NULL, 0, 0);
-    TL_setFontSize(p2Touches, 20);
+    TL_setFontSize(p2Touches, (int)(20 * Draw_getScalingFactor()));
     TL_setFont(p2Touches, NULL);
 
     gInfo = TL_createTextLabel(NULL, 0, 0);
-    TL_setFontSize(gInfo, 80);
+    TL_setFontSize(gInfo, (int)(80 * Draw_getScalingFactor()));
     TL_setFont(gInfo, NULL);
 
     //Set label positions
     int a = TL_getWidth(p1Name);
     int b = TL_getWidth(p2Name);
     int c = fmax(a, b);
-    c = SCREEN_WIDTH - c - 15;
+    c = Viewport_getWidth() - c - 15;
     TL_setX(p1Name, c);
     TL_setX(p2Name, c);
     TL_setX(p1Score, c);
@@ -109,13 +123,13 @@ int main(int argc, char* argv[])
     a = TL_getHeight(p1Name);
     b = TL_getHeight(p2Name);
     c = fmax(a, b);
-    TL_setY(p2Name, 5);
+    TL_setY(p2Name, 5 * Draw_getScalingFactor());
     TL_setY(p2Score, TL_getY(p2Name) + TL_getHeight(p2Name));
     TL_setY(p2Touches, TL_getY(p2Score) + TL_getHeight(p2Name));
-    TL_setY(p1Name, SCREEN_HEIGHT - 105 - 3 * c);
+    TL_setY(p1Name, (int)(Viewport_getHeight() - (105 * Draw_getScalingFactor()) - 3 * c));
     TL_setY(p1Score, TL_getY(p1Name) + TL_getHeight(p1Name));
     TL_setY(p1Touches, TL_getY(p1Score) + TL_getHeight(p1Name));
- 
+
     bool resetPositions = true;
     int t0, t1;
 
@@ -133,16 +147,38 @@ int main(int argc, char* argv[])
         while( SDL_PollEvent( &e ) != 0 )
         {
             //User requests quit
-            if( e.type == SDL_QUIT )quit = true;
-            else
+            if( e.type == SDL_QUIT )
             {
-                if(isMouseEvent(e))
+                quit = true;
+            }else
+            {
+                /** NO NEED FOR MOUSE EVENTS TO EXIST **/
+                /*if(isMouseEvent(e))
                 {
                     EH_handleEvent(&e);
-                }else if(isJoystickEvent(e))
+                }*/
+                /***************************************/
+                #ifndef __ANDROID__
+                if(isJoystickEvent(e))
                 {
                     PhysCont_handleEvent(&e);
                 }
+                #else
+                if (isTouchEvent(e))
+                {
+                    int touchx = (int)(e.tfinger.x * (float)Viewport_getWidth() / Draw_getScalingFactor());
+                    int touchy = (int)(e.tfinger.y * (float)Viewport_getHeight() / Draw_getScalingFactor());
+                    e.tfinger.x = touchx;
+                    e.tfinger.y = touchy;
+                    EH_handleEvent(&e);
+
+                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Touch event: %i, %i \n", (int)(e.tfinger.x), (int)(e.tfinger.y));
+                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Finger ID: %" PRId64 "\n", e.tfinger.fingerId);
+                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Controller x, y: %i %i\n", (int)gs->controllers[0].knob.x, (int)gs->controllers[0].knob.y);
+                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "type: %i\n", e.tfinger.type);
+                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Device ID: %i\n", e.tfinger.touchId);
+                }
+                #endif
             }
         }
 
@@ -167,7 +203,7 @@ int main(int argc, char* argv[])
                 break;
         }
 
-                //Step 3: draw result
+        //Step 3: draw result
         Draw_renderScene();
 
         snprintf(p1score, 20, "goals %i", gs->players[0]->score);
@@ -187,8 +223,8 @@ int main(int argc, char* argv[])
         TL_renderTextLabel(p1Touches);
         TL_renderTextLabel(p2Touches);
         // content of gInfo label is not constant so draw position should be calculated before render
-        TL_setX(gInfo, (SCREEN_WIDTH - TL_getWidth(gInfo)) / 2);
-        TL_setY(gInfo, (SCREEN_HEIGHT - TL_getHeight(gInfo)) / 2);
+        TL_setX(gInfo, (Viewport_getWidth() - TL_getWidth(gInfo)) / 2);
+        TL_setY(gInfo, (Viewport_getHeight() - TL_getHeight(gInfo)) / 2);
         TL_renderTextLabel(gInfo);
 
         // render content of renderer to screen and reset
@@ -200,6 +236,7 @@ int main(int argc, char* argv[])
     AI_freeDecisionTree(dt);
     dt = NULL;
     celebrationTree = NULL;
+
     TL_destroyTextLabel(p1Name);
     TL_destroyTextLabel(p2Name);
     TL_destroyTextLabel(p1Score);
@@ -214,6 +251,7 @@ int main(int argc, char* argv[])
     p1Touches = NULL;
     p2Touches = NULL;
     gInfo = NULL;
+
     releaseResources();
 
     return 0;
@@ -628,7 +666,7 @@ void loadSprites()
 {
     // Background image for court
     Sprite bg =  Sprite_createSprite(PATH_TO_COURT, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 90, NULL);
-    Sprite_setSpriteInWorldDims(bg, SCREEN_WIDTH, SCREEN_HEIGHT);
+    Sprite_setSpriteInWorldDims(bg, WORLD_WIDTH, WORLD_HEIGHT);
     Sprite_posByCentre(bg, false);
     Sprite_setSpriteInWorldPosRef(bg, &ZERO_ANCHOR, &ZERO_ANCHOR, NULL);
 

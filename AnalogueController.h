@@ -3,9 +3,14 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#ifdef __ANDROID__
+#include <SDL.h>
+#else
 #include <SDL2/SDL.h>
+#endif
 #include "Utility/Geometry.h"
 #include "EventHandler.h"
+#include "Constants.h"
 
 typedef enum Controller_Mode
 {
@@ -19,7 +24,7 @@ typedef struct AnalogueController
     Rect touchableArea;
     Controller_Mode mode;
     EventHandler evHan;
-
+    SDL_FingerID currFinger;
 }AnalogueController;
 
 //create controller

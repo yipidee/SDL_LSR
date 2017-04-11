@@ -9,8 +9,6 @@ typedef struct EventHandlingObject
     void* selfRef;
 }EventHandlingObject;
 
-//a "null" event to send to handlers that need to no there was no event
-static SDL_Event BUTTONUP_EVENT;
 //list of available handlers
 static List EventHandlers;
 //whether the module is initilialised or not
@@ -23,11 +21,6 @@ void EH_init()
         List_new(&EventHandlers, sizeof(EventHandlingObject), NULL);
         isInitialised = true;
     }
-    SDL_Event e;
-    e.type=SDL_MOUSEBUTTONUP;
-    e.button.x = -1;
-    e.button.y = -1;
-    BUTTONUP_EVENT = e;
 }
 
 void EH_destroy()
@@ -64,11 +57,11 @@ bool EH_handleEvent(SDL_Event* ev)
     while(current)
     {
         evHanObj = current->data;
-        if(Rect_containsPoint(evHanObj->touchableArea, ev->button.x, ev->button.y))
+        if(Rect_containsPoint(evHanObj->touchableArea, ev->tfinger.x, ev->tfinger.y))
         {
             handled = evHanObj->evHandler(evHanObj->selfRef, ev);
         }else{
-            if(evHanObj->needsNoActionNotification) evHanObj->evHandler(evHanObj->selfRef, &BUTTONUP_EVENT);
+            if(evHanObj->needsNoActionNotification) evHanObj->evHandler(evHanObj->selfRef, ev);
         }
         current = current->next;
     }

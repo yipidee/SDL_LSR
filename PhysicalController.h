@@ -1,7 +1,11 @@
 #ifndef _PHYSCONT_H
 #define _PHYSCONT_H
 
+#ifdef __ANDROID__
+#include <SDL.h>
+#else
 #include <SDL2/SDL.h>
+#endif
 #include <stdbool.h>
 #include "Utility/Geometry.h"
 

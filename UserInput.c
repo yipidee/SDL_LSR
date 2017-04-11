@@ -81,7 +81,7 @@ static Input getInputFromAnalCont()
     {
         i.direction = AnalCont_getCurrentInput(ac1);
         i.control = AnalCont_getCurrentInput(ac2);
-        i.shot = AnalCont_getCurrentInput(ac3);
+        if(Vec3D_isZero(i.control))i.shot = AnalCont_getCurrentInput(ac3);
     }else
     {
         printf("no onscreen control referenced");
@@ -91,6 +91,8 @@ static Input getInputFromAnalCont()
 
 static void init()
 {
+//force on screen control for touch devices
+#ifndef __ANDROID__
     if(PhysCont_PhysicalControllerPresent())
     {
         getInput = &getInputFromPhysCont;
@@ -99,4 +101,7 @@ static void init()
     {
         getInput = &getInputFromAnalCont;
     }
+#else
+    getInput = &getInputFromAnalCont;
+#endif
 }

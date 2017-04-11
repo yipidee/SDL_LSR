@@ -7,6 +7,7 @@
 #define isMouseEvent(e) ((e).type == SDL_MOUSEBUTTONUP || (e).type == SDL_MOUSEBUTTONDOWN || (e).type == SDL_MOUSEMOTION)
 #define isJoystickEvent(e) ((e).type == SDL_JOYAXISMOTION || (e).type == SDL_JOYBUTTONDOWN || (e).type == SDL_JOYBUTTONUP || \
                             (e).type == SDL_JOYDEVICEREMOVED || (e).type == SDL_JOYDEVICEADDED)
+#define isTouchEvent(e) ((e).type == SDL_FINGERMOTION || (e).type == SDL_FINGERDOWN || (e).type == SDL_FINGERUP)
 #define isMouseBL(e) (((e)->motion.state&SDL_BUTTON_LMASK)==SDL_BUTTON_LMASK)
 #define isMouseBR(e) (((e)->motion.state&SDL_BUTTON_RMASK)==SDL_BUTTON_RMASK)
 

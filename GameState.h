@@ -8,7 +8,11 @@
 ************************************************************************
 ***********************************************************************/
 
+#ifdef __ANDROID__
+#include <SDL.h>
+#else
 #include <SDL2/SDL.h>
+#endif
 #include "GameObject.h"
 #include "Player.h"
 #include "Utility/Geometry.h"

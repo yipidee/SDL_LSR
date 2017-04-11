@@ -10,7 +10,11 @@
 ////  3D Vectors
 /////////////////////////////////////
 #include <stdbool.h>
+#ifdef __ANDROID__
+#include <SDL.h>
+#else
 #include <SDL2/SDL.h>
+#endif
 
 #define Vec3D_subtract(a,b) Vec3D_add((a),Vec3D_scalarMult((b),-1.0))
 #define Vec3D_getNormal(a,b) Vec3D_normalise(Vec3D_crossProduct((a),(b)))

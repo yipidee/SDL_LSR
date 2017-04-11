@@ -64,7 +64,7 @@ bool PhysCont_handleEvent(SDL_Event* e)
         if(e->jaxis.axis == 0)
         {
             Sint16 x = e->jaxis.value;
-            if (fabs(x) < CONS_CONTROLLER_DEADZONE) x = 0;
+            if (abs(x) < CONS_CONTROLLER_DEADZONE) x = 0;
             leftStick.i = (double)x/32768.0;
             handled = true;
         }
@@ -72,7 +72,7 @@ bool PhysCont_handleEvent(SDL_Event* e)
         else if(e->jaxis.axis == 1)
         {
             Sint16 y = e->jaxis.value;
-            if (fabs(y) < CONS_CONTROLLER_DEADZONE) y = 0;
+            if (abs(y) < CONS_CONTROLLER_DEADZONE) y = 0;
             leftStick.j = (double)y/32768.0;
             handled = true;
         }
@@ -80,7 +80,7 @@ bool PhysCont_handleEvent(SDL_Event* e)
         else if(e->jaxis.axis == 2)
         {
             Sint16 x = e->jaxis.value;
-            if (fabs(x) < CONS_CONTROLLER_DEADZONE) x = 0;
+            if (abs(x) < CONS_CONTROLLER_DEADZONE) x = 0;
             rightStick.j = (double)x/32768.0;
             handled = true;
         }
@@ -88,7 +88,7 @@ bool PhysCont_handleEvent(SDL_Event* e)
         else if(e->jaxis.axis == 3)
         {
             Sint16 y = e->jaxis.value;
-            if (fabs(y) < CONS_CONTROLLER_DEADZONE) y = 0;
+            if (abs(y) < CONS_CONTROLLER_DEADZONE) y = 0;
             rightStick.i = (double)y/32768.0;
             handled = true;
         }

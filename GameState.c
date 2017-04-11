@@ -75,19 +75,19 @@ void GS_registerTouchHandlers(GameState* gs)
     AnalogueController controller1 = AnalCont_create(ANALOGUE_MODE);
     AnalCont_setSize(&controller1, SIZE_CONTROLLER_1);
     AnalCont_setKnobSize(&controller1, SIZE_CONTROLLER_KNOB1);
-    AnalCont_setPosition(&controller1, controller1.base.r+10, SCREEN_HEIGHT-controller1.base.r-10);
+    AnalCont_setPosition(&controller1, controller1.base.r+10, WORLD_HEIGHT-controller1.base.r-10);
 
     //second controller
     AnalogueController controller2 = AnalCont_create(ANALOGUE_MODE);
     AnalCont_setSize(&controller2, SIZE_CONTROLLER_2);
     AnalCont_setKnobSize(&controller2, SIZE_CONTROLLER_KNOB2);
-    AnalCont_setPosition(&controller2, SCREEN_WIDTH-controller2.base.r-10, SCREEN_HEIGHT-controller2.base.r-30);
+    AnalCont_setPosition(&controller2, WORLD_WIDTH-controller2.base.r-10, WORLD_HEIGHT-controller2.base.r-30);
 
     //third controller
     AnalogueController controller3 = AnalCont_create(ANALOGUE_MODE);
     AnalCont_setSize(&controller3, SIZE_CONTROLLER_3);
     AnalCont_setKnobSize(&controller3, SIZE_CONTROLLER_KNOB3);
-    AnalCont_setPosition(&controller3, SCREEN_WIDTH-2*controller2.base.r-controller3.base.r-10, SCREEN_HEIGHT-controller3.base.r-10);
+    AnalCont_setPosition(&controller3, WORLD_WIDTH-2*controller2.base.r-controller3.base.r-10, WORLD_HEIGHT-controller3.base.r-10);
 
     gs->controllers[0] = controller1;
     gs->controllers[1] = controller2;

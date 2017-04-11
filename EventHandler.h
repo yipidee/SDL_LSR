@@ -13,7 +13,11 @@
 #define _EVENT_HANDLER_H
 
 #include <stdbool.h>
+#ifdef __ANDROID__
+#include <SDL.h>
+#else
 #include <SDL2/SDL.h>
+#endif
 #include "Utility/Geometry.h"
 #include "Utility/List.h"
 #include "SDL_Helper.h"

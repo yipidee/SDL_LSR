@@ -1,4 +1,8 @@
+#ifdef __ANDROID__
+#include <SDL.h>
+#else
 #include <SDL2/SDL.h>
+#endif
 #include "SDL_Helper.h"
 
 static bool isInitialised = false;

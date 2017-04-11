@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include "AnalogueController.h"
 #include "SDL_Helper.h"
+#include <android/log.h>
 
 //Protype static functions
-static bool _MouseDown(AnalogueController* ac, SDL_Event* e);
-static bool _MouseUp(AnalogueController* ac, SDL_Event* e);
-static bool _MouseMove(AnalogueController* ac, SDL_Event* e);
+static bool _FingerDown(AnalogueController* ac, SDL_Event* e);
+static bool _FingerUp(AnalogueController* ac, SDL_Event* e);
+static bool _FingerMove(AnalogueController* ac, SDL_Event* e);
 
 //create controller
 AnalogueController AnalCont_create(Controller_Mode mode)
@@ -53,13 +54,13 @@ Rect AnalCont_getTouchableArea(AnalogueController* ac)
 //returns diameter of controller view
 int AnalCont_getSize(AnalogueController* ac)
 {
-    return (ac->base.r * 2);
+    return (int)(ac->base.r * 2);
 }
 
 //returns diameter of knob within view
 int AnalCont_getKnobSize(AnalogueController* ac)
 {
-    return (ac->knob.r * 2);
+    return (int)(ac->knob.r * 2);
 }
 
 //get current input
@@ -82,16 +83,20 @@ bool AnalCont_handleEvent(void* ac, SDL_Event* e)
     AnalogueController* a = ac;
     Uint32 eventType = e->type;
     switch(eventType){
-        case SDL_MOUSEBUTTONDOWN:
-            _MouseDown(a, e);
+        case SDL_FINGERDOWN:
+            _FingerDown(a, e);
             break;
-        case SDL_MOUSEBUTTONUP:
-            _MouseUp(a, e);
+        case SDL_FINGERUP:
+            _FingerUp(a, e);
             break;
-        case SDL_MOUSEMOTION:
-            _MouseMove(a, e);
+        case SDL_FINGERMOTION:
+            _FingerMove(a, e);
             break;
+        default:
+            return false;
     }
+    //if(a->base.x==55)__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "touch at: %i, %i\n", (int)e->tfinger.x, (int)e->tfinger.y);
+    //if(a->base.x==55)__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "knob at: %i, %i\n", (int)a->knob.x, (int)a->knob.y);
     return true;
 }
 
@@ -101,21 +106,23 @@ bool AnalCont_handleEvent(void* ac, SDL_Event* e)
 ******************************************************************
 *****************************************************************/
 
-static bool _MouseDown(AnalogueController* ac, SDL_Event* e)
+static bool _FingerDown(AnalogueController* ac, SDL_Event* e)
 {
     //immediately return if null pointer
     if(ac==NULL || e==NULL) return false;
-
-    if(Rect_containsPoint(ac->touchableArea, e->button.x, e->button.y))
+    int touchx = (int)e->tfinger.x;
+    int touchy = (int)e->tfinger.y;
+    if(Rect_containsPoint(ac->touchableArea, touchx, touchy))
     {
+        ac->currFinger = e->tfinger.fingerId;
         Vec3D centre = {ac->base.x,ac->base.y,0};
-        Vec3D touch = {e->button.x,e->button.y,0};
+        Vec3D touch = {touchx,touchy,0};
         Vec3D a = Vec3D_subtract(touch, centre);
         double r = Vec3D_getMagnitude(a);
         if(r<=(ac->base.r-ac->knob.r))
         {
-            ac->knob.x = e->button.x;
-            ac->knob.y = e->button.y;
+            ac->knob.x = touchx;
+            ac->knob.y = touchy;
         }else{
             a = Vec3D_normalise(a);
             a = Vec3D_scalarMult(a, (float)(ac->base.r-ac->knob.r));
@@ -126,36 +133,40 @@ static bool _MouseDown(AnalogueController* ac, SDL_Event* e)
     return true;
 }
 
-static bool _MouseUp(AnalogueController* ac, SDL_Event* e)
+static bool _FingerUp(AnalogueController* ac, SDL_Event* e)
 {
     //immediately return if null pointer
     if(ac==NULL || e==NULL) return false;
-
-    ac->knob.x = ac->base.x;
-    ac->knob.y = ac->base.y;
-    return true;
+    if(e->tfinger.fingerId == ac->currFinger)
+    {
+        ac->knob.x = ac->base.x;
+        ac->knob.y = ac->base.y;
+        return true;
+    }else
+    {
+        return false;
+    }
 }
 
-static bool _MouseMove(AnalogueController* ac, SDL_Event* e)
+static bool _FingerMove(AnalogueController* ac, SDL_Event* e)
 {
     //immediately return if null pointer
     if(ac==NULL || e==NULL) return false;
 
-    if(isMouseBL(e))
+    if(e->tfinger.fingerId == ac->currFinger)
     {
-        ac->knob.x = e->motion.x;
-        ac->knob.y = e->motion.y;
-        SDL_Event myEvent;
-        if(Rect_containsPoint(ac->touchableArea, ac->knob.x, ac->knob.y))
+        if(Rect_containsPoint(ac->touchableArea, (int)e->tfinger.x, (int)e->tfinger.y))
         {
-            myEvent.button.x = ac->knob.x;
-            myEvent.button.y = ac->knob.y;
-            _MouseDown(ac, &myEvent);
+            _FingerDown(ac, e);
         }else
         {
-            _MouseUp(ac, &myEvent);
+            //myEvent.type = SDL_FINGERUP;
+            //myEvent.tfinger.fingerId = e->tfinger.fingerId;
+            _FingerUp(ac, e);
         }
-
+        return true;
+    }else
+    {
+        return false;
     }
-    return true;
 }

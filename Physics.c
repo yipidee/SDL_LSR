@@ -44,10 +44,10 @@ void Phys_boundaryCollision(GameObject* go, Rect r)
             delta.j = go->BCirc.r - go->pos.j;
             GO_move(go, delta);
         }
-        if(go->pos.j > (SCREEN_HEIGHT - go->BCirc.r))
+        if(go->pos.j > (WORLD_HEIGHT - go->BCirc.r))
         {
             Vec3D delta = VECTOR_ZERO;
-            delta.j = SCREEN_HEIGHT - go->BCirc.r - go->pos.j;
+            delta.j = WORLD_HEIGHT - go->BCirc.r - go->pos.j;
             GO_move(go, delta);
         }
     }
@@ -62,10 +62,10 @@ void Phys_boundaryCollision(GameObject* go, Rect r)
             delta.i = go->BCirc.r - go->pos.i;
             GO_move(go, delta);
         }
-        if(go->pos.i > (SCREEN_WIDTH - go->BCirc.r))
+        if(go->pos.i > (WORLD_WIDTH - go->BCirc.r))
         {
             Vec3D delta = VECTOR_ZERO;
-            delta.i = SCREEN_WIDTH - go->BCirc.r - go->pos.i;
+            delta.i = WORLD_WIDTH - go->BCirc.r - go->pos.i;
             GO_move(go, delta);
         }
     }
@@ -85,10 +85,10 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
             delta.j = go->BCirc.r - go->pos.j;
             GO_move(go, delta);
         }
-        if(go->pos.j > (SCREEN_HEIGHT - go->BCirc.r))
+        if(go->pos.j > (WORLD_HEIGHT - go->BCirc.r))
         {
             Vec3D delta = VECTOR_ZERO;
-            delta.j = SCREEN_HEIGHT - go->BCirc.r - go->pos.j;
+            delta.j = WORLD_HEIGHT - go->BCirc.r - go->pos.j;
             GO_move(go, delta);
         }
         go->vel.j = 0;
@@ -101,10 +101,10 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
             delta.i = go->BCirc.r - go->pos.i;
             GO_move(go, delta);
         }
-        if(go->pos.i > (SCREEN_WIDTH - go->BCirc.r))
+        if(go->pos.i > (WORLD_WIDTH - go->BCirc.r))
         {
             Vec3D delta = VECTOR_ZERO;
-            delta.i = SCREEN_WIDTH - go->BCirc.r - go->pos.i;
+            delta.i = WORLD_WIDTH - go->BCirc.r - go->pos.i;
             GO_move(go, delta);
         }
         go->vel.i = 0;

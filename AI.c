@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
-#include <string.h>
 #include "AI.h"
 
 typedef struct decisionTreeNode* Node;
@@ -83,8 +82,7 @@ void AI_freeDecisionTree(DecisionTree dt)
 // function that traverses decision tree and return AI input
 Input AI_getUserInput(GameState* gs, int id, Node start)
 {
-    //dummy function returning null input for the sake of testing
-
+    if(start == NULL) return INPUT_NULL;
     if(start->type == BranchNode)
     {
 
@@ -265,7 +263,7 @@ Input shoot(GameState* gs, int id)
 Input playIntoCorner(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
-    Vec3D dir = Vec3D_subtract(Vec3D_makeVector(SCREEN_WIDTH, SCREEN_HEIGHT, 0), GO_getPos(gs->ball));
+    Vec3D dir = Vec3D_subtract(Vec3D_makeVector(WORLD_WIDTH, WORLD_HEIGHT, 0), GO_getPos(gs->ball));
     i.control = Vec3D_normalise(dir);
     return i;
 }

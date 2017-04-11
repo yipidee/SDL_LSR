@@ -1,7 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef __ANDROID__
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+#else
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#endif
 #include <string.h>
 #include "SDL_Helper.h"
 #include "Draw.h"
@@ -12,6 +17,8 @@
 static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;
 static SDL_Rect viewport = {0,0,0,0};
+static double scale = 1.0;
+
 static bool isInitialised = false;
 
 //list for tracking loaded textures
@@ -31,8 +38,9 @@ struct textureListItem
 static List sprites;
 
 //function prototypes
-void Viewport_init(int w, int h);
+void Viewport_init();
 SDL_Texture* Draw_loadTexture(char* pathToImage);
+double Draw_getScalingFactor() {return scale;}
 
 //static function prototypes
 static SDL_Texture* getTextureRef(char* pathToImg);
@@ -211,10 +219,10 @@ void Sprite_renderSprite(Sprite s)
         relPos = Vec3D_subtract(gPos, vPos);
 
         SDL_Rect tmpRect = {
-                (int)relPos.i,       //x
-                (int)relPos.j,       //y
-                s->gW,          //w
-                s->gH           //h
+                (int)(relPos.i * scale),       //x
+                (int)(relPos.j * scale),       //y
+                s->gW * scale, //w
+                s->gH * scale   //h
         };
         dstRect = tmpRect;
         pDstRect = &dstRect;
@@ -283,7 +291,7 @@ bool Draw_init()
             }
 
             //Create window
-            gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+            gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WORLD_WIDTH, WORLD_HEIGHT, SDL_WINDOW_SHOWN );
             if( gWindow == NULL )
             {
                 printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -302,7 +310,7 @@ bool Draw_init()
                     SDL_SetRenderDrawColor( gRenderer, COLOUR_BLACK );
 
                     int img_flags = IMG_INIT_PNG;
-                    if(!(IMG_Init(img_flags)&&img_flags))
+                    if(!(IMG_Init(img_flags)&img_flags))
                     {
                         printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
                     }
@@ -310,7 +318,8 @@ bool Draw_init()
                     {
                         List_new(&loadedTextures, sizeof(struct textureListItem), &freeListedTexture);
                         List_new(&sprites, sizeof(struct _Sprite), NULL);
-                        Viewport_init(SCREEN_WIDTH, SCREEN_HEIGHT);
+                        SDL_GetWindowSize(gWindow, &viewport.w, &viewport.h);
+                        Viewport_init();
                         isInitialised = true;
                     }
                 }
@@ -363,19 +372,20 @@ SDL_Texture* Draw_loadTexture(char* pathToImage)
     return t;
 }
 
-
 /********************************************************************
 *********************************************************************
 ****                          View Port                           ***
 *********************************************************************
 ********************************************************************/
 
-void Viewport_init(int w, int h)
+void Viewport_init()
 {
-    viewport.w = w;
-    viewport.h = h;
     viewport.x = 0;
     viewport.y = 0;
+    double h_scale = (double)viewport.w / (double) WORLD_WIDTH;
+    double v_scale = (double)viewport.h / (double) WORLD_HEIGHT;
+    //store min scale factor as global scaling factor
+    scale = fmin(h_scale, v_scale);
 }
 
 void Viewport_setPos(Vec3D p)
@@ -388,6 +398,16 @@ void Viewport_setPosByCentre(Vec3D p)
 {
     viewport.x = (int)p.i-(viewport.w/2);
     viewport.y = (int)p.j-(viewport.h/2);
+}
+
+int Viewport_getWidth()
+{
+    return viewport.w;
+}
+
+int Viewport_getHeight()
+{
+    return viewport.h;
 }
 
 /********************************************************************
