@@ -11,12 +11,21 @@
 // The below dimensions are in world
 #define WORLD_WIDTH 422
 #define WORLD_HEIGHT 675
-#define SIZE_CONTROLLER_1 90
-#define SIZE_CONTROLLER_2 70
-#define SIZE_CONTROLLER_3 70
-#define SIZE_CONTROLLER_KNOB1 55
-#define SIZE_CONTROLLER_KNOB2 45
-#define SIZE_CONTROLLER_KNOB3 45
+#ifdef __ANDROID__
+    #define SIZE_CONTROLLER_1 120
+    #define SIZE_CONTROLLER_2 90
+    #define SIZE_CONTROLLER_3 90
+    #define SIZE_CONTROLLER_KNOB1 70
+    #define SIZE_CONTROLLER_KNOB2 60
+    #define SIZE_CONTROLLER_KNOB3 60
+#else
+    #define SIZE_CONTROLLER_1 90
+    #define SIZE_CONTROLLER_2 70
+    #define SIZE_CONTROLLER_3 70
+    #define SIZE_CONTROLLER_KNOB1 55
+    #define SIZE_CONTROLLER_KNOB2 35
+    #define SIZE_CONTROLLER_KNOB3 35
+#endif
 #define SIZE_PLAYER_H 45
 #define SIZE_PLAYER_W 45
 #define SIZE_BALL_H 22
@@ -79,9 +88,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////        Defines for physics constants                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
-#define CONS_MAX_APPLIABLE_IMPULSE 60
+#define CONS_MAX_APPLIABLE_IMPULSE 55
 #define CONS_MAX_CONTROL_IMPULSE 40
-#define CONS_MAX_SPEED 7
+#define CONS_MAX_SPEED 6
 #define CONS_BALL_WALL_COR 0.65
 #define CONS_BALL_PLAYER_COR 0.1
 #define CONS_BALL_COURT_DEACC -0.3

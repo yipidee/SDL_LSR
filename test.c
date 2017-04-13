@@ -724,6 +724,8 @@ void loadSprites()
     Sprite_posByCentre(c1Knob, true);
     Sprite_setSpriteInWorldPosRef(c1Back, &gs->controllers[0].base.x, &gs->controllers[0].base.y, NULL);
     Sprite_setSpriteInWorldPosRef(c1Knob, &gs->controllers[0].knob.x, &gs->controllers[0].knob.y, NULL);
+    Sprite_setAlpha(c1Back, 126);
+    Sprite_setAlpha(c1Knob, 126);
 
     Sprite c2Back, c2Knob;
     c2Back = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
@@ -734,6 +736,8 @@ void loadSprites()
     Sprite_posByCentre(c2Knob, true);
     Sprite_setSpriteInWorldPosRef(c2Back, &gs->controllers[1].base.x, &gs->controllers[1].base.y, NULL);
     Sprite_setSpriteInWorldPosRef(c2Knob, &gs->controllers[1].knob.x, &gs->controllers[1].knob.y, NULL);
+    Sprite_setAlpha(c2Back, 126);
+    Sprite_setAlpha(c2Knob, 126);
 
     Sprite c3Back, c3Knob;
     c3Back = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
@@ -744,4 +748,6 @@ void loadSprites()
     Sprite_posByCentre(c3Knob, true);
     Sprite_setSpriteInWorldPosRef(c3Back, &gs->controllers[2].base.x, &gs->controllers[2].base.y, NULL);
     Sprite_setSpriteInWorldPosRef(c3Knob, &gs->controllers[2].knob.x, &gs->controllers[2].knob.y, NULL);
+    Sprite_setAlpha(c3Back, 126);
+    Sprite_setAlpha(c3Knob, 126);
 }

@@ -17,6 +17,10 @@ void PhysCont_deviceRemoved(SDL_Event* e);
 void PhysCont_deviceAdded(SDL_Event* e);
 
 #define PhysCont_PhysicalControllerPresent() (SDL_NumJoysticks() > 0)
+#ifdef __ANDROID__
+#undef PhysCont_PhysicalControllerPresent
+#define PhysCont_PhysicalControllerPresent() false
+#endif
 
 //handle joystick events
 bool PhysCont_handleEvent(SDL_Event* e);

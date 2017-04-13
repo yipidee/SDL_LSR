@@ -8,17 +8,19 @@
 ********************************************************
 */
 
-#define USE_FULL_IMAGE_WIDTH 0
-#define USE_FULL_IMAGE_HEIGHT 0
 #ifdef __ANDROID__
 #include <SDL.h>
 #else
 #include <SDL2/SDL.h>
 #endif
 #include <stdbool.h>
+#include <stdint.h>
 #include "Utility/Geometry.h"
 #include "AnalogueController.h"
 #include "Constants.h"
+
+#define USE_FULL_IMAGE_WIDTH 0
+#define USE_FULL_IMAGE_HEIGHT 0
 
 typedef struct _Spritesheet* Spritesheet;
 typedef struct _Sprite* Sprite;
@@ -43,6 +45,7 @@ void Sprite_tickFrame(Sprite s);
 int Sprite_getCurrFrame(Sprite s);
 int* Sprite_getRateSetAddress(Sprite s);
 void Sprite_setFrameRate(int* rate, int r);
+void Sprite_setAlpha(Sprite s, uint8_t alpha);
 #define Sprite_setFR(s, r) Sprite_setFrameRate(Sprite_getRateSetAddress((s)), (r))
 
 //text label methods

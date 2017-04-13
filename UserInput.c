@@ -80,8 +80,8 @@ static Input getInputFromAnalCont()
     if(onscreenRefsSet)
     {
         i.direction = AnalCont_getCurrentInput(ac1);
-        i.control = AnalCont_getCurrentInput(ac2);
-        if(Vec3D_isZero(i.control))i.shot = AnalCont_getCurrentInput(ac3);
+        i.control = AnalCont_getCurrentInput(ac3);
+        if(Vec3D_isZero(i.control))i.shot = AnalCont_getCurrentInput(ac2);
     }else
     {
         printf("no onscreen control referenced");

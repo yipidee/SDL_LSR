@@ -258,6 +258,10 @@ void Sprite_setFrameRate(int* addr, int rate)
     *addr = rate;
 }
 
+void Sprite_setAlpha(Sprite s, uint8_t alpha)
+{
+    SDL_SetTextureAlphaMod(s->spriteSheet->spritesheet, alpha);
+}
 /*
 int* Sprite_getAngleSetAddress(Sprite s)
 {
