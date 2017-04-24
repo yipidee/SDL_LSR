@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "AnalogueController.h"
 #include "SDL_Helper.h"
-#include <android/log.h>
+//#include <android/log.h>
 
 //Protype static functions
 static bool _FingerDown(AnalogueController* ac, SDL_Event* e);

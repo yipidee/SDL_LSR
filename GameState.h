@@ -16,7 +16,6 @@
 #include "GameObject.h"
 #include "Player.h"
 #include "Utility/Geometry.h"
-#include "PhysicalController.h"
 #include "AnalogueController.h"
 #include "EventHandler.h"
 #include "Goal.h"
@@ -42,10 +41,10 @@ typedef struct GameState
     GameObject* ball;
     Rect pitch;
     Goal goals[2];
-
+#ifndef  __ANDROID__
     //Input elements
     AnalogueController controllers[3]; //TODO: collect this into single structure with "getInput" function
-
+#endif
 }GameState;
 
 //create destroy functions for gamestate

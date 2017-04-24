@@ -9,7 +9,8 @@ bool usingPhysicalController = false;
 
 //local function prototypes
 static Input getInputFromPhysCont();
-static Input getInputFromAnalCont();
+//static Input getInputFromAnalCont();
+static Input getInputFromTouchscreen();
 static void init();
 
 //static refs to onscreen controls if being used
@@ -20,7 +21,6 @@ Input UI_getUserInput()
     if(!initialized)init();
     return getInput();
 }
-
 
 /***DOES NOT BELONG HERE!!!!!!!!!***/
 void UI_setOnscreenControlRef(AnalogueController* a1, AnalogueController* a2, AnalogueController* a3)
@@ -72,7 +72,7 @@ static Input getInputFromPhysCont()
     }
     return i;
 }
-
+/*
 static Input getInputFromAnalCont()
 {
     if(!initialized) init();
@@ -88,6 +88,36 @@ static Input getInputFromAnalCont()
     }
     return i;
 }
+*/
+static Input getInputFromTouchscreen()
+{
+    if(!initialized) init();
+    Input i = INPUT_NULL;
+    
+    //get direction input
+    i.direction = TS_getDirInput();
+    if(TS_notInit(i.direction)||TS_noTarget(i.direction)) i.direction = VECTOR_ZERO;
+    
+    //get kick input
+    Vec3D kick = TS_getKickInput();
+    if(!(TS_notInit(kick)||TS_noTarget(kick)))
+    {
+        if(Vec3D_getMagnitude(kick)>0.5)
+        {
+            i.shot = kick;
+            i.control = VECTOR_ZERO;
+        }else
+        {
+            i.control = Vec3D_scalarMult(kick, 1.5);
+            i.shot = VECTOR_ZERO; 
+        }
+    }else
+    {
+        i.shot = VECTOR_ZERO;
+        i.control = VECTOR_ZERO;
+    }
+    return i;
+}
 
 static void init()
 {
@@ -97,11 +127,11 @@ static void init()
     {
         getInput = &getInputFromPhysCont;
         usingPhysicalController = true;
-    }else
+    }/*else
     {
         getInput = &getInputFromAnalCont;
-    }
+    }*/
 #else
-    getInput = &getInputFromAnalCont;
+    getInput = &getInputFromTouchscreen;
 #endif
 }

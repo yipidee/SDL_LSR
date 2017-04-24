@@ -20,7 +20,7 @@ void releaseResources();
 void loadSprites();
 void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input in, bool* contacted);
 void collisionWithEnergisedObject(GameObject* go1, GameObject* go2);
-void drawControlsOnScreen(Input input);
+//void drawControlsOnScreen(Input input);
 void updatePhysics(GameState* gs, Input input1, Input input2);
 void checkRules(GameState* gs, bool* resetPositions);
 void checkForGoal(GameState* gs);
@@ -30,7 +30,7 @@ void normalPlayTick(bool* resetPositions, DecisionTree dt);
 void penaltyTick(bool* resetPositions, DecisionTree dt);
 void goalScoredTick(bool* resetPositions, DecisionTree dt);
 void gameOverTick();
-void hideControls();
+//void hideControls();
 
 //globally available pointer to game state
 GameState* gs = NULL;
@@ -50,16 +50,21 @@ int main(int argc, char* argv[])
 {
     Draw_init();
     gs = GS_initializeGameState();
-    GS_registerTouchHandlers(gs);
+//    GS_registerTouchHandlers(gs);
     GS_loadGameObjects(gs);
-    UI_setOnscreenControlRef(&gs->controllers[0], &gs->controllers[1], &gs->controllers[2]);
+//    UI_setOnscreenControlRef(&gs->controllers[0], &gs->controllers[1], &gs->controllers[2]);
+#ifdef __ANDROID__
+    Rect toucharea = {0,0,Viewport_getWidth(), Viewport_getHeight()};
+    TS_init(gs, toucharea.w / 2);
+    EH_registerHandler(toucharea, &TS_handleEvent, false, NULL);
+#endif
     AI_init();
     loadSprites();
 
     //Main loop flag
     bool quit = false;
 
-    //Event handler
+    //Event place holder
     SDL_Event e;
 
     //AI decision tree to use
@@ -172,7 +177,7 @@ int main(int argc, char* argv[])
                     e.tfinger.y = touchy;
                     EH_handleEvent(&e);
 
-                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Touch event: %i, %i \n", (int)(e.tfinger.x), (int)(e.tfinger.y));
+                    __android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Touch event: %i, %i \n", (int)(e.tfinger.x), (int)(e.tfinger.y));
                     //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Finger ID: %" PRId64 "\n", e.tfinger.fingerId);
                     //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Controller x, y: %i %i\n", (int)gs->controllers[0].knob.x, (int)gs->controllers[0].knob.y);
                     //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "type: %i\n", e.tfinger.type);
@@ -268,7 +273,7 @@ void normalPlayTick(bool* resetPositions, DecisionTree dt)
     //Step 1: get input from user (if in playstate requiring input)
     Input input1 = UI_getUserInput();
     Input input2 = AI_getUserInput(gs, 1, dt);
-    if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
+    //if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
 
     //Step 2: Update physics
     //update positions
@@ -321,7 +326,7 @@ void penaltyTick(bool* resetPositions, DecisionTree dt)
     {
         Input input1 = UI_getUserInput();
         Input input2 = AI_getUserInput(gs, 1, dt);
-        if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
+        //if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
 
         //Step 2: Update physics
         //update positions
@@ -357,10 +362,12 @@ void gameOverTick()
     ;
 }
 
+/*
 void hideControls()
 {
     ;
 }
+*/
 
 void setPenConditions(GameState* gs, int id)
 {
@@ -626,6 +633,7 @@ void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input input, bool
     }
 }
 
+/*
 void drawControlsOnScreen(Input input)
 {
     Vec3D knobPos = {gs->controllers[0].base.x, gs->controllers[0].base.y, 0};
@@ -654,7 +662,7 @@ void drawControlsOnScreen(Input input)
         gs->controllers[2].knob.y = gs->controllers[2].base.y;
     }
 }
-
+*/
 void releaseResources()
 {
     EH_destroy();
@@ -714,6 +722,8 @@ void loadSprites()
     Sprite_posByCentre(post4_s, true);
     Sprite_setSpriteInWorldPosRef(post4_s, &Goal_getRPost(gs->goals[1])->pos.i, &Goal_getRPost(gs->goals[1])->pos.j, NULL);
 
+/*
+#ifndef __ANDROID__
     //create sprites associated with controllers
     Sprite c1Back, c1Knob;
     c1Back = Sprite_createSprite(PATH_TO_ORANGE_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
@@ -750,4 +760,6 @@ void loadSprites()
     Sprite_setSpriteInWorldPosRef(c3Knob, &gs->controllers[2].knob.x, &gs->controllers[2].knob.y, NULL);
     Sprite_setAlpha(c3Back, 126);
     Sprite_setAlpha(c3Knob, 126);
+#endif
+*/
 }

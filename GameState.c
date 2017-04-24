@@ -2,6 +2,7 @@
 #include "GameState.h"
 #include "Constants.h"
 #include "Draw.h"
+#include "TouchscreenControl.h"
 
 //create destroy functions for gamestate
 GameState* GS_initializeGameState()
@@ -69,6 +70,7 @@ void GS_loadGameObjects(GameState* gs)
     gs->goals[1] = Goal_createGoal(Vec3D_makeVector(POS_N_GOAL_L),Vec3D_makeVector(POS_N_GOAL_R),SIZE_POST_DIAMETER);
 }
 
+/*
 void GS_registerTouchHandlers(GameState* gs)
 {
     //first controller
@@ -97,6 +99,5 @@ void GS_registerTouchHandlers(GameState* gs)
     EH_registerHandler(gs->controllers[0].touchableArea, gs->controllers[0].evHan, true, &gs->controllers[0]);
     EH_registerHandler(gs->controllers[1].touchableArea, gs->controllers[1].evHan, true, &gs->controllers[1]);
     EH_registerHandler(gs->controllers[2].touchableArea, gs->controllers[2].evHan, true, &gs->controllers[2]);
-
-}
+}*/
 

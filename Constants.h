@@ -9,27 +9,20 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 // The below dimensions are in world
-#define WORLD_WIDTH 422
-#define WORLD_HEIGHT 675
-#ifdef __ANDROID__
-    #define SIZE_CONTROLLER_1 120
-    #define SIZE_CONTROLLER_2 90
-    #define SIZE_CONTROLLER_3 90
-    #define SIZE_CONTROLLER_KNOB1 70
-    #define SIZE_CONTROLLER_KNOB2 60
-    #define SIZE_CONTROLLER_KNOB3 60
-#else
-    #define SIZE_CONTROLLER_1 90
-    #define SIZE_CONTROLLER_2 70
-    #define SIZE_CONTROLLER_3 70
-    #define SIZE_CONTROLLER_KNOB1 55
-    #define SIZE_CONTROLLER_KNOB2 35
-    #define SIZE_CONTROLLER_KNOB3 35
-#endif
-#define SIZE_PLAYER_H 45
-#define SIZE_PLAYER_W 45
-#define SIZE_BALL_H 22
-#define SIZE_BALL_W 22
+#define WORLD_WIDTH 427
+#define WORLD_HEIGHT 640
+/*
+#define SIZE_CONTROLLER_1 90
+#define SIZE_CONTROLLER_2 70
+#define SIZE_CONTROLLER_3 70
+#define SIZE_CONTROLLER_KNOB1 55
+#define SIZE_CONTROLLER_KNOB2 35
+#define SIZE_CONTROLLER_KNOB3 35
+*/
+#define SIZE_PLAYER_H 40
+#define SIZE_PLAYER_W 40
+#define SIZE_BALL_H 20
+#define SIZE_BALL_W 20
 #define SIZE_PITCH 0, 0, WORLD_WIDTH, WORLD_HEIGHT
 #define SIZE_BEHIND_GOAL_AREA 50
 #define SIZE_POST_DIAMETER 8
@@ -89,8 +82,8 @@
 /////////        Defines for physics constants                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
 #define CONS_MAX_APPLIABLE_IMPULSE 55
-#define CONS_MAX_CONTROL_IMPULSE 40
-#define CONS_MAX_SPEED 6
+#define CONS_MAX_CONTROL_IMPULSE 35
+#define CONS_MAX_SPEED 7
 #define CONS_BALL_WALL_COR 0.65
 #define CONS_BALL_PLAYER_COR 0.1
 #define CONS_BALL_COURT_DEACC -0.3
@@ -109,6 +102,6 @@
 #define DT_DEFAULT "assets/decision_trees/_default_.dt"
 
 #define PI 3.14159265358979323846
-#define MAX_LONG_VALUE 4294967295
+#define MAX_LONG_VALUE 65535
 
 #endif // CONSTANTS_H_

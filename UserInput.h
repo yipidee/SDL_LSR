@@ -3,6 +3,7 @@
 
 #include "PhysicalController.h"
 #include "AnalogueController.h"
+#include "TouchscreenControl.h"
 #include "Utility/Geometry.h"
 
 typedef struct Input
