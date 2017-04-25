@@ -1,5 +1,4 @@
 #include "TouchscreenControl.h"
-#define isScreenLeft(x) ((x)<cutoffX) 
 
 //constants
 static const Vec3D NOTARGET = {-1,-1,-1};
@@ -58,9 +57,9 @@ Vec3D TS_getDirInput()
         Vec3D playerPos;
         playerPos = Player_getPos(gamestate->players[0]);
         res = Vec3D_subtract(target, playerPos);
-        if(Vec3D_getMagnitude(res)>MaxMag)Vec3D_scalarMult(Vec3D_normalise(res), MaxMag);
+        /*if(Vec3D_getMagnitude(res)>MaxMag)Vec3D_scalarMult(*/res = Vec3D_normalise(res);/*, MaxMag);
         res.i /= (float)MaxMag;
-        res.j /= (float)MaxMag;
+        res.j /= (float)MaxMag;*/
     }else
     {
         res = NOTINIT;

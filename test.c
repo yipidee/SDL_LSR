@@ -41,7 +41,7 @@ int BALL_FRAME_INFO[] = {4};
 int* ball_frameRate = NULL;
 
 int CALFNUTS_FRAME_INFO[] = {1, 4};
-int* calfnuts_frameRate = NULL;
+//int* calfnuts_frameRate = NULL;
 
 //background anchor, again horrible architecture
 double ZERO_ANCHOR = 0;
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 //    UI_setOnscreenControlRef(&gs->controllers[0], &gs->controllers[1], &gs->controllers[2]);
 #ifdef __ANDROID__
     Rect toucharea = {0,0,Viewport_getWidth(), Viewport_getHeight()};
-    TS_init(gs, toucharea.w / 2);
+    TS_init(gs, (int)(toucharea.w / 2.7));
     EH_registerHandler(toucharea, &TS_handleEvent, false, NULL);
 #endif
     AI_init();
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
     //Set label positions
     int a = TL_getWidth(p1Name);
     int b = TL_getWidth(p2Name);
-    int c = fmax(a, b);
+    int c = (int)fmax(a, b);
     c = Viewport_getWidth() - c - 15;
     TL_setX(p1Name, c);
     TL_setX(p2Name, c);
@@ -127,8 +127,8 @@ int main(int argc, char* argv[])
 
     a = TL_getHeight(p1Name);
     b = TL_getHeight(p2Name);
-    c = fmax(a, b);
-    TL_setY(p2Name, 5 * Draw_getScalingFactor());
+    c = (int)fmax(a, b);
+    TL_setY(p2Name, (int)(5 * Draw_getScalingFactor()));
     TL_setY(p2Score, TL_getY(p2Name) + TL_getHeight(p2Name));
     TL_setY(p2Touches, TL_getY(p2Score) + TL_getHeight(p2Name));
     TL_setY(p1Name, (int)(Viewport_getHeight() - (105 * Draw_getScalingFactor()) - 3 * c));
@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
                     e.tfinger.y = touchy;
                     EH_handleEvent(&e);
 
-                    __android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Touch event: %i, %i \n", (int)(e.tfinger.x), (int)(e.tfinger.y));
+                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Touch event: %i, %i \n", (int)(e.tfinger.x), (int)(e.tfinger.y));
                     //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Finger ID: %" PRId64 "\n", e.tfinger.fingerId);
                     //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Controller x, y: %i %i\n", (int)gs->controllers[0].knob.x, (int)gs->controllers[0].knob.y);
                     //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "type: %i\n", e.tfinger.type);
@@ -207,6 +207,8 @@ int main(int argc, char* argv[])
                 //printf("%s\n", "gameover");
                 break;
         }
+
+        if(Player_touchingBall(gs->players[0])) TS_resetKickSwitch=true;
 
         //Step 3: draw result
         Draw_renderScene();
@@ -239,8 +241,8 @@ int main(int argc, char* argv[])
         if(gs->players[0]->score >= winningScore || gs->players[1]->score >= winningScore) quit = true;
     }
     AI_freeDecisionTree(dt);
-    dt = NULL;
-    celebrationTree = NULL;
+    /*dt = NULL;
+    celebrationTree = NULL;*/
 
     TL_destroyTextLabel(p1Name);
     TL_destroyTextLabel(p2Name);
@@ -249,12 +251,12 @@ int main(int argc, char* argv[])
     TL_destroyTextLabel(p1Touches);
     TL_destroyTextLabel(p2Touches);
     TL_destroyTextLabel(gInfo);
-    p1Name = NULL;
+    /*p1Name = NULL;
     p2Name = NULL;
     p1Score = NULL;
     p2Score = NULL;
     p1Touches = NULL;
-    p2Touches = NULL;
+    p2Touches = NULL;*/
     gInfo = NULL;
 
     releaseResources();
@@ -590,7 +592,7 @@ void collisionWithEnergisedObject(GameObject* go1, GameObject* go2)
         Vec3D vec = Vec3D_subtract(GO_getPos(go2), GO_getPos(go1));
         double distanceBetweenCentres = Vec3D_getMagnitude(vec);
         double minAllowableDistance = Circle_getR(&go1->BCirc) + Circle_getR(&go2->BCirc);
-        double distToMove = minAllowableDistance - distanceBetweenCentres;
+        float distToMove = (float)(minAllowableDistance - distanceBetweenCentres);
 
         if(GO_isStationary(go1) && GO_isStationary(go2))
         {
@@ -610,7 +612,7 @@ void collisionWithEnergisedObject(GameObject* go1, GameObject* go2)
 void collisionWithFreeObject(GameObject* go1, GameObject* go2, Input input, bool* contacted)
 {
     //static bool contacted = false;
-    Vec3D impulse = VECTOR_ZERO;
+    Vec3D impulse;
 
     //with gs->ball
     if(GO_isInContact(go1, go2))
@@ -688,7 +690,7 @@ void loadSprites()
     Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_cs, true);
     Sprite_setSpriteInWorldPosRef(player_cs, &gs->players[1]->go->pos.i, &gs->players[1]->go->pos.j, NULL);
-    calfnuts_frameRate = Sprite_getRateSetAddress(player_cs);
+    //calfnuts_frameRate = Sprite_getRateSetAddress(player_cs);
     Sprite_setSpriteRotationRef(player_cs, &gs->players[1]->go->rPos);
     Sprite_setSpriteStateRef(player_cs, (int*)&gs->players[1]->state);
     Sprite_setFR(player_cs, 5);
