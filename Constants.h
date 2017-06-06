@@ -9,8 +9,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 // The below dimensions are in world
-#define WORLD_WIDTH 427
-#define WORLD_HEIGHT 640
+#define WORLD_WIDTH 400
+#define WORLD_HEIGHT 600
 /*
 #define SIZE_CONTROLLER_1 90
 #define SIZE_CONTROLLER_2 70
@@ -19,14 +19,14 @@
 #define SIZE_CONTROLLER_KNOB2 35
 #define SIZE_CONTROLLER_KNOB3 35
 */
-#define SIZE_PLAYER_H 40
-#define SIZE_PLAYER_W 40
+#define SIZE_PLAYER_H 35
+#define SIZE_PLAYER_W 35
 #define SIZE_BALL_H 20
 #define SIZE_BALL_W 20
 #define SIZE_PITCH 0, 0, WORLD_WIDTH, WORLD_HEIGHT
 #define SIZE_BEHIND_GOAL_AREA 50
 #define SIZE_POST_DIAMETER 8
-#define SIZE_GOAL_WIDTH 75
+#define SIZE_GOAL_WIDTH 60
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for positions of objects                                    //////////
@@ -53,6 +53,11 @@
 #define PATH_TO_COURT "assets/imgs/court.png"
 #define PATH_TO_CALFNUTS "assets/imgs/calfnuts_sprite.png"
 #define PATH_TO_POST_ART PATH_TO_RED_CONTROLLER
+
+#define BG_IMG_H 800
+#define BG_IMG_W 500
+#define BG_IMG_BORDER_H 100
+#define BG_IMG_BORDER_W 50
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for colours                                  //////////
@@ -81,7 +86,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////        Defines for physics constants                                  //////////
 //////////////////////////////////////////////////////////////////////////////////////////
-#define CONS_MAX_APPLIABLE_IMPULSE 55
+#define CONS_MAX_APPLIABLE_IMPULSE 50
 #define CONS_MAX_CONTROL_IMPULSE 35
 #define CONS_MAX_SPEED 7
 #define CONS_BALL_WALL_COR 0.65
@@ -97,8 +102,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////        Defines for Player/AI                                //////////
 //////////////////////////////////////////////////////////////////////////////////////////
-#define PLAYER_HALF_TOP 0, 0, WORLD_WIDTH, WORLD_HEIGHT / 2
-#define PLAYER_HALF_BOTTOM 0, WORLD_HEIGHT / 2, WORLD_WIDTH, WORLD_HEIGHT
+//#define PLAYER_HALF_TOP 0, 0, WORLD_WIDTH, WORLD_HEIGHT / 2
+//#define PLAYER_HALF_BOTTOM 0, WORLD_HEIGHT / 2, WORLD_WIDTH, WORLD_HEIGHT
 #define DT_DEFAULT "assets/decision_trees/_default_.dt"
 
 #define PI 3.14159265358979323846

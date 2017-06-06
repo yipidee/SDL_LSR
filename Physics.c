@@ -79,32 +79,32 @@ void Phys_boundaryAdjust(GameObject* go, Rect r)
     //determine struck wall and adjust accordingly
     if(Circle_inCollisionWithLine(go->BCirc, T, 0)||Circle_inCollisionWithLine(go->BCirc, B, 0))
     {
-        if(go->pos.j < go->BCirc.r)
+        if(go->pos.j < T.p1.j + go->BCirc.r)
         {
             Vec3D delta = VECTOR_ZERO;
-            delta.j = go->BCirc.r - go->pos.j;
+            delta.j = T.p1.j + go->BCirc.r - go->pos.j;
             GO_move(go, delta);
         }
-        if(go->pos.j > (WORLD_HEIGHT - go->BCirc.r))
+        if(go->pos.j > (B.p1.j - go->BCirc.r))
         {
             Vec3D delta = VECTOR_ZERO;
-            delta.j = WORLD_HEIGHT - go->BCirc.r - go->pos.j;
+            delta.j = B.p1.j - go->BCirc.r - go->pos.j;
             GO_move(go, delta);
         }
         go->vel.j = 0;
         go->acc.j = 0;
     }if(Circle_inCollisionWithLine(go->BCirc, R, 0)||Circle_inCollisionWithLine(go->BCirc, L, 0))
     {
-        if(go->pos.i < go->BCirc.r)
+        if(go->pos.i < L.p1.i + go->BCirc.r)
         {
             Vec3D delta = VECTOR_ZERO;
-            delta.i = go->BCirc.r - go->pos.i;
+            delta.i = L.p1.i + go->BCirc.r - go->pos.i;
             GO_move(go, delta);
         }
-        if(go->pos.i > (WORLD_WIDTH - go->BCirc.r))
+        if(go->pos.i > R.p1.i - go->BCirc.r)
         {
             Vec3D delta = VECTOR_ZERO;
-            delta.i = WORLD_WIDTH - go->BCirc.r - go->pos.i;
+            delta.i = R.p1.i - go->BCirc.r - go->pos.i;
             GO_move(go, delta);
         }
         go->vel.i = 0;

@@ -30,7 +30,7 @@ void normalPlayTick(bool* resetPositions, DecisionTree dt);
 void penaltyTick(bool* resetPositions, DecisionTree dt);
 void goalScoredTick(bool* resetPositions, DecisionTree dt);
 void gameOverTick();
-//void hideControls();
+void Draw_calcScreenOffsets(int imgW, int imgH, int borderW, int borderH, int *offsetX, int *offsetY);
 
 //globally available pointer to game state
 GameState* gs = NULL;
@@ -45,21 +45,38 @@ int CALFNUTS_FRAME_INFO[] = {1, 4};
 
 //background anchor, again horrible architecture
 double ZERO_ANCHOR = 0;
+int pitch_offset_x, pitch_offset_y;
 
 int main(int argc, char* argv[])
 {
     Draw_init();
+    Draw_calcScreenOffsets(BG_IMG_W, BG_IMG_H, BG_IMG_BORDER_W, BG_IMG_BORDER_H, &pitch_offset_x, &pitch_offset_y);
     gs = GS_initializeGameState();
-//    GS_registerTouchHandlers(gs);
-    GS_loadGameObjects(gs);
-//    UI_setOnscreenControlRef(&gs->controllers[0], &gs->controllers[1], &gs->controllers[2]);
+
 #ifdef __ANDROID__
     Rect toucharea = {0,0,Viewport_getWidth(), Viewport_getHeight()};
-    TS_init(gs, (int)(toucharea.w / 2.7));
+    TS_init(gs, (int)(toucharea.w / 4.0));
     EH_registerHandler(toucharea, &TS_handleEvent, false, NULL);
 #endif
-    AI_init();
+
+    //fix pitch rect offset position
+    Vec3D GO_offset = {BG_IMG_BORDER_W - pitch_offset_x , BG_IMG_BORDER_H - pitch_offset_y, 0};
+    gs->pitch.x = GO_offset.i;
+    gs->pitch.y = GO_offset.j;
+
+    GS_loadGameObjects(gs);
     loadSprites();
+
+    AI_init();
+    GO_setOffset(gs->ball, GO_offset);
+    GO_setOffset(Player_getGameObject(gs->players[0]), GO_offset);
+    GO_setOffset(Player_getGameObject(gs->players[1]), GO_offset);
+    GO_setOffset(Goal_getLPost(gs->goals[0]), GO_offset);
+    GO_setOffset(Goal_getLPost(gs->goals[1]), GO_offset);
+    GO_setOffset(Goal_getRPost(gs->goals[0]), GO_offset);
+    GO_setOffset(Goal_getRPost(gs->goals[1]), GO_offset);
+
+    GS_setTargetBoundaries(gs);
 
     //Main loop flag
     bool quit = false;
@@ -144,7 +161,8 @@ int main(int argc, char* argv[])
     /*************************************************************
     *********              GAME LOOP           *******************
     *************************************************************/
-
+    Draw_renderScene();
+    Draw_drawSceneBuffer();
     //While application is running
     while( !quit )
     {
@@ -240,6 +258,7 @@ int main(int argc, char* argv[])
         //first to 5 wins and triggers quit game
         if(gs->players[0]->score >= winningScore || gs->players[1]->score >= winningScore) quit = true;
     }
+
     AI_freeDecisionTree(dt);
     /*dt = NULL;
     celebrationTree = NULL;*/
@@ -261,7 +280,8 @@ int main(int argc, char* argv[])
 
     releaseResources();
 
-    return 0;
+    //Exit from Game (and app in Android)
+    exit(0);
 }
 
 void normalPlayTick(bool* resetPositions, DecisionTree dt)
@@ -447,11 +467,11 @@ void checkRules(GameState* gs, bool* resetPositions)
 
 void resetGamePositions(GameState* gs)
 {
-    Player_setPos(gs->players[0], Vec3D_makeVector(POS_PLAYER1_START));
-    Player_setPos(gs->players[1], Vec3D_makeVector(POS_PLAYER2_START));
+    Player_setOffsetPos(gs->players[0], Vec3D_makeVector(POS_PLAYER1_START));
+    Player_setOffsetPos(gs->players[1], Vec3D_makeVector(POS_PLAYER2_START));
     Player_resetTouches(gs->players[0]);
     Player_resetTouches(gs->players[1]);
-    GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
+    GO_setOffsetPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
     GO_setVel(gs->ball, VECTOR_ZERO);
     GO_setAcc(gs->ball, VECTOR_ZERO);
 }
@@ -460,14 +480,14 @@ void takePenaltyPositions(GameState* gs)
 {
     if(Player_concededPenalty(gs->players[0]))
     {
-        Player_setPos(gs->players[0], Vec3D_makeVector(POS_PENALTY_S_RECEIVER));
-        Player_setPos(gs->players[1], Vec3D_makeVector(POS_PENALTY_S_TAKER));
+        Player_setOffsetPos(gs->players[0], Vec3D_makeVector(POS_PENALTY_S_RECEIVER));
+        Player_setOffsetPos(gs->players[1], Vec3D_makeVector(POS_PENALTY_S_TAKER));
     }else
     {
-        Player_setPos(gs->players[0], Vec3D_makeVector(POS_PENALTY_N_TAKER));
-        Player_setPos(gs->players[1], Vec3D_makeVector(POS_PENALTY_N_RECEIVER));
+        Player_setOffsetPos(gs->players[0], Vec3D_makeVector(POS_PENALTY_N_TAKER));
+        Player_setOffsetPos(gs->players[1], Vec3D_makeVector(POS_PENALTY_N_RECEIVER));
     }
-    GO_setPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
+    GO_setOffsetPos(gs->ball, Vec3D_makeVector(POS_BALL_START));
     GO_setVel(gs->ball, VECTOR_ZERO);
     GO_setAcc(gs->ball, VECTOR_ZERO);
 }
@@ -672,24 +692,55 @@ void releaseResources()
     Draw_quit();
 }
 
-void loadSprites()
+void Draw_calcScreenOffsets(int imgW, int imgH, int borderW, int borderH, int *offsetX, int *offsetY)
 {
     // Background image for court
-    Sprite bg =  Sprite_createSprite(PATH_TO_COURT, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 90, NULL);
+    int usedW, usedH, offw, offh;
+    if(Viewport_getScreenRatio() >= 1.5)
+    {
+        //usedW = WORLD_WIDTH;
+        int spaceH = Viewport_getHeight() - (int)(WORLD_HEIGHT * Viewport_getRatio());
+        spaceH = (int)((double)spaceH / Viewport_getRatio());
+        usedH = WORLD_HEIGHT + spaceH;
+        offw = borderW;
+        offh = (imgH - usedH) / 2;
+    } else
+    {
+        //usedH = WORLD_HEIGHT;
+        int spaceW = Viewport_getWidth() - (int)(WORLD_WIDTH * Viewport_getRatio());
+        spaceW = (int)((double)spaceW / Viewport_getRatio());
+        usedW = WORLD_WIDTH + spaceW;
+        offh = borderH;
+        offw = (imgW - usedW) / 2;
+    }
+    *offsetX = offw;
+    *offsetY = offh;
+}
+void loadSprites()
+{
+//    pitch_offset_x = 50 - offw;
+//    pitch_offset_y = 100 - offh;
+    Sprite bg =  Sprite_createSprite(PATH_TO_COURT, BG_IMG_W - 2 * pitch_offset_x, BG_IMG_H - 2 * pitch_offset_y, 0, NULL);
+    Sprite_setSSoffset(bg, pitch_offset_x, pitch_offset_y);
     Sprite_setSpriteInWorldDims(bg, WORLD_WIDTH, WORLD_HEIGHT);
     Sprite_posByCentre(bg, false);
     Sprite_setSpriteInWorldPosRef(bg, &ZERO_ANCHOR, &ZERO_ANCHOR, NULL);
+    Sprite_setIsFullscreen(bg, true);
+
+    //Vec3D allspriteoffset = {pitch_offset_x, pitch_offset_y, 0};
 
     //sprite rep of players
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
     Sprite_setSpriteInWorldPosRef(player_s, &gs->players[0]->go->pos.i, &gs->players[0]->go->pos.j, NULL);
+    //Sprite_setOffset(player_s, allspriteoffset);
 
     Sprite player_cs = Sprite_createSprite(PATH_TO_CALFNUTS, 69, 108, 2, CALFNUTS_FRAME_INFO);
     Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_cs, true);
     Sprite_setSpriteInWorldPosRef(player_cs, &gs->players[1]->go->pos.i, &gs->players[1]->go->pos.j, NULL);
+    //Sprite_setOffset(player_cs, allspriteoffset);
     //calfnuts_frameRate = Sprite_getRateSetAddress(player_cs);
     Sprite_setSpriteRotationRef(player_cs, &gs->players[1]->go->rPos);
     Sprite_setSpriteStateRef(player_cs, (int*)&gs->players[1]->state);
@@ -700,27 +751,32 @@ void loadSprites()
     Sprite_setSpriteInWorldDims(ball_s, SIZE_BALL_W, SIZE_BALL_H);
     Sprite_posByCentre(ball_s, true);
     Sprite_setSpriteInWorldPosRef(ball_s, &gs->ball->pos.i, &gs->ball->pos.j, NULL);
+    //Sprite_setOffset(ball_s, allspriteoffset);
     ball_frameRate = Sprite_getRateSetAddress(ball_s);
     Sprite_setSpriteRotationRef(ball_s, &gs->ball->rPos);
     
     //sprites for posts of goals
     Sprite post1_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post1_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
+    //Sprite_setOffset(post1_s, allspriteoffset);
     Sprite_posByCentre(post1_s, true);
     Sprite_setSpriteInWorldPosRef(post1_s, &Goal_getLPost(gs->goals[0])->pos.i, &Goal_getLPost(gs->goals[0])->pos.j, NULL);
 
     Sprite post2_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post2_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
+    //Sprite_setOffset(post2_s, allspriteoffset);
     Sprite_posByCentre(post2_s, true);
     Sprite_setSpriteInWorldPosRef(post2_s, &Goal_getRPost(gs->goals[0])->pos.i, &Goal_getRPost(gs->goals[0])->pos.j, NULL);
 
     Sprite post3_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post3_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
+    //Sprite_setOffset(post3_s, allspriteoffset);
     Sprite_posByCentre(post3_s, true);
     Sprite_setSpriteInWorldPosRef(post3_s, &Goal_getLPost(gs->goals[1])->pos.i, &Goal_getLPost(gs->goals[1])->pos.j, NULL);
 
     Sprite post4_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post4_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
+    //Sprite_setOffset(post4_s, allspriteoffset);
     Sprite_posByCentre(post4_s, true);
     Sprite_setSpriteInWorldPosRef(post4_s, &Goal_getRPost(gs->goals[1])->pos.i, &Goal_getRPost(gs->goals[1])->pos.j, NULL);
 

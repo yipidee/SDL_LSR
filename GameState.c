@@ -37,29 +37,29 @@ void GS_loadGameObjects(GameState* gs)
 {
     //logical game object, players
     GameObject* player = GO_createGameObject();
-    GO_setPos(player, Vec3D_makeVector(POS_PLAYER1_START));
+    GO_setOffsetPos(player, Vec3D_makeVector(POS_PLAYER1_START));
     Circle playerBounds = {0,0,SIZE_PLAYER_H / 2 - 1};
     GO_setBCirc(player, playerBounds);
     GO_setMass(player, CONS_MASS_PLAYER);
 
     Player mccoy = Player_create(player);
-    Player_setOwnHalf(mccoy, Rect_create(PLAYER_HALF_BOTTOM));
+    Player_setOwnHalf(mccoy, Rect_create(gs->pitch.x, gs->pitch.y + gs->pitch.h / 2, gs->pitch.w, gs->pitch.h / 2));
     mccoy->touches = 2;
     gs->players[0] = mccoy;
 
     GameObject* player_c = GO_createGameObject();
-    GO_setPos(player_c, Vec3D_makeVector(POS_PLAYER2_START));
+    GO_setOffsetPos(player_c, Vec3D_makeVector(POS_PLAYER2_START));
     GO_setBCirc(player_c, playerBounds);
     GO_setMass(player_c, CONS_MASS_PLAYER);
 
     Player calfnuts = Player_create(player_c);
-    Player_setOwnHalf(calfnuts, Rect_create(PLAYER_HALF_TOP));
+    Player_setOwnHalf(calfnuts, Rect_create(gs->pitch.x, gs->pitch.y, gs->pitch.w, gs->pitch.h / 2));
     calfnuts->touches = 2;
     gs->players[1] = calfnuts;
 
     //logical game object, ball
     GameObject* ball = GO_createGameObject();
-    GO_setPos(ball, Vec3D_makeVector(POS_BALL_START));
+    GO_setOffsetPos(ball, Vec3D_makeVector(POS_BALL_START));
     Circle ballBounds = {0,0,SIZE_BALL_H / 2};
     GO_setBCirc(ball, ballBounds);
     GO_setMass(ball, CONS_MASS_BALL);
@@ -68,6 +68,13 @@ void GS_loadGameObjects(GameState* gs)
     //logical game object
     gs->goals[0] = Goal_createGoal(Vec3D_makeVector(POS_S_GOAL_L),Vec3D_makeVector(POS_S_GOAL_R),SIZE_POST_DIAMETER);
     gs->goals[1] = Goal_createGoal(Vec3D_makeVector(POS_N_GOAL_L),Vec3D_makeVector(POS_N_GOAL_R),SIZE_POST_DIAMETER);
+}
+
+void GS_setTargetBoundaries(GameState* gs)
+{
+    // set goal area
+    Goal_setGoalArea(gs->goals[0]);
+    Goal_setGoalArea(gs->goals[1]);
 }
 
 /*

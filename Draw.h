@@ -46,6 +46,8 @@ int Sprite_getCurrFrame(Sprite s);
 int* Sprite_getRateSetAddress(Sprite s);
 void Sprite_setFrameRate(int* rate, int r);
 void Sprite_setAlpha(Sprite s, uint8_t alpha);
+void Sprite_setSSoffset(Sprite s, int off_w, int off_h);
+void Sprite_setIsFullscreen(Sprite s, bool b);
 #define Sprite_setFR(s, r) Sprite_setFrameRate(Sprite_getRateSetAddress((s)), (r))
 
 //text label methods
@@ -71,5 +73,7 @@ void Draw_drawSceneBuffer();  //draw buffer to screen and clear content
 //viewport functions
 int Viewport_getWidth();
 int Viewport_getHeight();
+double Viewport_getRatio();
+double Viewport_getScreenRatio();
 
 #endif // _DRAW_H_

@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 #include "GameObject.h"
 #include "Utility/List.h"
 
@@ -29,6 +29,8 @@ GameObject* GO_createGameObject()
     go.mass = 1;
     go.isStationary = false;
     go.BCirc = Circle_create(0, 0, 1);
+    go.offset = VECTOR_ZERO;
+    go.isOffset = false;
 
     List_append(&GO_LIST, &go);
     return (GameObject*)GO_LIST.tail->data;
@@ -170,6 +172,19 @@ void GO_setVel(GameObject* go, Vec3D v)
 void GO_setPos(GameObject* go, Vec3D p)
 {
     go->pos = p;
+    go->BCirc.x = go->pos.i;
+    go->BCirc.y = go->pos.j;
+}
+
+void GO_setOffsetPos(GameObject* go, Vec3D p)
+{
+    go->pos = p;
+    if(go->isOffset)
+    {
+        GO_move(go, go->offset);
+    }
+    go->BCirc.x = go->pos.i;
+    go->BCirc.y = go->pos.j;
 }
 
 void GO_setRPos(GameObject* go, double p)
@@ -202,6 +217,13 @@ void GO_setBCirc(GameObject* go, Circle c)
 void GO_setMass(GameObject* go, int m)
 {
     go->mass = m;
+}
+
+void GO_setOffset(GameObject* go, Vec3D Offset)
+{
+    go->isOffset = true;
+    go->offset = Offset;
+    GO_setOffsetPos(go, go->pos);
 }
 
 //getters for physics variables

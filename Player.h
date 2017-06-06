@@ -18,6 +18,7 @@
 #define Player_setAcc(p,v) GO_setAcc((p)->go, (v))
 #define Player_setVel(p,v) GO_setVel((p)->go, (v))
 #define Player_setPos(p,v) GO_setPos((p)->go, (v))
+#define Player_setOffsetPos(p,v) GO_setOffsetPos((p)->go, (v))
 #define Player_setRAcc(p,i) GO_setRAcc((p)->go, (i))
 #define Player_setRVel(p,i) GO_setRVel((p)->go, (i))
 #define Player_setRPos(p,i) GO_setRPos((p)->go, (i))

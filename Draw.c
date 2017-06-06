@@ -2,7 +2,7 @@
 #include <stdio.h>
 #ifdef __ANDROID__
 #include <SDL_image.h>
-#include <SDL_ttf.h>
+#include <../SDL_ttf/SDL_ttf.h>
 #else
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -18,6 +18,7 @@ static SDL_Window* gWindow = NULL;
 static SDL_Renderer* gRenderer = NULL;
 static SDL_Rect viewport = {0,0,0,0};
 static double scale = 1.0;
+static double screen_ratio = 1.0;
 
 static bool isInitialised = false;
 
@@ -55,6 +56,7 @@ struct _Spritesheet
 {
     SDL_Texture* spritesheet;
     int w, h;   //width and height of single frame
+    int offset_w, offset_h;
     int noStates;   //how many states represented in sheet
     int* framesPerState; //array of ints specifying how many frames per state exist
 };
@@ -62,12 +64,20 @@ struct _Spritesheet
 Spritesheet Spritesheet_create(char* pathToImg, int w, int h, int noStates, int* framesPerState)
 {
     Spritesheet res = malloc(sizeof(struct _Spritesheet));
-    if(pathToImg){res->spritesheet = Draw_loadTexture(pathToImg);} else {res = NULL; return NULL;}
+    if(pathToImg){res->spritesheet = Draw_loadTexture(pathToImg);} else {res = NULL; return res;}
     res->w = w;
     res->h = h;
+    res->offset_h = 0;
+    res->offset_w = 0;
     res->noStates = noStates;
     res->framesPerState = framesPerState;
     return res;
+}
+
+void Spritesheet_setOffset(Spritesheet ss, int off_w, int off_h)
+{
+    ss->offset_w = off_w;
+    ss->offset_h = off_h;
 }
 
 void Spritesheet_destroy(Spritesheet s)
@@ -93,6 +103,7 @@ struct _Sprite
     int* state;                 //state
     int frame, frameRate;      //current frame
     bool isFullscreen;     //whether exists in global space or directly on screen
+    Vec3D offset;  // offset in global game world
 };
 
 Sprite Sprite_createSprite(char* pathToSpriteSheet, int sW, int sH, int numStates, int* framesPerState)
@@ -125,11 +136,6 @@ void Sprite_destroySprite(Sprite s)
     free(s);
 }
 
-void Sprite_isFullscreen(Sprite s, bool fullscreen)
-{
-    s->isFullscreen = fullscreen;
-}
-
 void Sprite_posByCentre(Sprite s, bool PBC)
 {
     s->posRefByCentre = PBC;
@@ -160,7 +166,7 @@ void Sprite_setSpriteStateRef(Sprite s, int* state)
 
 void Sprite_renderSprite(Sprite s)
 {
-    int currState = (s->state==NULL)?0:*(s->state);
+    int currState = (s->state==NULL) ? 0 : *(s->state);
 
     //source rect on spritesheet from where to read the image
     SDL_Rect srcRect;
@@ -184,8 +190,8 @@ void Sprite_renderSprite(Sprite s)
             localH = s->spriteSheet->h;
         }
         SDL_Rect tmpRect= {
-               s->frame*localW,         //x
-               currState*localH,        //y
+               s->frame*localW + s->spriteSheet->offset_w,         //x
+               currState*localH + s->spriteSheet->offset_h,        //y
                localW,                  //w
                localH                   //h
         };
@@ -202,6 +208,7 @@ void Sprite_renderSprite(Sprite s)
         pDstRect = NULL;
     }else
     {
+        gPos = VECTOR_ZERO;
         if(s->gX) gPos.i = *(s->gX);
         if(s->gY) gPos.j = *(s->gY);
         if(s->gZ) gPos.k = *(s->gZ);
@@ -218,19 +225,25 @@ void Sprite_renderSprite(Sprite s)
 
         relPos = Vec3D_subtract(gPos, vPos);
 
-        SDL_Rect tmpRect = {
-                (int)(relPos.i * scale),       //x
-                (int)(relPos.j * scale),       //y
-                s->gW * scale, //w
-                s->gH * scale   //h
-        };
-        dstRect = tmpRect;
-        pDstRect = &dstRect;
+        if(s->isFullscreen)
+        {
+            pDstRect = NULL;
+        }else
+        {
+            SDL_Rect tmpRect = {
+                    (int) ((relPos.i) * scale),       //x
+                    (int) ((relPos.j) * scale),       //y
+                    (int) (s->gW * scale), //w
+                    (int) (s->gH * scale)   //h
+            };
+            dstRect = tmpRect;
+            pDstRect = &dstRect;
+        }
     }
 
     //copy the image into the renderer for render to screen at next step
     int rotation = s->angle ? (int)(*s->angle * (double)180 / PI) : 0;
-    SDL_RenderCopyEx(gRenderer, s->spriteSheet->spritesheet, pSrcRect, pDstRect, rotation, NULL, 0);
+    SDL_RenderCopyEx(gRenderer, s->spriteSheet->spritesheet, pSrcRect, pDstRect, rotation, NULL, SDL_FLIP_NONE);
 }
 
 void Sprite_tickFrame(Sprite s)
@@ -261,6 +274,21 @@ void Sprite_setFrameRate(int* addr, int rate)
 void Sprite_setAlpha(Sprite s, uint8_t alpha)
 {
     SDL_SetTextureAlphaMod(s->spriteSheet->spritesheet, alpha);
+}
+
+void Sprite_setSSoffset(Sprite s, int off_w, int off_h)
+{
+    Spritesheet_setOffset(s->spriteSheet, off_w, off_h);
+}
+
+void Sprite_setIsFullscreen(Sprite s, bool b)
+{
+    s->isFullscreen = b;
+}
+
+void Sprite_setOffset(Sprite s, Vec3D Offset)
+{
+    s->offset = Offset;
 }
 /*
 int* Sprite_getAngleSetAddress(Sprite s)
@@ -322,7 +350,7 @@ bool Draw_init()
                     {
                         List_new(&loadedTextures, sizeof(struct textureListItem), &freeListedTexture);
                         List_new(&sprites, sizeof(struct _Sprite), NULL);
-                        SDL_GetWindowSize(gWindow, &viewport.w, &viewport.h);
+                        SDL_GetRendererOutputSize(gRenderer, &viewport.w, &viewport.h);
                         Viewport_init();
                         isInitialised = true;
                     }
@@ -384,12 +412,10 @@ SDL_Texture* Draw_loadTexture(char* pathToImage)
 
 void Viewport_init()
 {
-    viewport.x = 0;
-    viewport.y = 0;
-    double h_scale = (double)viewport.w / (double) WORLD_WIDTH;
-    double v_scale = (double)viewport.h / (double) WORLD_HEIGHT;
-    //store min scale factor as global scaling factor
-    scale = fmin(h_scale, v_scale);
+    screen_ratio = (double)viewport.h / (double)viewport.w;
+    scale = screen_ratio >= 1.5 ? (double)viewport.w / (double)WORLD_WIDTH : (double)viewport.h / (double)WORLD_HEIGHT;
+    viewport.x = 0;//(int)((viewport.w - WORLD_WIDTH * scale) / 2.0);
+    viewport.y = 0;//(int)((viewport.h - WORLD_HEIGHT * scale) / 2.0);
 }
 
 void Viewport_setPos(Vec3D p)
@@ -412,6 +438,16 @@ int Viewport_getWidth()
 int Viewport_getHeight()
 {
     return viewport.h;
+}
+
+double Viewport_getRatio()
+{
+    return scale;
+}
+
+double Viewport_getScreenRatio()
+{
+    return screen_ratio;
 }
 
 /********************************************************************
@@ -448,7 +484,7 @@ void Draw_drawSceneBuffer()
 void Draw_line(Vec3D p1, Vec3D p2)
 {
     SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-    SDL_RenderDrawLine(gRenderer, p1.i, p1.j, p2.i, p2.j);
+    SDL_RenderDrawLine(gRenderer, (int)p1.i, (int)p1.j, (int)p2.i, (int)p2.j);
 }
 
 /********************************************************************
@@ -548,9 +584,9 @@ TextLabel TL_createTextLabel(char* text, int x, int y)
 void TL_destroyTextLabel(TextLabel tl)
 {
     TTF_CloseFont(tl->mFont);
-    if(tl->textSurf != NULL) {SDL_FreeSurface(tl->textSurf); tl->textSurf=NULL;}
+    if(tl->textSurf != NULL) {SDL_FreeSurface(tl->textSurf); /*tl->textSurf=NULL;*/}
     if(tl)free(tl);
-    tl = NULL;
+    //tl = NULL;
 }
 
 //Sets tl's text data

@@ -19,7 +19,8 @@ typedef struct GameObject
     double rPos, rVel, rAcc;   //rotational properties initialised to 0
     Circle BCirc;             //bounding circle for collision detection
     int mass;
-    bool isStationary;      //flag to indicate no need for physics update
+    bool isStationary, isOffset;      //flag to indicate no need for physics update
+    Vec3D offset;
 } GameObject;
 
 // create/destroy functions for game object
@@ -38,6 +39,9 @@ void GO_setRAcc(GameObject* go, double a);
 void GO_setStationary(GameObject* go, bool b);
 void GO_setBCirc(GameObject* go, Circle c);
 void GO_setMass(GameObject* go, int m);
+void GO_setOffset(GameObject* go, Vec3D Offset);
+void GO_setOffsetPos(GameObject* go, Vec3D p);
+
 
 //getters for physics variables
 Vec3D GO_getAcc(const GameObject* go);

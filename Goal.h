@@ -1,6 +1,7 @@
 #ifndef _GOAL_H
 #define _GOAL_H
 
+#include <stdbool.h>
 #include "Utility/Geometry.h"
 #include "GameObject.h"
 
@@ -11,6 +12,9 @@ Goal Goal_createGoal(Vec3D p1, Vec3D p2, int d);
 
 // destroy and existing goal object
 void Goal_destroyGoal(Goal g);  //Must be called after Gameobjects destroyed!!
+
+// create area in which if ball is detected a goal is declared
+void Goal_setGoalArea(Goal g);
 
 // get the width of a goal object, adjusted for post diameter
 int Goal_getWidth(Goal g);

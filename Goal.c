@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdlib.h>
 #include "Goal.h"
 #include "Constants.h"
 
@@ -17,10 +18,10 @@ Goal Goal_createGoal(Vec3D p1, Vec3D p2, int d)
     //assign memory for goal and set up game objects
     Goal g = malloc(sizeof(struct _Goal));
     g->posts[0] = GO_createGameObject();
-    GO_setPos(g->posts[0], p1);
+    GO_setOffsetPos(g->posts[0], p1);
     GO_setStationary(g->posts[0], true);
     g->posts[1] = GO_createGameObject();
-    GO_setPos(g->posts[1], p2);
+    GO_setOffsetPos(g->posts[1], p2);
     GO_setStationary(g->posts[1], true);
     g->diameter = d;
 
@@ -29,6 +30,17 @@ Goal Goal_createGoal(Vec3D p1, Vec3D p2, int d)
     GO_setBCirc(g->posts[0], lBC);
     Circle rBC = Circle_create(p2.i, p2.j, d/2);
     GO_setBCirc(g->posts[1], rBC);
+
+    return g;
+}
+
+// create area in which if ball is detected a goal is declared
+void Goal_setGoalArea(Goal g)
+{
+    // post positions
+    Vec3D p1, p2;
+    p1 = GO_getPos(g->posts[0]);
+    p2 = GO_getPos(g->posts[1]);
 
     //calc properties
     Vec3D l2rVec = Vec3D_subtract(p2, p1);
@@ -51,8 +63,6 @@ Goal Goal_createGoal(Vec3D p1, Vec3D p2, int d)
         goalArea.h = 50;
     }
     g->net = goalArea;
-
-    return g;
 }
 
 //Must be called after Gameobjects destroyed!!
