@@ -47,9 +47,41 @@ int CALFNUTS_FRAME_INFO[] = {1, 4};
 double ZERO_ANCHOR = 0;
 int pitch_offset_x, pitch_offset_y;
 
+//transform function relating geometric location between in world and on screen
+Vec3D world2screen(Vec3D v)
+{
+    double x = v.i;
+    double y = v.j;
+
+    x = ((BG_IMG_BORDER_W - pitch_offset_x) + x) * Viewport_getRatio();
+    y = ((BG_IMG_BORDER_H - pitch_offset_y) + y) * Viewport_getRatio();
+
+    v.i = x;
+    v.j = y;
+    v.k = 0;
+
+    return v;
+}
+
+//transform function relating screen location to world location
+Vec3D screen2world(Vec3D v)
+{
+    double x = v.i;
+    double y = v.j;
+
+    x = (x - (BG_IMG_BORDER_W - pitch_offset_x)) / Viewport_getRatio();
+    y = (y - (BG_IMG_BORDER_H - pitch_offset_y)) / Viewport_getRatio();
+
+    v.i = x;
+    v.j = y;
+    v.k = 0;
+
+    return v;
+}
+
 int main(int argc, char* argv[])
 {
-    Draw_init();
+    Draw_init(&world2screen);
     Draw_calcScreenOffsets(BG_IMG_W, BG_IMG_H, BG_IMG_BORDER_W, BG_IMG_BORDER_H, &pitch_offset_x, &pitch_offset_y);
     gs = GS_initializeGameState();
 
@@ -60,22 +92,14 @@ int main(int argc, char* argv[])
 #endif
 
     //fix pitch rect offset position
-    Vec3D GO_offset = {BG_IMG_BORDER_W - pitch_offset_x , BG_IMG_BORDER_H - pitch_offset_y, 0};
-    gs->pitch.x = GO_offset.i;
-    gs->pitch.y = GO_offset.j;
+    //Vec3D GO_offset = {BG_IMG_BORDER_W - pitch_offset_x , BG_IMG_BORDER_H - pitch_offset_y, 0};
+    //gs->pitch.x = GO_offset.i;
+    //gs->pitch.y = GO_offset.j;
 
     GS_loadGameObjects(gs);
     loadSprites();
 
     AI_init();
-    GO_setOffset(gs->ball, GO_offset);
-    GO_setOffset(Player_getGameObject(gs->players[0]), GO_offset);
-    GO_setOffset(Player_getGameObject(gs->players[1]), GO_offset);
-    GO_setOffset(Goal_getLPost(gs->goals[0]), GO_offset);
-    GO_setOffset(Goal_getLPost(gs->goals[1]), GO_offset);
-    GO_setOffset(Goal_getRPost(gs->goals[0]), GO_offset);
-    GO_setOffset(Goal_getRPost(gs->goals[1]), GO_offset);
-
     GS_setTargetBoundaries(gs);
 
     //Main loop flag
@@ -161,7 +185,7 @@ int main(int argc, char* argv[])
     /*************************************************************
     *********              GAME LOOP           *******************
     *************************************************************/
-    Draw_renderScene();
+    Draw_updateView();
     Draw_drawSceneBuffer();
     //While application is running
     while( !quit )
@@ -189,10 +213,10 @@ int main(int argc, char* argv[])
                 #else
                 if (isTouchEvent(e))
                 {
-                    int touchx = (int)(e.tfinger.x * (float)Viewport_getWidth() / Draw_getScalingFactor());
-                    int touchy = (int)(e.tfinger.y * (float)Viewport_getHeight() / Draw_getScalingFactor());
-                    e.tfinger.x = touchx;
-                    e.tfinger.y = touchy;
+                    Vec3D touch = {e.tfinger.x * Viewport_getWidth(), e.tfinger.y * Viewport_getHeight(), 0};
+                    touch = screen2world(touch);
+                    e.tfinger.x = (float)touch.i;
+                    e.tfinger.y = (float)touch.j;
                     EH_handleEvent(&e);
 
                     //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Touch event: %i, %i \n", (int)(e.tfinger.x), (int)(e.tfinger.y));
@@ -229,7 +253,7 @@ int main(int argc, char* argv[])
         if(Player_touchingBall(gs->players[0])) TS_resetKickSwitch=true;
 
         //Step 3: draw result
-        Draw_renderScene();
+        Draw_updateView();
 
         snprintf(p1score, 20, "goals %i", gs->players[0]->score);
         snprintf(p2score, 20, "goals %i", gs->players[1]->score);
@@ -695,27 +719,29 @@ void releaseResources()
 void Draw_calcScreenOffsets(int imgW, int imgH, int borderW, int borderH, int *offsetX, int *offsetY)
 {
     // Background image for court
-    int usedW, usedH, offw, offh;
-    if(Viewport_getScreenRatio() >= 1.5)
-    {
-        //usedW = WORLD_WIDTH;
-        int spaceH = Viewport_getHeight() - (int)(WORLD_HEIGHT * Viewport_getRatio());
-        spaceH = (int)((double)spaceH / Viewport_getRatio());
-        usedH = WORLD_HEIGHT + spaceH;
-        offw = borderW;
-        offh = (imgH - usedH) / 2;
-    } else
-    {
-        //usedH = WORLD_HEIGHT;
-        int spaceW = Viewport_getWidth() - (int)(WORLD_WIDTH * Viewport_getRatio());
-        spaceW = (int)((double)spaceW / Viewport_getRatio());
-        usedW = WORLD_WIDTH + spaceW;
-        offh = borderH;
-        offw = (imgW - usedW) / 2;
-    }
-    *offsetX = offw;
-    *offsetY = offh;
+    int Sw = Viewport_getWidth();
+    int Sh = Viewport_getHeight();
+
+    int Iw = imgW;
+    int Ih = imgH;
+
+    int Cw = Iw - 2 * borderW;  // width of real content in bg img
+    int Ch = Ih - 2 * borderH;  // height of real content in bg img
+
+    double SA = (double)Sw/(double)Sh;
+    double CA = (double)Cw/(double)Ch;
+    double SF = CA <= SA ? (double)Sh / (double)Ch : (double)Sw / (double)Cw;
+
+    int Iw_dash = (int)(SF * Iw);
+    int Ih_dash = (int)(SF * Ih);
+
+    int offX = (int)((Iw_dash - Sw) / (2 * SF));
+    int offY = (int)((Ih_dash - Sh) / (2 * SF));
+
+    *offsetX = offX;
+    *offsetY = offY;
 }
+
 void loadSprites()
 {
 //    pitch_offset_x = 50 - offw;

@@ -27,7 +27,7 @@ typedef struct _Sprite* Sprite;
 typedef struct _TextLabel* TextLabel;
 
 //initialise/quit drawing utilities
-bool Draw_init();
+bool Draw_init(TransformFunc tf);
 void Draw_quit();
 double Draw_getScalingFactor();
 
@@ -66,7 +66,7 @@ int TL_getWidth(TextLabel tl);  //get width of text label
 int TL_getHeight(TextLabel tl);  //get Height of text label
 
 //render all visible sprites to the buffer in order of creation
-void Draw_renderScene();
+void Draw_updateView();
 void Draw_line(Vec3D p1, Vec3D p2);
 void Draw_drawSceneBuffer();  //draw buffer to screen and clear content
 

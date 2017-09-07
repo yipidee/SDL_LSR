@@ -19,6 +19,7 @@ static SDL_Renderer* gRenderer = NULL;
 static SDL_Rect viewport = {0,0,0,0};
 static double scale = 1.0;
 static double screen_ratio = 1.0;
+static TransformFunc Game2ScreenTransformFunc = NULL;
 
 static bool isInitialised = false;
 
@@ -219,6 +220,24 @@ void Sprite_renderSprite(Sprite s)
             gPos.j -= (s->gH/2);
         }
 
+        vPos = gPos;
+        if(Game2ScreenTransformFunc)vPos = Game2ScreenTransformFunc(gPos);
+
+        if(s->isFullscreen)
+        {
+            pDstRect = NULL;
+        }else
+        {
+            SDL_Rect tmpRect = {
+                    (int) vPos.i,       //x
+                    (int) vPos.j,       //y
+                    (int) (s->gW * scale), //w
+                    (int) (s->gH * scale)   //h
+            };
+            dstRect = tmpRect;
+            pDstRect = &dstRect;
+        }
+/*
         vPos.i = viewport.x;
         vPos.j = viewport.y;
         vPos.k = 0;
@@ -238,7 +257,7 @@ void Sprite_renderSprite(Sprite s)
             };
             dstRect = tmpRect;
             pDstRect = &dstRect;
-        }
+        }*/
     }
 
     //copy the image into the renderer for render to screen at next step
@@ -307,7 +326,7 @@ void Sprite_setAngle(int* addr, int angle)
 *********************************************************************
 ********************************************************************/
 
-bool Draw_init()
+bool Draw_init(TransformFunc tf)
 {
     if(!isInitialised){
         if(!SDL_Helper_init())
@@ -352,6 +371,7 @@ bool Draw_init()
                         List_new(&sprites, sizeof(struct _Sprite), NULL);
                         SDL_GetRendererOutputSize(gRenderer, &viewport.w, &viewport.h);
                         Viewport_init();
+                        if(tf)Game2ScreenTransformFunc = tf;
                         isInitialised = true;
                     }
                 }
@@ -384,7 +404,7 @@ void Draw_quit()
 //Image handling functions
 SDL_Texture* Draw_loadTexture(char* pathToImage)
 {
-    if(!isInitialised) Draw_init();
+    if(!isInitialised) Draw_init(NULL);
     SDL_Surface* s = NULL;
     SDL_Texture* t = getTextureRef(pathToImage);
 
@@ -412,8 +432,8 @@ SDL_Texture* Draw_loadTexture(char* pathToImage)
 
 void Viewport_init()
 {
-    screen_ratio = (double)viewport.h / (double)viewport.w;
-    scale = screen_ratio >= 1.5 ? (double)viewport.w / (double)WORLD_WIDTH : (double)viewport.h / (double)WORLD_HEIGHT;
+    screen_ratio = (double)viewport.w / (double)viewport.h;
+    scale = screen_ratio <= 1.5 ? (double)viewport.w / (double)WORLD_WIDTH : (double)viewport.h / (double)WORLD_HEIGHT;
     viewport.x = 0;//(int)((viewport.w - WORLD_WIDTH * scale) / 2.0);
     viewport.y = 0;//(int)((viewport.h - WORLD_HEIGHT * scale) / 2.0);
 }
@@ -457,7 +477,7 @@ double Viewport_getScreenRatio()
 ********************************************************************/
 
 
-void Draw_renderScene()
+void Draw_updateView()
 {
     // tick count
     ++animation_count;

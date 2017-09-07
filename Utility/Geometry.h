@@ -32,6 +32,10 @@ typedef struct Vec3D
     double k;
 } Vec3D;
 
+// define a function pointer to behave as transform function
+// not used in this module, but geometry related
+typedef Vec3D (*TransformFunc)(Vec3D);
+
 static const Vec3D VECTOR_ZERO = {0,0,0};
 static const Vec3D VECTOR_N = {0,-1,0};
 static const Vec3D VECTOR_E = {1,0,0};
