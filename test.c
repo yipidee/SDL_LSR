@@ -4,6 +4,8 @@
 #ifdef __ANDROID__
 #include <SDL.h>
 #include <android/log.h>
+#include <SDL_video.h>
+
 #else
 #include <SDL2/SDL.h>
 #endif
@@ -50,15 +52,12 @@ int pitch_offset_x, pitch_offset_y;
 //transform function relating geometric location between in world and on screen
 Vec3D world2screen(Vec3D v)
 {
-    double x = v.i;
-    double y = v.j;
+    static const Vec3D CENTRE_POINT_W = {WORLD_WIDTH / 2.0, WORLD_HEIGHT / 2.0, 0};
+    const Vec3D CENTRE_POINT_S = {Viewport_getWidth() / 2.0, Viewport_getHeight() / 2.0, 0};
 
-    x = ((BG_IMG_BORDER_W - pitch_offset_x) + x) * Viewport_getRatio();
-    y = ((BG_IMG_BORDER_H - pitch_offset_y) + y) * Viewport_getRatio();
-
-    v.i = x;
-    v.j = y;
-    v.k = 0;
+    Vec3D centreToVec = Vec3D_subtract(v, CENTRE_POINT_W);
+    v = Vec3D_scalarMult(centreToVec, (float)Viewport_getRatio());
+    v = Vec3D_add(v, CENTRE_POINT_S);
 
     return v;
 }
@@ -66,15 +65,12 @@ Vec3D world2screen(Vec3D v)
 //transform function relating screen location to world location
 Vec3D screen2world(Vec3D v)
 {
-    double x = v.i;
-    double y = v.j;
+    static const Vec3D CENTRE_POINT_W = {WORLD_WIDTH / 2.0, WORLD_HEIGHT / 2.0, 0};
+    const Vec3D CENTRE_POINT_S = {Viewport_getWidth() / 2.0, Viewport_getHeight() / 2.0, 0};
 
-    x = (x - (BG_IMG_BORDER_W - pitch_offset_x)) / Viewport_getRatio();
-    y = (y - (BG_IMG_BORDER_H - pitch_offset_y)) / Viewport_getRatio();
-
-    v.i = x;
-    v.j = y;
-    v.k = 0;
+    Vec3D centreToVec = Vec3D_subtract(v, CENTRE_POINT_S);
+    v = Vec3D_scalarMult(centreToVec, (float)(1.0/Viewport_getRatio()));
+    v = Vec3D_add(v, CENTRE_POINT_W);
 
     return v;
 }
@@ -83,18 +79,14 @@ int main(int argc, char* argv[])
 {
     Draw_init(&world2screen);
     Draw_calcScreenOffsets(BG_IMG_W, BG_IMG_H, BG_IMG_BORDER_W, BG_IMG_BORDER_H, &pitch_offset_x, &pitch_offset_y);
+
     gs = GS_initializeGameState();
 
 #ifdef __ANDROID__
     Rect toucharea = {0,0,Viewport_getWidth(), Viewport_getHeight()};
-    TS_init(gs, (int)(toucharea.w / 4.0));
+    TS_init(gs, (int)(toucharea.w / 5.0));
     EH_registerHandler(toucharea, &TS_handleEvent, false, NULL);
 #endif
-
-    //fix pitch rect offset position
-    //Vec3D GO_offset = {BG_IMG_BORDER_W - pitch_offset_x , BG_IMG_BORDER_H - pitch_offset_y, 0};
-    //gs->pitch.x = GO_offset.i;
-    //gs->pitch.y = GO_offset.j;
 
     GS_loadGameObjects(gs);
     loadSprites();
@@ -158,7 +150,7 @@ int main(int argc, char* argv[])
     int a = TL_getWidth(p1Name);
     int b = TL_getWidth(p2Name);
     int c = (int)fmax(a, b);
-    c = Viewport_getWidth() - c - 15;
+    c = Viewport_getWidth() - c - 25;
     TL_setX(p1Name, c);
     TL_setX(p2Name, c);
     TL_setX(p1Score, c);
@@ -169,10 +161,10 @@ int main(int argc, char* argv[])
     a = TL_getHeight(p1Name);
     b = TL_getHeight(p2Name);
     c = (int)fmax(a, b);
-    TL_setY(p2Name, (int)(5 * Draw_getScalingFactor()));
+    TL_setY(p2Name, (int)((10 + pitch_offset_y) * Draw_getScalingFactor()));
     TL_setY(p2Score, TL_getY(p2Name) + TL_getHeight(p2Name));
     TL_setY(p2Touches, TL_getY(p2Score) + TL_getHeight(p2Name));
-    TL_setY(p1Name, (int)(Viewport_getHeight() - (105 * Draw_getScalingFactor()) - 3 * c));
+    TL_setY(p1Name, (int)(Viewport_getHeight() - ((2 * pitch_offset_y) * Draw_getScalingFactor()) - 3 * c));
     TL_setY(p1Score, TL_getY(p1Name) + TL_getHeight(p1Name));
     TL_setY(p1Touches, TL_getY(p1Score) + TL_getHeight(p1Name));
 
@@ -187,6 +179,7 @@ int main(int argc, char* argv[])
     *************************************************************/
     Draw_updateView();
     Draw_drawSceneBuffer();
+
     //While application is running
     while( !quit )
     {
@@ -218,12 +211,6 @@ int main(int argc, char* argv[])
                     e.tfinger.x = (float)touch.i;
                     e.tfinger.y = (float)touch.j;
                     EH_handleEvent(&e);
-
-                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Touch event: %i, %i \n", (int)(e.tfinger.x), (int)(e.tfinger.y));
-                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Finger ID: %" PRId64 "\n", e.tfinger.fingerId);
-                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Controller x, y: %i %i\n", (int)gs->controllers[0].knob.x, (int)gs->controllers[0].knob.y);
-                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "type: %i\n", e.tfinger.type);
-                    //__android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Device ID: %i\n", e.tfinger.touchId);
                 }
                 #endif
             }
@@ -294,17 +281,11 @@ int main(int argc, char* argv[])
     TL_destroyTextLabel(p1Touches);
     TL_destroyTextLabel(p2Touches);
     TL_destroyTextLabel(gInfo);
-    /*p1Name = NULL;
-    p2Name = NULL;
-    p1Score = NULL;
-    p2Score = NULL;
-    p1Touches = NULL;
-    p2Touches = NULL;*/
     gInfo = NULL;
 
     releaseResources();
 
-    //Exit from Game (and app in Android)
+    //Exit from Game (and activity in Android)
     exit(0);
 }
 
@@ -558,6 +539,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
 
     //collision detection
     //player/ball pitch boundary
+
     if(Player_isInContactWithBoundary(gs->players[0], gs->pitch)) Player_adjustForBoundary(gs->players[0], gs->pitch);
     if(Player_isInContactWithBoundary(gs->players[1], gs->pitch)) Player_adjustForBoundary(gs->players[1], gs->pitch);
     if(Phys_inCollisionWithBoundary(gs->ball, gs->pitch)) Phys_boundaryCollision(gs->ball, gs->pitch);
@@ -740,6 +722,10 @@ void Draw_calcScreenOffsets(int imgW, int imgH, int borderW, int borderH, int *o
 
     *offsetX = offX;
     *offsetY = offY;
+
+    __android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "X offset: %d\n", offX);
+    __android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Y offset: %d\n", offY);
+
 }
 
 void loadSprites()
@@ -749,7 +735,7 @@ void loadSprites()
     Sprite bg =  Sprite_createSprite(PATH_TO_COURT, BG_IMG_W - 2 * pitch_offset_x, BG_IMG_H - 2 * pitch_offset_y, 0, NULL);
     Sprite_setSSoffset(bg, pitch_offset_x, pitch_offset_y);
     Sprite_setSpriteInWorldDims(bg, WORLD_WIDTH, WORLD_HEIGHT);
-    Sprite_posByCentre(bg, false);
+    //Sprite_posByCentre(bg, true);
     Sprite_setSpriteInWorldPosRef(bg, &ZERO_ANCHOR, &ZERO_ANCHOR, NULL);
     Sprite_setIsFullscreen(bg, true);
 

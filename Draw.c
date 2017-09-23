@@ -8,6 +8,7 @@
 #include <SDL2/SDL_ttf.h>
 #endif
 #include <string.h>
+#include <SDL_video.h>
 #include "SDL_Helper.h"
 #include "Draw.h"
 #include "Utility/List.h"
@@ -22,6 +23,9 @@ static double screen_ratio = 1.0;
 static TransformFunc Game2ScreenTransformFunc = NULL;
 
 static bool isInitialised = false;
+
+// local func prototype
+void Draw_screenSetup(TransformFunc tf);
 
 //list for tracking loaded textures
 static List loadedTextures;
@@ -206,6 +210,13 @@ void Sprite_renderSprite(Sprite s)
     SDL_Rect* pDstRect;
     if(s->isFullscreen)
     {
+/*
+        dstRect.x = 0;
+        dstRect.y = 0;
+        dstRect.w = Viewport_getWidth();
+        dstRect.h = Viewport_getHeight();
+        pDstRect = &dstRect;
+*/
         pDstRect = NULL;
     }else
     {
@@ -342,7 +353,12 @@ bool Draw_init(TransformFunc tf)
             }
 
             //Create window
-            gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WORLD_WIDTH, WORLD_HEIGHT, SDL_WINDOW_SHOWN );
+            gWindow = SDL_CreateWindow( "SDL Tutorial",
+                                        SDL_WINDOWPOS_UNDEFINED,
+                                        SDL_WINDOWPOS_UNDEFINED,
+                                        WORLD_WIDTH,
+                                        WORLD_HEIGHT,
+                                        SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN );
             if( gWindow == NULL )
             {
                 printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -367,11 +383,8 @@ bool Draw_init(TransformFunc tf)
                     }
                     else
                     {
-                        List_new(&loadedTextures, sizeof(struct textureListItem), &freeListedTexture);
-                        List_new(&sprites, sizeof(struct _Sprite), NULL);
-                        SDL_GetRendererOutputSize(gRenderer, &viewport.w, &viewport.h);
-                        Viewport_init();
-                        if(tf)Game2ScreenTransformFunc = tf;
+                        SDL_Delay(5000);
+                        Draw_screenSetup(tf);
                         isInitialised = true;
                     }
                 }
@@ -379,6 +392,19 @@ bool Draw_init(TransformFunc tf)
         }
     }
 	return isInitialised;
+}
+
+void Draw_screenSetup(TransformFunc tf)
+{
+    List_new(&loadedTextures, sizeof(struct textureListItem), &freeListedTexture);
+    List_new(&sprites, sizeof(struct _Sprite), NULL);
+    SDL_DisplayMode dm;
+    //SDL_GetRendererOutputSize(gRenderer, &viewport.w, &viewport.h);
+    SDL_GetCurrentDisplayMode(0, &dm);
+    viewport.w = dm.w;
+    viewport.h = dm.h;
+    Viewport_init();
+    if(tf)Game2ScreenTransformFunc = tf;
 }
 
 void Draw_quit()
@@ -432,8 +458,8 @@ SDL_Texture* Draw_loadTexture(char* pathToImage)
 
 void Viewport_init()
 {
-    screen_ratio = (double)viewport.w / (double)viewport.h;
-    scale = screen_ratio <= 1.5 ? (double)viewport.w / (double)WORLD_WIDTH : (double)viewport.h / (double)WORLD_HEIGHT;
+    screen_ratio = (double)viewport.h / (double)viewport.w;
+    scale = screen_ratio >= 1.5 ? (double)viewport.w / (double)WORLD_WIDTH : (double)viewport.h / (double)WORLD_HEIGHT;
     viewport.x = 0;//(int)((viewport.w - WORLD_WIDTH * scale) / 2.0);
     viewport.y = 0;//(int)((viewport.h - WORLD_HEIGHT * scale) / 2.0);
 }
