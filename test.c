@@ -4,8 +4,6 @@
 #ifdef __ANDROID__
 #include <SDL.h>
 #include <android/log.h>
-#include <SDL_video.h>
-
 #else
 #include <SDL2/SDL.h>
 #endif
@@ -722,10 +720,6 @@ void Draw_calcScreenOffsets(int imgW, int imgH, int borderW, int borderH, int *o
 
     *offsetX = offX;
     *offsetY = offY;
-
-    __android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "X offset: %d\n", offX);
-    __android_log_print(ANDROID_LOG_VERBOSE, "TT_LSR", "Y offset: %d\n", offY);
-
 }
 
 void loadSprites()

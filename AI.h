@@ -76,5 +76,6 @@ Input stop(GameState* gs, int id);  //returns NULL input (stops player)
 Input returnToOwnHalf(GameState* gs, int id);  //returns Input returning player to own half
 Input shoot(GameState* gs, int id); //returns input to shoot at goal
 Input playIntoCorner(GameState* gs, int id); //returns input to play ball toward bottom right corner
+Input returnToOwnHalf(GameState* gs, int id); //player runs back to own half
 
 #endif // _AI_H

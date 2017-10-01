@@ -8,7 +8,7 @@
 #include <SDL2/SDL_ttf.h>
 #endif
 #include <string.h>
-#include <SDL_video.h>
+//#include <SDL_video.h>
 #include "SDL_Helper.h"
 #include "Draw.h"
 #include "Utility/List.h"
@@ -358,7 +358,7 @@ bool Draw_init(TransformFunc tf)
                                         SDL_WINDOWPOS_UNDEFINED,
                                         WORLD_WIDTH,
                                         WORLD_HEIGHT,
-                                        SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN );
+                                        SDL_WINDOW_SHOWN /*| SDL_WINDOW_FULLSCREEN*/ );
             if( gWindow == NULL )
             {
                 printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -383,7 +383,9 @@ bool Draw_init(TransformFunc tf)
                     }
                     else
                     {
+                    #ifdef __ANDROID__
                         SDL_Delay(5000);
+                    #endif
                         Draw_screenSetup(tf);
                         isInitialised = true;
                     }
@@ -398,11 +400,14 @@ void Draw_screenSetup(TransformFunc tf)
 {
     List_new(&loadedTextures, sizeof(struct textureListItem), &freeListedTexture);
     List_new(&sprites, sizeof(struct _Sprite), NULL);
+#ifndef __ANDROID__
+    SDL_GetRendererOutputSize(gRenderer, &viewport.w, &viewport.h);
+#else
     SDL_DisplayMode dm;
-    //SDL_GetRendererOutputSize(gRenderer, &viewport.w, &viewport.h);
     SDL_GetCurrentDisplayMode(0, &dm);
     viewport.w = dm.w;
     viewport.h = dm.h;
+#endif
     Viewport_init();
     if(tf)Game2ScreenTransformFunc = tf;
 }

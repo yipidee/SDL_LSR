@@ -48,5 +48,5 @@ vgcore.*
 *.yy.*
 test_parser
 makefile
-.vscode/
-
+.vscode/*
+.vs/*

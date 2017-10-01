@@ -56,6 +56,7 @@ struct LFuncEntry LFuncList[] = {
             {"returnToOwnHalf", &returnToOwnHalf},
             {"shoot", &shoot},
             {"playIntoCorner", &playIntoCorner},
+            {"returnToOwnHalf", &returnToOwnHalf},
             {"END", NULL}
             };
 
