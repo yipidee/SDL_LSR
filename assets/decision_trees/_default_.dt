@@ -36,7 +36,7 @@
 
 // need to presepecify the total number of nodes in
 // in a decision tree for memory management purposes
-numnodes = 17
+numnodes = 19
 
 // The actual node definitions and their interlinking
 &0:func = isPenalty yes = 1 no = 11
@@ -58,9 +58,10 @@ numnodes = 17
 &10:func = canScore yes = 7 no = 13 
 &11:func = inOwnHalf yes = 8 no = 14
 &12:func = touchingBall yes = 10 no = 5
-#13:func = playIntoCorner
+&13:func = randomTrueFalse yes = 17 no = 18
 &14:func = oppHasTouches yes = 15 no = 12
 #15:func = returnToOwnHalf
 &16:func = oppHasTouches yes = 3 no = 5
-
+#17:func = playIntoLCorner
+#18:func = playIntoRCorner
 end

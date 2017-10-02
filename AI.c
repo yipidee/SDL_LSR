@@ -55,7 +55,8 @@ struct LFuncEntry LFuncList[] = {
             {"stop", &stop},
             {"returnToOwnHalf", &returnToOwnHalf},
             {"shoot", &shoot},
-            {"playIntoCorner", &playIntoCorner},
+            {"playIntoLCorner", &playIntoLCorner},
+            {"playIntoRCorner", &playIntoRCorner},
             {"returnToOwnHalf", &returnToOwnHalf},
             {"END", NULL}
             };
@@ -261,10 +262,18 @@ Input shoot(GameState* gs, int id)
     return i;
 }
 
-Input playIntoCorner(GameState* gs, int id)
+Input playIntoLCorner(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
     Vec3D dir = Vec3D_subtract(Vec3D_makeVector(WORLD_WIDTH, WORLD_HEIGHT, 0), GO_getPos(gs->ball));
+    i.control = Vec3D_normalise(dir);
+    return i;
+}
+
+Input playIntoRCorner(GameState* gs, int id)
+{
+    Input i = INPUT_NULL;
+    Vec3D dir = Vec3D_subtract(Vec3D_makeVector(0, WORLD_HEIGHT, 0), GO_getPos(gs->ball));
     i.control = Vec3D_normalise(dir);
     return i;
 }
