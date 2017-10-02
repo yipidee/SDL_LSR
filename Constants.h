@@ -50,7 +50,7 @@
 #define PATH_TO_RED_CONTROLLER "assets/imgs/red.png"
 #define PATH_TO_BLUE_CONTROLLER "assets/imgs/blue.png"
 #define PATH_TO_BALL "assets/imgs/ball.png"
-#define PATH_TO_COURT "assets/imgs/court.png"
+#define PATH_TO_COURT "assets/imgs/new_court.png"
 #define PATH_TO_CALFNUTS "assets/imgs/calfnuts_sprite.png"
 #define PATH_TO_POST_ART PATH_TO_RED_CONTROLLER
 
