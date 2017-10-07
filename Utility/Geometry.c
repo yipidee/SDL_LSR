@@ -110,6 +110,7 @@ bool Vec3D_equal(Vec3D v1, Vec3D v2)
 Vec3D Vec3D_normalise(Vec3D v)
 {
     double mag = Vec3D_getMagnitude(v);
+    if(mag == 0)return VECTOR_ZERO;
     Vec3D res = {v.i/mag,
                  v.j/mag,
                  v.k/mag
