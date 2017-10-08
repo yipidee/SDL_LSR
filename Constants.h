@@ -27,6 +27,7 @@
 #define SIZE_BEHIND_GOAL_AREA 50
 #define SIZE_POST_DIAMETER 8
 #define SIZE_GOAL_WIDTH 60
+#define SIZE_DEFENSIVE_AREA 75
 
 //////////////////////////////////////////////////////////////////////////////////////////
 /////////   Defines for positions of objects                                    //////////

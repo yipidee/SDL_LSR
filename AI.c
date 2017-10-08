@@ -3,6 +3,9 @@
 #include <time.h>
 #include "AI.h"
 
+// local utility functions
+Vec3D getDefensivePoint(GameState* gs, int id);
+
 typedef struct decisionTreeNode* Node;
 
 typedef enum NodeType
@@ -47,6 +50,7 @@ struct BFuncEntry BFuncList[] = {
             {"canScore", &canScore},
             {"isPenalty", &isPenalty},
             {"concededPenalty", &concededPenalty},
+            {"inDefensivePosition", &inDefensivePosition},
             {"END", NULL}
             };
 
@@ -58,6 +62,7 @@ struct LFuncEntry LFuncList[] = {
             {"playIntoLCorner", &playIntoLCorner},
             {"playIntoRCorner", &playIntoRCorner},
             {"returnToOwnHalf", &returnToOwnHalf},
+            {"takeDefensivePosition", &takeDefensivePosition},
             {"END", NULL}
             };
 
@@ -221,6 +226,19 @@ bool concededPenalty(GameState* gs, int i)
     return Player_concededPenalty(gs->players[i]);
 }
 
+bool inDefensivePosition(GameState* gs, int i)
+{
+    Vec3D dp = getDefensivePoint(gs, i);
+    Rect defensiveArea = {
+        dp.i - SIZE_DEFENSIVE_AREA,
+        dp.j - SIZE_DEFENSIVE_AREA,
+        SIZE_DEFENSIVE_AREA * 2,
+        SIZE_DEFENSIVE_AREA * 2
+    };
+    Vec3D p = Player_getPos(gs->players[1]);
+    return Rect_containsPoint(defensiveArea, p.i, p.j);
+}
+
 /*************************************************************
 ****************   Leaf Node Functions
 *************************************************************/
@@ -276,6 +294,27 @@ Input playIntoRCorner(GameState* gs, int id)
     Vec3D dir = Vec3D_subtract(Vec3D_makeVector(0, WORLD_HEIGHT, 0), GO_getPos(gs->ball));
     i.control = Vec3D_normalise(dir);
     return i;
+}
+
+Input takeDefensivePosition(GameState* gs, int id)
+{
+    Input i = INPUT_NULL;
+    Vec3D C = getDefensivePoint(gs, id);
+    i.direction = Vec3D_normalise(Vec3D_subtract(C, Player_getPos(gs->players[1])));
+    return i;
+}
+
+Vec3D getDefensivePoint(GameState* gs, int id)
+{
+    Vec3D closestBlockingPoint = VECTOR_ZERO;
+    Vec3D GoalCentre = {WORLD_WIDTH /2, SIZE_BEHIND_GOAL_AREA, 0};
+    Vec3D P2 = Player_getPos(gs->players[0]);
+    Line player2Goal = {P2, GoalCentre};
+    closestBlockingPoint = Line_getClosestPointFromPointOnLine(
+        player2Goal,
+        Player_getPos(gs->players[1])
+    );
+    return closestBlockingPoint;
 }
 
 /***************************************************************

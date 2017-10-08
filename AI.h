@@ -67,6 +67,7 @@ bool canScore(GameState* gs, int i);  //open view of goal
 bool touchingBall(GameState* gs, int i);  //touching the ball
 bool isPenalty(GameState* gs, int i);  //returns whether game in penalty state
 bool concededPenalty(GameState* gs, int i);  //returns whether player conceded penalty
+bool inDefensivePosition(GameState* gs, int i); //returns whether player in blocking position
 
 /*************************************************************
 ****************   Leaf Node Functions
@@ -78,5 +79,6 @@ Input shoot(GameState* gs, int id); //returns input to shoot at goal
 Input playIntoLCorner(GameState* gs, int id); //returns input to play ball toward bottom right corner
 Input playIntoRCorner(GameState* gs, int id); //returns input to play ball toward bottom right corner
 Input returnToOwnHalf(GameState* gs, int id); //player runs back to own half
+Input takeDefensivePosition(GameState* gs, int id); //player runs back to own half
 
 #endif // _AI_H
