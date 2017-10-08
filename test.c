@@ -90,7 +90,6 @@ int main(int argc, char* argv[])
     loadSprites();
 
     AI_init();
-    GS_setTargetBoundaries(gs);
 
     //Main loop flag
     bool quit = false;

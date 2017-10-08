@@ -70,13 +70,6 @@ void GS_loadGameObjects(GameState* gs)
     gs->goals[1] = Goal_createGoal(Vec3D_makeVector(POS_N_GOAL_L),Vec3D_makeVector(POS_N_GOAL_R),SIZE_POST_DIAMETER);
 }
 
-void GS_setTargetBoundaries(GameState* gs)
-{
-    // set goal area
-    Goal_setGoalArea(gs->goals[0]);
-    Goal_setGoalArea(gs->goals[1]);
-}
-
 /*
 void GS_registerTouchHandlers(GameState* gs)
 {

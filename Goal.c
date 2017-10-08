@@ -7,11 +7,13 @@ struct _Goal
 {
     GameObject* posts[2];
     int diameter;
-    Rect net;
     //useful properties probably better to calc once
     Vec3D normalToGoal;
     int goalWidth; //considers diameter of posts
+    Vec3D LastBallPosition;
 };
+
+//static Vec3D LastBallPosition;
 
 Goal Goal_createGoal(Vec3D p1, Vec3D p2, int d)
 {
@@ -31,38 +33,14 @@ Goal Goal_createGoal(Vec3D p1, Vec3D p2, int d)
     Circle rBC = Circle_create(p2.i, p2.j, d/2);
     GO_setBCirc(g->posts[1], rBC);
 
-    return g;
-}
+    g->LastBallPosition = Vec3D_makeVector(-1, -1, -1);
 
-// create area in which if ball is detected a goal is declared
-void Goal_setGoalArea(Goal g)
-{
-    // post positions
-    Vec3D p1, p2;
-    p1 = GO_getPos(g->posts[0]);
-    p2 = GO_getPos(g->posts[1]);
-
-    //calc properties
     Vec3D l2rVec = Vec3D_subtract(p2, p1);
     g->normalToGoal = Vec3D_getNormal(l2rVec, VECTOR_UP);
     //Vec3D_print(g->normalToGoal);printf("\n");
     g->goalWidth = (int)Vec3D_getMagnitude(l2rVec);
 
-    Rect goalArea;
-    if(Vec3D_equal(g->normalToGoal, VECTOR_S))
-    {
-        goalArea.x = GO_getPos(g->posts[0]).i;
-        goalArea.y = GO_getPos(g->posts[0]).j - 50;
-        goalArea.w = g->goalWidth;
-        goalArea.h = 50;
-    }else
-    {
-        goalArea.x = GO_getPos(g->posts[1]).i;
-        goalArea.y = GO_getPos(g->posts[1]).j;
-        goalArea.w = g->goalWidth;
-        goalArea.h = 50;
-    }
-    g->net = goalArea;
+    return g;
 }
 
 //Must be called after Gameobjects destroyed!!
@@ -72,17 +50,41 @@ void Goal_destroyGoal(Goal g)
 }
 
 bool Goal_scored(Goal g, GameObject* ball)
-/* Goal deemed legit if in net and has a j component of velocity
-   in opposite direction of goal normal
-*/
+/* Goal deemed legit if it crosses the line in the correct direction in this tick */
 {
     bool res = false;
 
-    if(Rect_containsCircle(g->net, ball->BCirc) && (GO_getVel(ball).j != 0))
+    if(Vec3D_equal(g->LastBallPosition, Vec3D_makeVector(-1, -1, -1)))
     {
-        if((fabs(g->normalToGoal.j) + fabs(GO_getVel(ball).j)) != fabs(g->normalToGoal.j + GO_getVel(ball).j))res = true;
+        g->LastBallPosition = GO_getPos(ball);
+        return false;
     }
 
+    //get positions of goal posts and ball
+    Vec3D L = GO_getPos(g->posts[0]);
+    Vec3D R = GO_getPos(g->posts[1]);
+    Vec3D B = GO_getPos(ball);
+    Vec3D LR = Vec3D_subtract(R, L);  // vector representing goal line
+
+    //get position of ball rel to left post
+    B = Vec3D_subtract(B, L);
+
+    //transpose position of B into goal axis coordinate system
+    double alpha = Vec3D_getAngle(g->normalToGoal, VECTOR_S);
+    B = Vec3D_rotateVectorByAlphaRad(B, alpha);
+
+    //Goal conditions
+    // 1. In this tick the last and current position change signs in the right direction
+    // 2. The i component is within 0 and the magnitude of LR
+    
+    //get last position of ball rel to goal
+    Vec3D lp = Vec3D_subtract(g->LastBallPosition, L);
+    lp = Vec3D_rotateVectorByAlphaRad(lp, alpha);
+
+    if((lp.j >= 0 && B.j < 0) && (B.i >= 0 && B.i <= g->goalWidth))res = true;
+
+    //update last position of ball
+    g->LastBallPosition = GO_getPos(ball);
     return res;
 }
 
