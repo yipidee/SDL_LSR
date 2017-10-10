@@ -60,31 +60,19 @@ bool Goal_scored(Goal g, GameObject* ball)
         return false;
     }
 
+    Line goalLine, pathOfBall;
+
     //get positions of goal posts and ball
-    Vec3D L = GO_getPos(g->posts[0]);
-    Vec3D R = GO_getPos(g->posts[1]);
-    Vec3D B = GO_getPos(ball);
-    Vec3D LR = Vec3D_subtract(R, L);  // vector representing goal line
+    goalLine.p1 = GO_getPos(g->posts[0]);
+    goalLine.p2 = GO_getPos(g->posts[1]);
+    pathOfBall.p1 = g->LastBallPosition;
+    pathOfBall.p2 = GO_getPos(ball);
 
-    //get position of ball rel to left post
-    B = Vec3D_subtract(B, L);
-
-    //transpose position of B into goal axis coordinate system
-    double alpha = Vec3D_getAngle(g->normalToGoal, VECTOR_S);
-    B = Vec3D_rotateVectorByAlphaRad(B, alpha);
-
-    //Goal conditions
-    // 1. In this tick the last and current position change signs in the right direction
-    // 2. The i component is within 0 and the magnitude of LR
-    
-    //get last position of ball rel to goal
-    Vec3D lp = Vec3D_subtract(g->LastBallPosition, L);
-    lp = Vec3D_rotateVectorByAlphaRad(lp, alpha);
-
-    if((lp.j >= 0 && B.j < 0) && (B.i >= 0 && B.i <= g->goalWidth))res = true;
+    res = Line_lineCrossesLineInNormalDirection(goalLine, pathOfBall);
 
     //update last position of ball
     g->LastBallPosition = GO_getPos(ball);
+
     return res;
 }
 

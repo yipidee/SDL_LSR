@@ -202,5 +202,7 @@ Vec3D Line_getClosestPointFromPointOnLine(Line l, Vec3D p);
 
 double Line_getDistanceOfPointFromLine(Line l, Vec3D p);
 
+// determines whether L2 intersects L1 in the direction of the norm of L1
+bool Line_lineCrossesLineInNormalDirection(Line l1, Line l2);
 
 #endif // _GEOMETRY_H
