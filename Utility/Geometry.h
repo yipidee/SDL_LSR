@@ -188,6 +188,8 @@ typedef struct Line
     Vec3D p2;
 }Line;
 
+Line Line_makeLineFromPoints(Vec3D P1, Vec3D P2);
+
 bool Circle_inCollisionWithLine(Circle c, Line l, double offset);
 
 double Line_getLength(Line l);
@@ -202,7 +204,13 @@ Vec3D Line_getClosestPointFromPointOnLine(Line l, Vec3D p);
 
 double Line_getDistanceOfPointFromLine(Line l, Vec3D p);
 
+// determines whether L2 intersects L1
+bool Line_lineCrossesLine(Line l1, Line l2);
+
 // determines whether L2 intersects L1 in the direction of the norm of L1
 bool Line_lineCrossesLineInNormalDirection(Line l1, Line l2);
+
+// determines if a point is on the positive side of a line
+bool Line_pointOnPositiveSideofLine(Line l, Vec3D p);
 
 #endif // _GEOMETRY_H

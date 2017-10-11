@@ -353,6 +353,12 @@ bool Circle_inCollisionWithLine(Circle c, Line l, double offset)
 ////                   Line
 ///////////////////////////////////////////////////
 
+Line Line_makeLineFromPoints(Vec3D P1, Vec3D P2)
+{
+    Line l = {P1, P2};
+    return l;
+}
+
 double Line_getLength(Line l)
 {
     Vec3D dVec = Vec3D_subtract(l.p2, l.p1);
@@ -448,6 +454,55 @@ bool Line_lineCrossesLineInNormalDirection(Line l1, Line l2)
         (lastPos.j >= 0 && newPos.j < 0) &&
         (newPos.i >= 0 && newPos.i <= Vec3D_getMagnitude(goalLine))
     )res = true;
+
+    return res;
+}
+
+bool Line_lineCrossesLine(Line l1, Line l2)
+{
+    bool res = false;
+
+    //set a line to mark as line to be crossed
+    Vec3D goalLine = Vec3D_subtract(l1.p2, l1.p1);
+    Vec3D glN = Vec3D_getNormal(goalLine, VECTOR_UP);
+
+    //treat start and end of 2nd line as points
+    Vec3D lastPos = l2.p1;
+    Vec3D newPos = l2.p2;
+
+    //transpose into new coords
+    // 1. position of points of 2nd line rel to first
+    lastPos = Vec3D_subtract(lastPos, l1.p1);
+    newPos =  Vec3D_subtract(newPos, l1.p1);
+    // 2. rotate into same axis as line 1
+    double alpha = Vec3D_getAngle(glN, VECTOR_S);
+    lastPos = Vec3D_rotateVectorByAlphaRad(lastPos, alpha);
+    newPos = Vec3D_rotateVectorByAlphaRad(newPos, alpha);
+
+    if(
+        ((lastPos.j >= 0 && newPos.j < 0) || (lastPos.j <= 0 && newPos.j > 0)) &&
+        (newPos.i >= 0 && newPos.i <= Vec3D_getMagnitude(goalLine))
+    )res = true;
+
+    return res;
+}
+
+bool Line_pointOnPositiveSideofLine(Line l, Vec3D p)
+{
+    bool res = false;
+
+    //set a line to mark as line to be crossed
+    Vec3D goalLine = Vec3D_subtract(l.p2, l.p1);
+    Vec3D glN = Vec3D_getNormal(goalLine, VECTOR_UP);
+
+    //transpose into new coords
+    // 1. position of points of 2nd line rel to first
+    p = Vec3D_subtract(p, l.p1);
+    // 2. rotate into same axis as line 1
+    double alpha = Vec3D_getAngle(glN, VECTOR_S);
+    p = Vec3D_rotateVectorByAlphaRad(p, alpha);
+
+    if(p.j > 0)res = true;
 
     return res;
 }
