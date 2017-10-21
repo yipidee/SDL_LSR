@@ -539,7 +539,8 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
 
     if(Player_isInContactWithBoundary(gs->players[0], gs->pitch)) Player_adjustForBoundary(gs->players[0], gs->pitch);
     if(Player_isInContactWithBoundary(gs->players[1], gs->pitch)) Player_adjustForBoundary(gs->players[1], gs->pitch);
-    if(Phys_inCollisionWithBoundary(gs->ball, gs->pitch)) Phys_boundaryCollision(gs->ball, gs->pitch);
+    //check and account for collision between free objects and boundary
+    Phys_boundaryCollision(gs->ball, gs->pitch);
 
     //collisions between ball and goals posts
     if(GO_isInContact(Goal_getLPost(gs->goals[0]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getLPost(gs->goals[0]), gs->ball, CONS_BALL_WALL_COR);}

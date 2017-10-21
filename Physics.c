@@ -18,56 +18,77 @@ bool Phys_inCollisionWithBoundary(GameObject* go, Rect r)
     if(GO_isInBounds(go, r)) return false;
 
     Line T, R, B, L;
+    r.x += go->BCirc.r;
+    r.y += go->BCirc.r;
+    r.w -= 2 * go->BCirc.r;
+    r.x -= 2 * go->BCirc.r;
     makeWalls(&T, &R, &B, &L, r);
+ 
+    Vec3D x = GO_getPos(go);
 
-    return (Circle_inCollisionWithLine(go->BCirc, T, 0)
-            ||Circle_inCollisionWithLine(go->BCirc, R, 0)
-            ||Circle_inCollisionWithLine(go->BCirc, B, 0)
-            ||Circle_inCollisionWithLine(go->BCirc, L, 0)
-            );
+    bool res = false;
+
+    if(
+        Line_pointOnPositiveSideofLine(T, x) ||
+        Line_pointOnPositiveSideofLine(R, x) ||
+        Line_pointOnPositiveSideofLine(B, x) ||
+        Line_pointOnPositiveSideofLine(L, x)
+    )res = true;
+    return res;
 }
 
 void Phys_boundaryCollision(GameObject* go, Rect r)
 {
-    Line T, R, B, L;
-    makeWalls(&T, &R, &B, &L, r);
+    if(!GO_isInBounds(go, r))
+    {
+        Line T, R, B, L;
+        r.x += go->BCirc.r;
+        r.y += go->BCirc.r;
+        r.w -= 2 * go->BCirc.r;
+        r.h -= 2 * go->BCirc.r;
+        makeWalls(&T, &R, &B, &L, r);
 
-    //determine struck wall and adjust accordingly
-    if(Circle_inCollisionWithLine(go->BCirc, T, 0)||Circle_inCollisionWithLine(go->BCirc, B, 0))
-    {
-        go->vel.j *= -CONS_BALL_WALL_COR;
-        go->acc.j *= -1;
-        go->vel.i *= CONS_BALL_WALL_COR;
-        if(go->pos.j < go->BCirc.r)
+        //position fix
+        Vec3D P = GO_getPos(go);
+        Vec3D delta = VECTOR_ZERO;
+        // check for collision with top wall
+        if(!Line_pointOnPositiveSideofLine(T, P))
         {
-            Vec3D delta = VECTOR_ZERO;
-            delta.j = go->BCirc.r - go->pos.j;
-            GO_move(go, delta);
+            //adjust position
+            delta.j = T.p1.j - P.j;
+            //adjust movement
+            go->vel.i *= CONS_BALL_WALL_COR;
+            go->vel.j *= -CONS_BALL_WALL_COR;
+            go->acc.j *= -1;
         }
-        if(go->pos.j > (WORLD_HEIGHT - go->BCirc.r))
+        if(!Line_pointOnPositiveSideofLine(R, P))
         {
-            Vec3D delta = VECTOR_ZERO;
-            delta.j = WORLD_HEIGHT - go->BCirc.r - go->pos.j;
-            GO_move(go, delta);
+            //adjust position
+            delta.i = R.p1.i - P.i;
+            //adjust movement
+            go->vel.i *= -CONS_BALL_WALL_COR;
+            go->vel.j *= CONS_BALL_WALL_COR;
+            go->acc.i *= -1;
         }
-    }
-    if(Circle_inCollisionWithLine(go->BCirc, R, 0)||Circle_inCollisionWithLine(go->BCirc, L, 0))
-    {
-        go->vel.i *= -CONS_BALL_WALL_COR;
-        go->acc.i *= -1;
-        go->vel.j *= CONS_BALL_WALL_COR;
-        if(go->pos.i < go->BCirc.r)
+        if(!Line_pointOnPositiveSideofLine(B, P))
         {
-            Vec3D delta = VECTOR_ZERO;
-            delta.i = go->BCirc.r - go->pos.i;
-            GO_move(go, delta);
+            //adjust position
+            delta.j = B.p1.j - P.j;
+            //adjust movement
+            go->vel.i *= CONS_BALL_WALL_COR;
+            go->vel.j *= -CONS_BALL_WALL_COR;
+            go->acc.j *= -1;
         }
-        if(go->pos.i > (WORLD_WIDTH - go->BCirc.r))
+        if(!Line_pointOnPositiveSideofLine(L, P))
         {
-            Vec3D delta = VECTOR_ZERO;
-            delta.i = WORLD_WIDTH - go->BCirc.r - go->pos.i;
-            GO_move(go, delta);
+            //adjust position
+            delta.i = L.p1.i - P.i;
+            //adjust movement
+            go->vel.i *= -CONS_BALL_WALL_COR;
+            go->vel.j *= CONS_BALL_WALL_COR;
+            go->acc.i *= -1;
         }
+        GO_move(go, delta);
     }
 }
 

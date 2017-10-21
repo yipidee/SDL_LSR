@@ -153,13 +153,12 @@ Vec3D Vec3D_rotateVectorByCosAlpha(Vec3D v, double cosAlpha)
 
 Vec3D Vec3D_transposeIntoRefCoordSystem(Vec3D v, Vec3D refXaxis)
 {
-    Vec3D unitXdash = Vec3D_normalise(refXaxis);
-    Vec3D unitYdash = Vec3D_getUnitNormal(unitXdash);
-    Vec3D res;
-    res.j = (v.j * unitXdash.i - v.i * unitXdash.j) / (unitYdash.j*unitXdash.i - unitYdash.i*unitXdash.j);
-    res.i = (v.i - res.j*unitYdash.i) / unitXdash.i;
-    res.k = 0;
-    return res;    
+    Vec3D res = VECTOR_ZERO;
+    double cosAlpha = Vec3D_getCosAlpha(refXaxis, v);
+    res.i = Vec3D_getMagnitude(v) * cosAlpha;
+    cosAlpha = Vec3D_getCosAlpha(Vec3D_negate(Vec3D_getUnitNormal(refXaxis)), v);
+    res.j = Vec3D_getMagnitude(v) * cosAlpha;
+    return res;
 }
 
 ///////////////////////////////////////////////////
@@ -493,15 +492,13 @@ bool Line_pointOnPositiveSideofLine(Line l, Vec3D p)
 
     //set a line to mark as line to be crossed
     Vec3D goalLine = Vec3D_subtract(l.p2, l.p1);
-    Vec3D glN = Vec3D_getNormal(goalLine, VECTOR_UP);
 
     //transpose into new coords
     // 1. position of points of 2nd line rel to first
     p = Vec3D_subtract(p, l.p1);
     // 2. rotate into same axis as line 1
-    double alpha = Vec3D_getAngle(glN, VECTOR_S);
-    p = Vec3D_rotateVectorByAlphaRad(p, alpha);
 
+    p = Vec3D_transposeIntoRefCoordSystem(p, goalLine);
     if(p.j > 0)res = true;
 
     return res;

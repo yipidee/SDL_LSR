@@ -9,7 +9,7 @@ bool Phys_inCollision(GameObject* go1, GameObject* go2);
 void Phys_conservationMomentumCollision1D(GameObject* go1, GameObject* go2, float COR);
 void Phys_conservationMomentumCollision2D(GameObject* go1, GameObject* go2, float COR);
 void Phys_appliedImpulse2D(GameObject* go, Vec3D impulse);
-void Phys_boundaryCollision(GameObject* go, Rect r);
+void Phys_boundaryCollision(GameObject* go, Rect r); //does nothing if no collision
 void Phys_boundaryAdjust(GameObject* go, Rect r);
 void Phys_adjustForCollisionWithStatObject(GameObject* go1, GameObject* go2);
 
