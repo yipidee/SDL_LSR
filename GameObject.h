@@ -56,6 +56,7 @@ bool GO_isStationary(const GameObject* go);
 //collision detection function
 bool GO_isInContact(GameObject* go1, GameObject* go2);
 bool GO_isInBounds(GameObject* go, Rect BoundingRect);
+void GO_fixOverlap(GameObject* go1, GameObject* go2);
 
 //whether a normal physics update will result in a change in direction
 bool GO_changesXDirectionInNextTick(const GameObject* go);

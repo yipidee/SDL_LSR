@@ -64,6 +64,19 @@ bool GO_isInBounds(GameObject* go, Rect BoundingRect)
     return Rect_containsCircle(BoundingRect, go->BCirc);
 }
 
+//fix an overlap between 2 objects, first object gets moved
+void GO_fixOverlap(GameObject* go1, GameObject* go2)
+{
+    if(GO_isInContact(go1, go2))
+    {
+        Vec3D dirOfCol = Vec3D_subtract(GO_getPos(go1), GO_getPos(go2));
+        double dist = Vec3D_getMagnitude(dirOfCol);
+        dirOfCol = Vec3D_normalise(dirOfCol);
+        double distToAdjust = go1->BCirc.r + go2->BCirc.r - dist;
+        GO_setPos(go1, Vec3D_add(GO_getPos(go1), Vec3D_scalarMult(dirOfCol, distToAdjust)));
+    }
+}
+
 void GO_move(GameObject* go, Vec3D delta)
 {
     go->pos = Vec3D_add(go->pos, delta);
