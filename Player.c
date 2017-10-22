@@ -110,6 +110,10 @@ void Player_updateState(Player p, GameObject* ball)
     {
         Player_setState(p, STATIONARY);
         alpha = Vec3D_getAngle(Vec3D_subtract(GO_getPos(ball), Player_getPos(p)), VECTOR_N);
+        ///////////////////////////////////////////////////
+        ///   Don't know why the below line is needed?   //
+        ///////////////////////////////////////////////////
+        alpha *= -1;
     }else
     {
         alpha = Vec3D_getAngle(Player_getVel(p), VECTOR_N);

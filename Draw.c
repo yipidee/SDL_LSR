@@ -8,7 +8,6 @@
 #include <SDL2/SDL_ttf.h>
 #endif
 #include <string.h>
-//#include <SDL_video.h>
 #include "SDL_Helper.h"
 #include "Draw.h"
 #include "Utility/List.h"
@@ -210,13 +209,6 @@ void Sprite_renderSprite(Sprite s)
     SDL_Rect* pDstRect;
     if(s->isFullscreen)
     {
-/*
-        dstRect.x = 0;
-        dstRect.y = 0;
-        dstRect.w = Viewport_getWidth();
-        dstRect.h = Viewport_getHeight();
-        pDstRect = &dstRect;
-*/
         pDstRect = NULL;
     }else
     {
@@ -248,27 +240,6 @@ void Sprite_renderSprite(Sprite s)
             dstRect = tmpRect;
             pDstRect = &dstRect;
         }
-/*
-        vPos.i = viewport.x;
-        vPos.j = viewport.y;
-        vPos.k = 0;
-
-        relPos = Vec3D_subtract(gPos, vPos);
-
-        if(s->isFullscreen)
-        {
-            pDstRect = NULL;
-        }else
-        {
-            SDL_Rect tmpRect = {
-                    (int) ((relPos.i) * scale),       //x
-                    (int) ((relPos.j) * scale),       //y
-                    (int) (s->gW * scale), //w
-                    (int) (s->gH * scale)   //h
-            };
-            dstRect = tmpRect;
-            pDstRect = &dstRect;
-        }*/
     }
 
     //copy the image into the renderer for render to screen at next step

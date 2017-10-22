@@ -543,10 +543,26 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     Phys_boundaryCollision(gs->ball, gs->pitch);
 
     //collisions between ball and goals posts
-    if(GO_isInContact(Goal_getLPost(gs->goals[0]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getLPost(gs->goals[0]), gs->ball, CONS_BALL_WALL_COR);}
-    else if(GO_isInContact(Goal_getRPost(gs->goals[0]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getRPost(gs->goals[0]), gs->ball, CONS_BALL_WALL_COR);}
-    else if(GO_isInContact(Goal_getLPost(gs->goals[1]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getLPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);}
-    else if(GO_isInContact(Goal_getRPost(gs->goals[1]), gs->ball)){Phys_conservationMomentumCollision2D(Goal_getRPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);}
+    if(GO_isInContact(Goal_getLPost(gs->goals[0]), gs->ball))
+    {
+        GO_fixOverlap(gs->ball, Goal_getLPost(gs->goals[0]));
+        Phys_conservationMomentumCollision2D(Goal_getLPost(gs->goals[0]), gs->ball, CONS_BALL_WALL_COR);
+    }
+    else if(GO_isInContact(Goal_getRPost(gs->goals[0]), gs->ball))
+    {
+        GO_fixOverlap(gs->ball, Goal_getRPost(gs->goals[0]));
+        Phys_conservationMomentumCollision2D(Goal_getRPost(gs->goals[0]), gs->ball, CONS_BALL_WALL_COR);
+    }
+    else if(GO_isInContact(Goal_getLPost(gs->goals[1]), gs->ball))
+    {
+        GO_fixOverlap(gs->ball, Goal_getLPost(gs->goals[1]));
+        Phys_conservationMomentumCollision2D(Goal_getLPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);
+    }
+    else if(GO_isInContact(Goal_getRPost(gs->goals[1]), gs->ball))
+    {
+        GO_fixOverlap(gs->ball, Goal_getRPost(gs->goals[1]));
+        Phys_conservationMomentumCollision2D(Goal_getRPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);
+    }
 
     //collisions between player 1 and goal posts
     if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[0])))
@@ -724,30 +740,23 @@ void Draw_calcScreenOffsets(int imgW, int imgH, int borderW, int borderH, int *o
 
 void loadSprites()
 {
-//    pitch_offset_x = 50 - offw;
-//    pitch_offset_y = 100 - offh;
     Sprite bg =  Sprite_createSprite(PATH_TO_COURT, BG_IMG_W - 2 * pitch_offset_x, BG_IMG_H - 2 * pitch_offset_y, 0, NULL);
     Sprite_setSSoffset(bg, pitch_offset_x, pitch_offset_y);
     Sprite_setSpriteInWorldDims(bg, WORLD_WIDTH, WORLD_HEIGHT);
-    //Sprite_posByCentre(bg, true);
     Sprite_setSpriteInWorldPosRef(bg, &ZERO_ANCHOR, &ZERO_ANCHOR, NULL);
     Sprite_setIsFullscreen(bg, true);
 
-    //Vec3D allspriteoffset = {pitch_offset_x, pitch_offset_y, 0};
 
     //sprite rep of players
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
     Sprite_setSpriteInWorldPosRef(player_s, &gs->players[0]->go->pos.i, &gs->players[0]->go->pos.j, NULL);
-    //Sprite_setOffset(player_s, allspriteoffset);
 
     Sprite player_cs = Sprite_createSprite(PATH_TO_CALFNUTS, 69, 108, 2, CALFNUTS_FRAME_INFO);
     Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_cs, true);
     Sprite_setSpriteInWorldPosRef(player_cs, &gs->players[1]->go->pos.i, &gs->players[1]->go->pos.j, NULL);
-    //Sprite_setOffset(player_cs, allspriteoffset);
-    //calfnuts_frameRate = Sprite_getRateSetAddress(player_cs);
     Sprite_setSpriteRotationRef(player_cs, &gs->players[1]->go->rPos);
     Sprite_setSpriteStateRef(player_cs, (int*)&gs->players[1]->state);
     Sprite_setFR(player_cs, 5);
@@ -757,32 +766,27 @@ void loadSprites()
     Sprite_setSpriteInWorldDims(ball_s, SIZE_BALL_W, SIZE_BALL_H);
     Sprite_posByCentre(ball_s, true);
     Sprite_setSpriteInWorldPosRef(ball_s, &gs->ball->pos.i, &gs->ball->pos.j, NULL);
-    //Sprite_setOffset(ball_s, allspriteoffset);
     ball_frameRate = Sprite_getRateSetAddress(ball_s);
     Sprite_setSpriteRotationRef(ball_s, &gs->ball->rPos);
     
     //sprites for posts of goals
     Sprite post1_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post1_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
-    //Sprite_setOffset(post1_s, allspriteoffset);
     Sprite_posByCentre(post1_s, true);
     Sprite_setSpriteInWorldPosRef(post1_s, &Goal_getLPost(gs->goals[0])->pos.i, &Goal_getLPost(gs->goals[0])->pos.j, NULL);
 
     Sprite post2_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post2_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
-    //Sprite_setOffset(post2_s, allspriteoffset);
     Sprite_posByCentre(post2_s, true);
     Sprite_setSpriteInWorldPosRef(post2_s, &Goal_getRPost(gs->goals[0])->pos.i, &Goal_getRPost(gs->goals[0])->pos.j, NULL);
 
     Sprite post3_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post3_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
-    //Sprite_setOffset(post3_s, allspriteoffset);
     Sprite_posByCentre(post3_s, true);
     Sprite_setSpriteInWorldPosRef(post3_s, &Goal_getLPost(gs->goals[1])->pos.i, &Goal_getLPost(gs->goals[1])->pos.j, NULL);
 
     Sprite post4_s = Sprite_createSprite(PATH_TO_POST_ART, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
     Sprite_setSpriteInWorldDims(post4_s, SIZE_POST_DIAMETER, SIZE_POST_DIAMETER);
-    //Sprite_setOffset(post4_s, allspriteoffset);
     Sprite_posByCentre(post4_s, true);
     Sprite_setSpriteInWorldPosRef(post4_s, &Goal_getRPost(gs->goals[1])->pos.i, &Goal_getRPost(gs->goals[1])->pos.j, NULL);
 
