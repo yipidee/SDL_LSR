@@ -105,6 +105,7 @@ struct _Sprite
     bool isVisible, posRefByCentre; //flag to mark a sprite for drawing
     Spritesheet spriteSheet;   //pointer to texture
     int* state;                 //state
+    int lastState;              //to check for state change
     int frame, frameRate;      //current frame
     bool isFullscreen;     //whether exists in global space or directly on screen
     Vec3D offset;  // offset in global game world
@@ -127,6 +128,7 @@ Sprite Sprite_createSprite(char* pathToSpriteSheet, int sW, int sH, int numState
     s->gZ=NULL;
     s->angle = NULL;
     s->state=NULL;
+    s->lastState = 0;
 
     List_append(&sprites, s);
     free(s);
@@ -290,6 +292,16 @@ void Sprite_setIsFullscreen(Sprite s, bool b)
 void Sprite_setOffset(Sprite s, Vec3D Offset)
 {
     s->offset = Offset;
+}
+
+int Sprite_getLastState(Sprite s)
+{
+    return s->lastState;
+}
+
+int Sprite_setLastState(Sprite s, int state)
+{
+    s->lastState = state;
 }
 /*
 int* Sprite_getAngleSetAddress(Sprite s)
@@ -487,11 +499,16 @@ void Draw_updateView()
     
     // render all sprites
     ListNode* curr = sprites.head;
+    int nowState;
+    bool needRefresh = false;
     while(curr)
     {
         Sprite s = curr->data;
+        nowState = s->state ? *s->state : 0;
+        needRefresh = (nowState != Sprite_getLastState(s));
+        Sprite_setLastState(s, nowState);
+        if(needRefresh || ((animation_count % s->frameRate)==0)) Sprite_tickFrame(s);
         if(s->isVisible)Sprite_renderSprite(s);
-        if((s->frameRate != MAX_LONG_VALUE)&&((animation_count % s->frameRate)==0)) Sprite_tickFrame(s);
         curr = curr->next;
     }
 }

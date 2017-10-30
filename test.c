@@ -564,35 +564,15 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
         Phys_conservationMomentumCollision2D(Goal_getRPost(gs->goals[1]), gs->ball, CONS_BALL_WALL_COR);
     }
 
-    //collisions between player 1 and goal posts
-    if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[0])))
-    {
-        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[0]));
-    } else if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[0])))
-    {
-        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[0]));
-    } else if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[1])))
-    {
-        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[1]));
-    } else if(GO_isInContact(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[1])))
-    {
-        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[1]));
-    }
-
-    //collisions between player 2 and goal posts
-    if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1])))
-    {
-        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1]));
-    } else if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[1])))
-    {
-        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[1]));
-    } else if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[0])))
-    {
-        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[0]));
-    } else if(GO_isInContact(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[0])))
-    {
-        Phys_adjustForCollisionWithStatObject(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[0]));
-    }
+    //collisions between player 1/2 and goal posts
+    GO_fixOverlap(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[0]));
+    GO_fixOverlap(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[0]));
+    GO_fixOverlap(Player_getGameObject(gs->players[0]), Goal_getLPost(gs->goals[1]));
+    GO_fixOverlap(Player_getGameObject(gs->players[0]), Goal_getRPost(gs->goals[1]));
+    GO_fixOverlap(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[0]));
+    GO_fixOverlap(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[0]));
+    GO_fixOverlap(Player_getGameObject(gs->players[1]), Goal_getLPost(gs->goals[1]));
+    GO_fixOverlap(Player_getGameObject(gs->players[1]), Goal_getRPost(gs->goals[1]));
 
     // determine if in new positions players can legally enter other half
     if(Rect_containsCircle(gs->players[1]->ownHalf, gs->ball->BCirc)&&!Player_hasTouches(gs->players[1]))
@@ -602,9 +582,9 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
 
     // determine if in new positions players can no longer legally enter other half
     if(Player_isInOwnHalf(gs->players[0]) && Player_hasTouches(gs->players[1]))
-        Player_setCanLeaveHalf(gs->players[0], false);
+        {Player_setCanLeaveHalf(gs->players[0], false);}
     if(Player_isInOwnHalf(gs->players[1]) && Player_hasTouches(gs->players[0]))
-        Player_setCanLeaveHalf(gs->players[1], false);
+        {Player_setCanLeaveHalf(gs->players[1], false);}
 
     // update player and ball states
     if(Vec3D_isZero(GO_getVel(gs->ball)))
