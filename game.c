@@ -726,9 +726,9 @@ void loadSprites()
     Sprite_setSpriteInWorldPosRef(bg, &ZERO_ANCHOR, &ZERO_ANCHOR, NULL);
     Sprite_setIsFullscreen(bg, true);
 
-
     //sprite rep of players
     Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    //Sprite player_s = Sprite_createSprite(PATH_TO_CALFNUTS, 69, 108, 2, CALFNUTS_FRAME_INFO);
     Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
     Sprite_setSpriteInWorldPosRef(player_s, &gs->players[0]->go->pos.i, &gs->players[0]->go->pos.j, NULL);
