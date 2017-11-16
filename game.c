@@ -1,3 +1,22 @@
+/*****************************************************************
+ *****************************************************************
+ * This is the entry point of the game proper; 
+ * Game title :         2Touch: Leitrim School Rulez
+ * Author:              Adrian Connolly
+ * 
+ * TODO:
+ * 1. Add sound
+ * 2. Tournament play
+ * 3. Improve Android input system
+ * 4. Difficulty select option
+ * 
+ * (Nice to haves)
+ * 5. "Select Ball" option for ball physics differences
+ * 6. Network 2-player 
+ * 
+ *****************************************************************
+ ****************************************************************/
+
 #include <stdbool.h>
 #include <math.h>
 #include <inttypes.h>
@@ -97,17 +116,8 @@ int main(int argc, char* argv[])
     //Event place holder
     SDL_Event e;
 
-    //AI decision tree to use
-    char pathToDT[512];
-#ifdef __ANDROID__
-    strcpy(pathToDT, SDL_AndroidGetInternalStoragePath());
-    strcat(pathToDT, "/");
-    strcat(pathToDT, DT_DEFAULT);
-#else
-    strcpy(pathToDT, DT_DEFAULT);
-#endif
-    DecisionTree dt = AI_parseDecisionTree(pathToDT);
-    DecisionTree celebrationTree = dt;//AI_parseDecisionTree(DT_DEFAULT);
+    DecisionTree  dt = AI_loadDecisionTree(DT_DEFAULT);
+    DecisionTree celebrationTree = AI_loadDecisionTree(DT_CELEBRATION);
 
     //labels
     char p1score[20];
@@ -268,6 +278,7 @@ int main(int argc, char* argv[])
     }
 
     AI_freeDecisionTree(dt);
+    AI_freeDecisionTree(celebrationTree);
     /*dt = NULL;
     celebrationTree = NULL;*/
 
@@ -364,8 +375,9 @@ void penaltyTick(bool* resetPositions, DecisionTree dt)
 void goalScoredTick(bool* resetPositions, DecisionTree dt)
 {
     static int goalStateTickCounter = 0;
-    //Input input1 = AI_getUserInput(gs, 0, dt);
-    //Input input2 = AI_getUserInput(gs, 1, dt);
+    Input input1 = AI_getUserInput(gs, 0, dt);
+    Input input2 = AI_getUserInput(gs, 1, dt);
+    updatePhysics(gs, input1, input2);
     //if(PhysCont_PhysicalControllerPresent())hideControls();
 
     ++goalStateTickCounter;
@@ -601,6 +613,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     double alpha = !Vec3D_isZero(GO_getVel(gs->ball)) ? (Vec3D_getAngle(GO_getVel(gs->ball), VECTOR_N)) : 0 ;
     GO_setRPos(gs->ball, alpha);
 
+    Player_updateState(gs->players[0], gs->ball);
     Player_updateState(gs->players[1], gs->ball);
 }
 
@@ -727,11 +740,14 @@ void loadSprites()
     Sprite_setIsFullscreen(bg, true);
 
     //sprite rep of players
-    Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
-    //Sprite player_s = Sprite_createSprite(PATH_TO_CALFNUTS, 69, 108, 2, CALFNUTS_FRAME_INFO);
+    //Sprite player_s = Sprite_createSprite(PATH_TO_RED_CONTROLLER, USE_FULL_IMAGE_WIDTH, USE_FULL_IMAGE_HEIGHT, 0, NULL);
+    Sprite player_s = Sprite_createSprite(PATH_TO_CALFNUTS, 69, 108, 2, CALFNUTS_FRAME_INFO);
     Sprite_setSpriteInWorldDims(player_s, SIZE_PLAYER_W, SIZE_PLAYER_H);
     Sprite_posByCentre(player_s, true);
     Sprite_setSpriteInWorldPosRef(player_s, &gs->players[0]->go->pos.i, &gs->players[0]->go->pos.j, NULL);
+    Sprite_setSpriteRotationRef(player_s, &gs->players[0]->go->rPos);
+    Sprite_setSpriteStateRef(player_s, (int*)&gs->players[0]->state);
+    Sprite_setFR(player_s, 5);
 
     Sprite player_cs = Sprite_createSprite(PATH_TO_CALFNUTS, 69, 108, 2, CALFNUTS_FRAME_INFO);
     Sprite_setSpriteInWorldDims(player_cs, SIZE_PLAYER_W, SIZE_PLAYER_H);

@@ -38,7 +38,7 @@ decisiontreefile:
     header body footer{
 			if(node_count > tree_size)yyerror("More nodes defined than tree contains.");
 			if(node_count < tree_size)yyerror("Less nodes defined than tree contains.");
-			printf("Decision Tree successfully parsed!\n");
+			printf("Decision Tree successfully parsed!\n\n");
             node_count = 0;
 			}
     ;

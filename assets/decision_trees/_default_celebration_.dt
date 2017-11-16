@@ -1,0 +1,55 @@
+// ***************************************************
+// ***************************************************
+//
+//                  ==============
+//                  HEADER SECTION
+//                  ==============
+//
+// The Header section contains meta data of no real
+// importance to AI behaviour but possibly of interest
+// to players and authors
+// ***************************************************
+// ***************************************************
+
+// author of this decision tree (spaces (currently )not
+// allowed)
+@author = "Adrian"
+
+// version of this tree
+@version = "1"
+
+// ***************************************************
+// ***************************************************
+//
+//                  ============
+//                  BODY SECTION
+//                  ============
+//
+// The Body section contains all the information
+// needed to build a decision tree in memory. There is
+// no technical difference between a "tree" and a
+// "node" so trees can easily be linked together. This
+// functionality is not yet present in the parser, but
+// can be done in code.
+// ***************************************************
+// ***************************************************
+
+// need to presepecify the total number of nodes in
+// in a decision tree for memory management purposes
+numnodes = 3
+
+// The actual node definitions and their interlinking
+// Entry to decision tree is via node 0
+&0:func = scored yes = 1 no = 2
+
+// **************************************************
+// **************************************************
+//
+// Leaf nodes (= action nodes)
+//
+// **************************************************
+// **************************************************
+#1:func = runToOpposition
+#2:func = walkToOwnGoal
+
+end

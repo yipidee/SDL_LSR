@@ -41,6 +41,7 @@ extern size_t NodeSize;
 
 //prototypes for decision tree building
 DecisionTree AI_parseDecisionTree(char* DTfile);
+DecisionTree AI_loadDecisionTree(char* dtFile);
 void AI_makeBranchNode(const DecisionTree dt, int id, char* func, int yes, int no);
 void AI_makeLeafNode(DecisionTree dt, int id, char* func);
 
@@ -68,6 +69,7 @@ bool touchingBall(GameState* gs, int i);  //touching the ball
 bool isPenalty(GameState* gs, int i);  //returns whether game in penalty state
 bool concededPenalty(GameState* gs, int i);  //returns whether player conceded penalty
 bool inDefensivePosition(GameState* gs, int i); //returns whether player in blocking position
+bool scoredLast(GameState* gs, int i); //returns whether player scored last
 
 /*************************************************************
 ****************   Leaf Node Functions
@@ -80,5 +82,7 @@ Input playIntoLCorner(GameState* gs, int id); //returns input to play ball towar
 Input playIntoRCorner(GameState* gs, int id); //returns input to play ball toward bottom right corner
 Input returnToOwnHalf(GameState* gs, int id); //player runs back to own half
 Input takeDefensivePosition(GameState* gs, int id); //player runs back to own half
+Input runToOpposition(GameState* gs, int id); //sprint toward opposition player (taunting)
+Input walkToOwnGoal(GameState* gs, int id); //walk forlornly to own goal
 
 #endif // _AI_H

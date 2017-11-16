@@ -303,6 +303,18 @@ int Sprite_setLastState(Sprite s, int state)
 {
     s->lastState = state;
 }
+
+bool Sprite_stateChanged(Sprite s)
+{
+    bool res = false;
+    int nowState = s->state ? *s->state : 0;
+    if(Sprite_getLastState(s) != nowState)
+    {
+        res = true;
+        Sprite_setLastState(s, nowState);
+    }
+    return res;
+}
 /*
 int* Sprite_getAngleSetAddress(Sprite s)
 {
@@ -499,15 +511,12 @@ void Draw_updateView()
     
     // render all sprites
     ListNode* curr = sprites.head;
-    int nowState;
-    bool needRefresh = false;
     while(curr)
     {
         Sprite s = curr->data;
-        nowState = s->state ? *s->state : 0;
-        needRefresh = (nowState != Sprite_getLastState(s));
-        Sprite_setLastState(s, nowState);
-        if(needRefresh || ((animation_count % s->frameRate)==0)) Sprite_tickFrame(s);
+        bool change = Sprite_stateChanged(s);
+        if(change)s->frame = -1;
+        if(change || ((animation_count % s->frameRate)==0)) Sprite_tickFrame(s);
         if(s->isVisible)Sprite_renderSprite(s);
         curr = curr->next;
     }

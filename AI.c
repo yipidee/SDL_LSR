@@ -51,6 +51,7 @@ struct BFuncEntry BFuncList[] = {
             {"isPenalty", &isPenalty},
             {"concededPenalty", &concededPenalty},
             {"inDefensivePosition", &inDefensivePosition},
+            {"scored", &scoredLast},
             {"END", NULL}
             };
 
@@ -63,6 +64,8 @@ struct LFuncEntry LFuncList[] = {
             {"playIntoRCorner", &playIntoRCorner},
             {"returnToOwnHalf", &returnToOwnHalf},
             {"takeDefensivePosition", &takeDefensivePosition},
+            {"runToOpposition", &runToOpposition},
+            {"walkToOwnGoal", &walkToOwnGoal},
             {"END", NULL}
             };
 
@@ -80,6 +83,21 @@ void AI_init()
     srand((int)time(NULL));
 }
 
+DecisionTree AI_loadDecisionTree(char* dtFile)
+{
+    //AI decision tree to use
+    static char pathToDT[512];
+#ifdef __ANDROID__
+    strcpy(pathToDT, SDL_AndroidGetInternalStoragePath());
+    strcat(pathToDT, "/");
+    strcat(pathToDT, dtFile);
+#else
+    strcpy(pathToDT, dtFile);
+#endif
+    DecisionTree dt = AI_parseDecisionTree(pathToDT);
+    return dt;
+}
+
 void AI_freeDecisionTree(DecisionTree dt)
 {
     free(dt);
@@ -92,7 +110,6 @@ Input AI_getUserInput(GameState* gs, int id, Node start)
     if(start == NULL) return INPUT_NULL;
     if(start->type == BranchNode)
     {
-
         Node next = start->node.b.func(gs, id) ? start->node.b.yes : start->node.b.no;
         if(next == NULL) return INPUT_NULL;
         return (AI_getUserInput(gs, id, next));
@@ -239,6 +256,11 @@ bool inDefensivePosition(GameState* gs, int i)
     return Rect_containsPoint(defensiveArea, p.i, p.j);
 }
 
+bool scoredLast(GameState* gs, int i)
+{
+    return gs->players[i]->lastScorer;
+}
+
 /*************************************************************
 ****************   Leaf Node Functions
 *************************************************************/
@@ -304,6 +326,29 @@ Input takeDefensivePosition(GameState* gs, int id)
     return i;
 }
 
+Input runToOpposition(GameState* gs, int id)
+{
+    Input i = INPUT_NULL;
+    int opposition = id == 0 ? 1 : 0;
+    Vec3D target = Player_getPos(gs->players[opposition]);
+    Vec3D currPos = Player_getPos(gs->players[id]);
+    Vec3D dir = Vec3D_subtract(target, currPos);
+    i.direction = Vec3D_scalarMult(Vec3D_normalise(dir), 0.55);
+    return i;
+}
+
+Input walkToOwnGoal(GameState* gs, int id)
+{
+    Input i = INPUT_NULL;
+    int ownGoal = id == 0 ? 0 : 1;
+    Vec3D L = GO_getPos(Goal_getLPost(gs->goals[ownGoal]));
+    Vec3D R = GO_getPos(Goal_getRPost(gs->goals[ownGoal]));
+    Vec3D target = Vec3D_add(L, Vec3D_scalarMult(Vec3D_subtract(R, L), 0.5));
+    Vec3D currPos = Player_getPos(gs->players[id]);
+    Vec3D dir = Vec3D_subtract(target, currPos);
+    i.direction = Vec3D_scalarMult(Vec3D_normalise(dir), 0.2);
+    return i;
+}
 Vec3D getDefensivePoint(GameState* gs, int id)
 {
     Vec3D closestBlockingPoint = VECTOR_ZERO;

@@ -21,8 +21,9 @@
 */
 #define SIZE_PLAYER_H 35
 #define SIZE_PLAYER_W 35
-#define SIZE_BALL_H 20
-#define SIZE_BALL_W 20
+#define SIZE_BALL_DIAMATER 17
+#define SIZE_BALL_H SIZE_BALL_DIAMATER
+#define SIZE_BALL_W SIZE_BALL_DIAMATER
 #define SIZE_PITCH 0, 0, WORLD_WIDTH, WORLD_HEIGHT
 #define SIZE_BEHIND_GOAL_AREA 50
 #define SIZE_POST_DIAMETER 8
@@ -107,6 +108,7 @@
 //#define PLAYER_HALF_TOP 0, 0, WORLD_WIDTH, WORLD_HEIGHT / 2
 //#define PLAYER_HALF_BOTTOM 0, WORLD_HEIGHT / 2, WORLD_WIDTH, WORLD_HEIGHT
 #define DT_DEFAULT "assets/decision_trees/_default_.dt"
+#define DT_CELEBRATION "assets/decision_trees/_default_celebration_.dt"
 
 #define PI 3.14159265358979323846
 #define MAX_LONG_VALUE 65535
