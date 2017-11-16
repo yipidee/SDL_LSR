@@ -127,6 +127,10 @@ static void init()
     {
         getInput = &getInputFromPhysCont;
         usingPhysicalController = true;
+    }else
+    {
+        printf("No Physical controllers connected. Exiting.\n");
+        exit(-1);
     }/*else
     {
         getInput = &getInputFromAnalCont;
