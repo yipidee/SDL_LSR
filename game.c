@@ -33,6 +33,8 @@
 #include "GameState.h"
 #include "UserInput.h"
 #include "AI.h"
+#include "Sound.h"
+#include "Constants.h"
 
 // prototypes
 void releaseResources();
@@ -66,6 +68,9 @@ int CALFNUTS_FRAME_INFO[] = {1, 4};
 double ZERO_ANCHOR = 0;
 int pitch_offset_x, pitch_offset_y;
 
+// sounds used in game
+SFX kickBallSound;
+
 //transform function relating geometric location between in world and on screen
 Vec3D world2screen(Vec3D v)
 {
@@ -94,7 +99,10 @@ Vec3D screen2world(Vec3D v)
 
 int main(int argc, char* argv[])
 {
-    Draw_init(&world2screen);
+    if(!Draw_init(&world2screen))
+    {
+        exit(-2);
+    }
     Draw_calcScreenOffsets(BG_IMG_W, BG_IMG_H, BG_IMG_BORDER_W, BG_IMG_BORDER_H, &pitch_offset_x, &pitch_offset_y);
 
     gs = GS_initializeGameState();
@@ -109,6 +117,8 @@ int main(int argc, char* argv[])
     loadSprites();
 
     AI_init();
+
+    kickBallSound = Sound_loadSFX(SFX_KICK_SOUND);
 
     //Main loop flag
     bool quit = false;
@@ -515,6 +525,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     if(((lastTickContact == false)&&(Player_touchingBall(gs->players[0]) == true)) || 
             ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[0]))&&Vec3D_isZero(GO_getVel(gs->ball))))
     {
+        Sound_playSFX(kickBallSound);
         Player_decrementTouches(gs->players[0]);
         Player_resetTouches(gs->players[1]);
     }
@@ -525,6 +536,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     if(((lastTickContact == false)&&(Player_touchingBall(gs->players[1]) == true)) || 
             ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[1]))&&Vec3D_isZero(GO_getVel(gs->ball))))
     {
+        Sound_playSFX(kickBallSound);
         Player_decrementTouches(gs->players[1]);
         Player_resetTouches(gs->players[0]);
     }

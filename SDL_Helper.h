@@ -1,6 +1,13 @@
 #ifndef _SDL_HELPER_H
 #define _SDL_HELPER_H
 
+#ifdef __ANDROID__
+#include <SDL.h>
+#include <SDL_mixer.h>
+#else
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+#endif
 #include <stdbool.h>
 
 //defined functions
@@ -14,5 +21,6 @@
 //init SDL for this game
 bool SDL_Helper_init();
 void SDL_Helper_quit();
+bool SDL_Helper_isInitialized();
 
 #endif // _SDL_HELPER_H
