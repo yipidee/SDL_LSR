@@ -118,5 +118,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 
 #define SFX_KICK_SOUND "assets/sounds/kick.wav"
+#define BGM_GAME_MUSIC "assets/sounds/bgm.mp3"
 
 #endif // CONSTANTS_H_

@@ -119,6 +119,12 @@ static Input getInputFromTouchscreen()
     return i;
 }
 
+static Input dummy()
+{
+    Input i = INPUT_NULL;
+    return i;
+}
+
 static void init()
 {
 //force on screen control for touch devices
@@ -129,8 +135,9 @@ static void init()
         usingPhysicalController = true;
     }else
     {
+        getInput = &dummy;/*
         printf("No Physical controllers connected. Exiting.\n");
-        exit(-1);
+        exit(-1);*/
     }/*else
     {
         getInput = &getInputFromAnalCont;

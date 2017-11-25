@@ -69,7 +69,8 @@ double ZERO_ANCHOR = 0;
 int pitch_offset_x, pitch_offset_y;
 
 // sounds used in game
-SFX kickBallSound;
+SFX SND_kickBall;
+BGM MUS_bgm;
 
 //transform function relating geometric location between in world and on screen
 Vec3D world2screen(Vec3D v)
@@ -118,7 +119,9 @@ int main(int argc, char* argv[])
 
     AI_init();
 
-    kickBallSound = Sound_loadSFX(SFX_KICK_SOUND);
+    //load sounds effects
+    SND_kickBall = Sound_loadSFX(SFX_KICK_SOUND);
+    MUS_bgm = Sound_LoadMusic(BGM_GAME_MUSIC);
 
     //Main loop flag
     bool quit = false;
@@ -196,6 +199,8 @@ int main(int argc, char* argv[])
     *************************************************************/
     Draw_updateView();
     Draw_drawSceneBuffer();
+
+    Sound_playMusic(MUS_bgm);
 
     //While application is running
     while( !quit )
@@ -300,7 +305,9 @@ int main(int argc, char* argv[])
     TL_destroyTextLabel(p2Touches);
     TL_destroyTextLabel(gInfo);
     gInfo = NULL;
-
+    Sound_freeSFX(SND_kickBall);
+    Sound_stopMusic();
+    Sound_freeMusic(MUS_bgm);
     releaseResources();
 
     //Exit from Game (and activity in Android)
@@ -316,7 +323,8 @@ void normalPlayTick(bool* resetPositions, DecisionTree dt)
     }
 
     //Step 1: get input from user (if in playstate requiring input)
-    Input input1 = UI_getUserInput();
+    //Input input1 = UI_getUserInput();
+    Input input1 = AI_getUserInput(gs, 0, dt);
     Input input2 = AI_getUserInput(gs, 1, dt);
     //if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
 
@@ -369,7 +377,8 @@ void penaltyTick(bool* resetPositions, DecisionTree dt)
     //Step 1: get input from user (if in playstate requiring input)
     if(!countDownOn)
     {
-        Input input1 = UI_getUserInput();
+        //Input input1 = UI_getUserInput();
+        Input input1 = AI_getUserInput(gs, 0, dt);
         Input input2 = AI_getUserInput(gs, 1, dt);
         //if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
 
@@ -525,7 +534,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     if(((lastTickContact == false)&&(Player_touchingBall(gs->players[0]) == true)) || 
             ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[0]))&&Vec3D_isZero(GO_getVel(gs->ball))))
     {
-        Sound_playSFX(kickBallSound);
+        Sound_playSFX(SND_kickBall);
         Player_decrementTouches(gs->players[0]);
         Player_resetTouches(gs->players[1]);
     }
@@ -536,7 +545,7 @@ void updatePhysics(GameState* gs, Input input1, Input input2)
     if(((lastTickContact == false)&&(Player_touchingBall(gs->players[1]) == true)) || 
             ((lastTickContact == true)&&Vec3D_isZero(Player_getVel(gs->players[1]))&&Vec3D_isZero(GO_getVel(gs->ball))))
     {
-        Sound_playSFX(kickBallSound);
+        Sound_playSFX(SND_kickBall);
         Player_decrementTouches(gs->players[1]);
         Player_resetTouches(gs->players[0]);
     }
@@ -714,6 +723,7 @@ void releaseResources()
 {
     EH_destroy();
     GS_destroyGameState(gs);
+    Sound_quit();
     Draw_quit();
 }
 

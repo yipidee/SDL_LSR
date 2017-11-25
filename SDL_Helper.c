@@ -11,7 +11,8 @@ bool SDL_Helper_init()
             printf( "SDL could not initialize! SDL Error: %s\n", SDL_GetError() );
         }else
         {
-            if((Mix_Init(0)) != 0)
+            Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+            if((Mix_Init(MIX_INIT_MP3)) != MIX_INIT_MP3)
             {
                 printf("Audio setup failed!\n");
             }else

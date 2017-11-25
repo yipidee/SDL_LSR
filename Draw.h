@@ -44,7 +44,7 @@ void Sprite_renderSprite(Sprite s);
 void Sprite_tickFrame(Sprite s);
 int Sprite_getCurrFrame(Sprite s);
 int Sprite_getLastState(Sprite s);
-int Sprite_setLastState(Sprite s, int state);
+void Sprite_setLastState(Sprite s, int state);
 bool Sprite_stateChanged(Sprite s);
 int* Sprite_getRateSetAddress(Sprite s);
 void Sprite_setFrameRate(int* rate, int r);

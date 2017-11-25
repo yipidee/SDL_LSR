@@ -299,7 +299,7 @@ int Sprite_getLastState(Sprite s)
     return s->lastState;
 }
 
-int Sprite_setLastState(Sprite s, int state)
+void Sprite_setLastState(Sprite s, int state)
 {
     s->lastState = state;
 }
