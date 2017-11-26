@@ -323,8 +323,8 @@ void normalPlayTick(bool* resetPositions, DecisionTree dt)
     }
 
     //Step 1: get input from user (if in playstate requiring input)
-    //Input input1 = UI_getUserInput();
-    Input input1 = AI_getUserInput(gs, 0, dt);
+    Input input1 = UI_getUserInput();
+    //Input input1 = AI_getUserInput(gs, 0, dt);
     Input input2 = AI_getUserInput(gs, 1, dt);
     //if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
 
@@ -377,8 +377,8 @@ void penaltyTick(bool* resetPositions, DecisionTree dt)
     //Step 1: get input from user (if in playstate requiring input)
     if(!countDownOn)
     {
-        //Input input1 = UI_getUserInput();
-        Input input1 = AI_getUserInput(gs, 0, dt);
+        Input input1 = UI_getUserInput();
+        //Input input1 = AI_getUserInput(gs, 0, dt);
         Input input2 = AI_getUserInput(gs, 1, dt);
         //if(PhysCont_PhysicalControllerPresent())drawControlsOnScreen(input1);
 

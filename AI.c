@@ -5,6 +5,7 @@
 
 // local utility functions
 Vec3D getDefensivePoint(GameState* gs, int id);
+static bool oneInXChance(int x);
 
 typedef struct decisionTreeNode* Node;
 
@@ -40,6 +41,12 @@ struct decisionTreeNode
 
 struct BFuncEntry BFuncList[] = {
             {"randomTrueFalse", &returnRandBool},
+            {"random1in3", &returnRand1in3},
+            {"random1in5", &returnRand1in5},
+            {"random1in10", &returnRand1in10},
+            {"random1in20", &returnRand1in20},
+            {"random1in50", &returnRand1in50},
+            {"random1in100", &returnRand1in100},
             {"inOwnHalf", &inOwnHalf},
             {"ballInOwnHalf", &ballInOwnHalf},
             {"ballIsStationary", &ballIsStationary},
@@ -129,6 +136,36 @@ bool returnRandBool(GameState* gs, int i)
     r /= RAND_MAX;
     bool res = (r > 0.5);
     return res;
+}
+
+bool returnRand1in3(GameState* gs, int i)
+{
+    return oneInXChance(3);
+}
+
+bool returnRand1in5(GameState* gs, int i)
+{
+    return oneInXChance(5);
+}
+
+bool returnRand1in10(GameState* gs, int i)
+{
+    return oneInXChance(10);
+}
+
+bool returnRand1in20(GameState* gs, int i)
+{
+    return oneInXChance(20);
+}
+
+bool returnRand1in50(GameState* gs, int i)
+{
+    return oneInXChance(50);
+}
+
+bool returnRand1in100(GameState* gs, int i)
+{
+    return oneInXChance(100);
 }
 
 //returns true if player in own half of court
@@ -252,7 +289,7 @@ bool inDefensivePosition(GameState* gs, int i)
         SIZE_DEFENSIVE_AREA * 2,
         SIZE_DEFENSIVE_AREA * 2
     };
-    Vec3D p = Player_getPos(gs->players[1]);
+    Vec3D p = Player_getPos(gs->players[i]);
     return Rect_containsPoint(defensiveArea, p.i, p.j);
 }
 
@@ -268,7 +305,7 @@ bool scoredLast(GameState* gs, int i)
 Input runToBall(GameState* gs, int i)
 {
     Input in = INPUT_NULL;
-    Vec3D toBall = Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[1]));
+    Vec3D toBall = Vec3D_subtract(GO_getPos(gs->ball), Player_getPos(gs->players[i]));
     int mag = Vec3D_getMagnitude(toBall);
     toBall = Vec3D_normalise(toBall);
     if(mag<CONS_MAX_SPEED)
@@ -296,7 +333,8 @@ Input returnToOwnHalf(GameState* gs, int id)
 Input shoot(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
-    Vec3D target = Vec3D_equal(gShotTarget, OUTSIDE_PLAYABLE_RANGE) ? GO_getPos(Goal_getLPost(gs->goals[0])) : gShotTarget;
+    int opp = id == 0 ? 1 : 0;
+    Vec3D target = Vec3D_equal(gShotTarget, OUTSIDE_PLAYABLE_RANGE) ? GO_getPos(Goal_getLPost(gs->goals[opp])) : gShotTarget;
     Vec3D dir = Vec3D_subtract(target, GO_getPos(gs->ball));
     i.shot = Vec3D_normalise(dir);
     return i;
@@ -305,7 +343,11 @@ Input shoot(GameState* gs, int id)
 Input playIntoLCorner(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
-    Vec3D dir = Vec3D_subtract(Vec3D_makeVector(WORLD_WIDTH, WORLD_HEIGHT, 0), GO_getPos(gs->ball));
+    static Vec3D corners[] = {
+        {0, 0, 0},
+        {WORLD_WIDTH, WORLD_HEIGHT, 0}
+    };
+    Vec3D dir = Vec3D_subtract(corners[id], GO_getPos(gs->ball));
     i.control = Vec3D_normalise(dir);
     return i;
 }
@@ -313,7 +355,11 @@ Input playIntoLCorner(GameState* gs, int id)
 Input playIntoRCorner(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
-    Vec3D dir = Vec3D_subtract(Vec3D_makeVector(0, WORLD_HEIGHT, 0), GO_getPos(gs->ball));
+    static Vec3D corners[] = {
+        {WORLD_WIDTH, 0, 0},
+        {0, WORLD_HEIGHT, 0}
+    };
+    Vec3D dir = Vec3D_subtract(corners[id], GO_getPos(gs->ball));
     i.control = Vec3D_normalise(dir);
     return i;
 }
@@ -322,7 +368,7 @@ Input takeDefensivePosition(GameState* gs, int id)
 {
     Input i = INPUT_NULL;
     Vec3D C = getDefensivePoint(gs, id);
-    i.direction = Vec3D_normalise(Vec3D_subtract(C, Player_getPos(gs->players[1])));
+    i.direction = Vec3D_normalise(Vec3D_subtract(C, Player_getPos(gs->players[id])));
     return i;
 }
 
@@ -349,17 +395,31 @@ Input walkToOwnGoal(GameState* gs, int id)
     i.direction = Vec3D_scalarMult(Vec3D_normalise(dir), 0.2);
     return i;
 }
+
 Vec3D getDefensivePoint(GameState* gs, int id)
 {
+    int opp = id == 0 ? 1: 0;
     Vec3D closestBlockingPoint = VECTOR_ZERO;
-    Vec3D GoalCentre = {WORLD_WIDTH /2, SIZE_BEHIND_GOAL_AREA, 0};
-    Vec3D P2 = Player_getPos(gs->players[0]);
-    Line player2Goal = {P2, GoalCentre};
+    Vec3D GoalCentres[] = {
+        {WORLD_WIDTH / 2, WORLD_HEIGHT - SIZE_BEHIND_GOAL_AREA, 0},
+        {WORLD_WIDTH / 2, SIZE_BEHIND_GOAL_AREA, 0}
+    };
+    Vec3D P2 = Player_getPos(gs->players[opp]);
+    Line player2Goal = {P2, GoalCentres[id]};
     closestBlockingPoint = Line_getClosestPointFromPointOnLine(
         player2Goal,
-        Player_getPos(gs->players[1])
+        Player_getPos(gs->players[id])
     );
     return closestBlockingPoint;
+}
+
+// General function for building various probabilities
+static bool oneInXChance(int x)
+{
+    double cutOff = 1.0 / (double)x;
+    double r = rand();
+    r /= RAND_MAX;
+    return (r < cutOff);
 }
 
 /***************************************************************

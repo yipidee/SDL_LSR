@@ -58,6 +58,12 @@ Input AI_getUserInput(GameState* gs, int id, DecisionTree dt);
 ****************   Branch Node Functions
 *************************************************************/
 bool returnRandBool(GameState* gs, int i);  //return True or False randomly
+bool returnRand1in3(GameState* gs, int i);  //return True or False randomly
+bool returnRand1in5(GameState* gs, int i);  //return True or False randomly
+bool returnRand1in10(GameState* gs, int i);  //return True or False randomly
+bool returnRand1in20(GameState* gs, int i);  //return True or False randomly
+bool returnRand1in50(GameState* gs, int i);  //return True or False randomly
+bool returnRand1in100(GameState* gs, int i);  //return True or False randomly
 bool inOwnHalf(GameState* gs, int i);  //return whether player is in own half
 bool hasTouches(GameState* gs, int i);  //return whether player has touches remaining
 bool oppHasAllTouches(GameState* gs, int i);  //returns true if opposition has all touches remaining
