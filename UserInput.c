@@ -1,6 +1,6 @@
 #include "UserInput.h"
 
-typedef Input (*inputSource)(void);
+typedef Input (*inputSource)(int i);
 inputSource getInput = NULL;
 
 static bool initialized = false;
@@ -16,10 +16,10 @@ static void init();
 //static refs to onscreen controls if being used
 static AnalogueController *ac1, *ac2, *ac3;
 
-Input UI_getUserInput()
+Input UI_getUserInput(int i)
 {
     if(!initialized)init();
-    return getInput();
+    return getInput(i);
 }
 
 /***DOES NOT BELONG HERE!!!!!!!!!***/
@@ -57,17 +57,17 @@ bool UI_noInput(Input i)
 ////////     local functions
 ///////////////////////////////////////////////////
 
-static Input getInputFromPhysCont()
+static Input getInputFromPhysCont(int x)
 {
     if(!initialized) init();
-    Input i = {PhysCont_getLeftStickInput(),VECTOR_ZERO,VECTOR_ZERO};
-    if(PhysCont_getShotMask())
+    Input i = {PhysCont_getLeftStickInput(x),VECTOR_ZERO,VECTOR_ZERO};
+    if(PhysCont_getShotMask(x))
     {
-        i.shot = PhysCont_getRightStickInput();
+        i.shot = PhysCont_getRightStickInput(x);
         i.control = VECTOR_ZERO;
     }else
     {
-        i.control = PhysCont_getRightStickInput();
+        i.control = PhysCont_getRightStickInput(x);
         i.shot = VECTOR_ZERO;
     }
     return i;
